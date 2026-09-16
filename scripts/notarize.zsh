@@ -14,6 +14,6 @@ xcrun notarytool submit "$release_stage/submission.zip" --keychain-profile "$KAN
 xcrun stapler staple "$release_stage/kanbanana.app"
 xcrun stapler validate "$release_stage/kanbanana.app"
 spctl --assess --type execute --verbose "$release_stage/kanbanana.app"
-ditto -c -k --keepParent "$release_stage/kanbanana.app" dist/kanbanana-0.2.0-beta.1-arm64.zip
-shasum -a 256 dist/kanbanana-0.2.0-beta.1-arm64.zip > dist/SHA256SUMS
+ditto -c -k --keepParent "$release_stage/kanbanana.app" dist/kanbanana-0.3.0-beta.1-arm64.zip
+shasum -a 256 dist/kanbanana-0.3.0-beta.1-arm64.zip > dist/SHA256SUMS
 print 'Notarized archive ready in dist/'

@@ -6,7 +6,7 @@
 2. Review the entire public tree and history for personal material; secret scanning does not review screenshots or ordinary private text.
 3. Regenerate synthetic screenshots with `zsh scripts/previews.zsh` and inspect them.
 4. Update version, changelog and dated compatibility evidence. Verify fresh-run onboarding, privacy controls, ordinary navigation, persistence and recovery.
-5. Publish a GitHub prerelease tagged `v0.2.0-beta.1`. Source-only releases must clearly say they have no signed download.
+5. Publish a GitHub prerelease tagged `v0.3.0-beta.1`. Source-only releases must clearly say they have no signed download.
 
 CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No production API key, signing identity or user data is needed.
 

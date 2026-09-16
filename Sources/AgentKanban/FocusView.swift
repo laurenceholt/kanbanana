@@ -1,3 +1,4 @@
+import KanbananaCore
 import SwiftUI
 
 extension BoardStore {

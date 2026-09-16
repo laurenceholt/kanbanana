@@ -9,9 +9,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-spec = importlib.util.spec_from_file_location("reader", Path(__file__).parents[1] / "Resources/reader.py")
-r = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(r)
+sys.path.insert(0, str(Path(__file__).parents[1] / "Resources"))
+from kanbanana_reader import adapters as r
+READER_ENTRY = Path(__file__).parents[1] / "Resources/reader.py"
 
 
 class ReaderTests(unittest.TestCase):
@@ -146,7 +146,7 @@ class ReaderTests(unittest.TestCase):
             self.assertEqual({c["nativeID"] for c in cards}, {"recent", "old"})
             self.assertTrue(all(c["state"] == "ready" for c in cards))
             # Exercise the actual fresh-process retry boundary and CLI flag.
-            output = subprocess.check_output([sys.executable, str(Path(r.__file__)), "--days", "14", "--tracked-id", "claude:old"], env={**os.environ, "HOME": d}, text=True, timeout=10)
+            output = subprocess.check_output([sys.executable, str(READER_ENTRY), "--days", "14", "--tracked-id", "claude:old"], env={**os.environ, "HOME": d}, text=True, timeout=10)
             retried = json.loads(output)
             self.assertEqual([c["nativeID"] for c in retried["cards"]], ["old"])
             self.assertEqual(retried["cards"][0]["state"], "ready")

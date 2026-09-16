@@ -1,3 +1,4 @@
+import KanbananaCore
 import AppKit
 
 enum BoardLayout: String, CaseIterable {

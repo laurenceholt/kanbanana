@@ -1,3 +1,4 @@
+import KanbananaCore
 import AppKit
 import ImageIO
 import SwiftUI
@@ -45,8 +46,6 @@ enum PhotoBackdrop {
         .generated("jellyfish", "A small ghost")
     ]
     static var assetNames: [String] { photos.map(\.id) }
-    // The preview supplies a resource root; the installed app always uses its bundle.
-    static var resourceRoot = Bundle.main.resourceURL
 
     static func index(at date: Date, offset: Int, context: String) -> Int {
         let text = context.lowercased()
@@ -61,15 +60,39 @@ enum PhotoBackdrop {
     }
     private static func normalized(_ value: Int) -> Int { (value % photos.count + photos.count) % photos.count }
 
+    // Keep the focal point near the center, clamping at the image edges so no gaps appear.
+    static func cropFrame(image: CGSize, viewport: CGSize, focalPoint: CGPoint) -> CGRect {
+        guard image.width > 0, image.height > 0, viewport.width > 0, viewport.height > 0 else { return .zero }
+        let scale = max(viewport.width / image.width, viewport.height / image.height)
+        let width = image.width * scale, height = image.height * scale
+        let x = min(0, max(viewport.width - width, viewport.width / 2 - focalPoint.x * width))
+        let y = min(0, max(viewport.height - height, viewport.height / 2 - focalPoint.y * height))
+        return CGRect(x: x, y: y, width: width, height: height)
+    }
+}
+
+/// The resource location is a value dependency, so previews never mutate live globals.
+private struct PhotoResourceRootKey: EnvironmentKey {
+    static let defaultValue: URL? = Bundle.main.resourceURL
+}
+extension EnvironmentValues {
+    var photoResourceRoot: URL? {
+        get { self[PhotoResourceRootKey.self] }
+        set { self[PhotoResourceRootKey.self] = newValue }
+    }
+}
+
+@MainActor final class PhotoImageLoader {
+    static let shared = PhotoImageLoader()
     // Decode just the current photograph, never the whole library at full resolution.
-    private static let fullImages = cache(count: 3, bytes: 48 * 1024 * 1024)
-    private static let thumbnails = cache(count: 24, bytes: 10 * 1024 * 1024)
+    private let fullImages = PhotoImageLoader.cache(count: 3, bytes: 48 * 1024 * 1024)
+    private let thumbnails = PhotoImageLoader.cache(count: 24, bytes: 10 * 1024 * 1024)
     private static func cache(count: Int, bytes: Int) -> NSCache<NSString, NSImage> {
         let cache = NSCache<NSString, NSImage>()
         cache.countLimit = count; cache.totalCostLimit = bytes
         return cache
     }
-    static func image(for photo: BackdropPhoto, thumbnail: Bool = false) -> NSImage? {
+    func image(for photo: BackdropPhoto, thumbnail: Bool = false, resourceRoot: URL? = Bundle.main.resourceURL) -> NSImage? {
         guard let url = resourceRoot?.appendingPathComponent("Photos/\(photo.filename)") else { return nil }
         let cache = thumbnail ? thumbnails : fullImages
         let key = url.path as NSString
@@ -91,25 +114,17 @@ enum PhotoBackdrop {
         return result
     }
 
-    // Keep the focal point near the center, clamping at the image edges so no gaps appear.
-    static func cropFrame(image: CGSize, viewport: CGSize, focalPoint: CGPoint) -> CGRect {
-        guard image.width > 0, image.height > 0, viewport.width > 0, viewport.height > 0 else { return .zero }
-        let scale = max(viewport.width / image.width, viewport.height / image.height)
-        let width = image.width * scale, height = image.height * scale
-        let x = min(0, max(viewport.width - width, viewport.width / 2 - focalPoint.x * width))
-        let y = min(0, max(viewport.height - height, viewport.height / 2 - focalPoint.y * height))
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
 }
 
 struct CroppedPhotograph: View {
+    @Environment(\.photoResourceRoot) private var resourceRoot
     let photo: BackdropPhoto
     var thumbnail = false
     var body: some View {
         GeometryReader { proxy in
             ZStack {
                 Color.black
-                if let image = PhotoBackdrop.image(for: photo, thumbnail: thumbnail) {
+                if let image = PhotoImageLoader.shared.image(for: photo, thumbnail: thumbnail, resourceRoot: resourceRoot) {
                     let frame = PhotoBackdrop.cropFrame(image: image.size, viewport: proxy.size, focalPoint: photo.focalPoint)
                     Image(nsImage: image).resizable()
                         .frame(width: frame.width, height: frame.height)

@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import XCTest
 @testable import AgentKanban
 
@@ -36,13 +38,13 @@ final class ProjectLaneTests: XCTestCase {
         XCTAssertEqual(lanes.flatMap(\.cards).map(\.id), [oldMath.id, boat.id])
         XCTAssertEqual(lanes.map(\.latestActivity), [40, 20])
     }
-    @MainActor func testLaneDropsMoveOnlyAssignmentAndRequestedStatus() throws {
+    @MainActor func testLaneDropsMoveOnlyAssignmentAndRequestedStatus() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let math = Project(name: "Math", note: "Ship the installer"), boats = Project(name: "Boats")
         let card = card("task", time: Date().timeIntervalSince1970)
-        store.saved.projects = [math, boats]; store.saved.cards = [card]
+        try await store.installFixture { state in state.projects = [math, boats] }; try await store.installFixture { state in state.cards = [card] }
         store.assign(card, to: math.id)
         let original = store.saved
         XCTAssertTrue(store.moveToLane(card, projectID: math.id, column: .ready))

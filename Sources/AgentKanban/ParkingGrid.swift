@@ -1,3 +1,4 @@
+import KanbananaCore
 import SwiftUI
 
 /// Measure every parked card at a fixed column width. Avoid lazy-grid height

@@ -1,22 +1,6 @@
+import KanbananaCore
 import AppKit
 import SwiftUI
-
-struct PrivacyOptions: Codable, Equatable {
-    var disabledProviders: Set<String> = []
-    var excludedSummaryProjects: Set<String> = []
-    var dailySummaryLimit = 100
-    var codexHome: String? = nil
-    var claudeHome: String? = nil
-}
-struct SummaryUsage: Codable, Equatable {
-    var day: String
-    var attempts: Int
-    static func today(_ date: Date = Date()) -> String {
-        let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
-    }
-}
 
 enum BrandArtwork {
     static let image: NSImage? = {
@@ -41,14 +25,7 @@ enum IntegrationInfo {
         }
         return result
     }
-    static func safeHealth(_ value: String?) -> String {
-        guard let value else { return "Not checked" }
-        // Export a fixed vocabulary, never arbitrary source strings.
-        for label in ["Connected", "Disabled", "Not installed", "No local sessions", "Access denied", "Unsupported format", "Unavailable"] {
-            if value.hasPrefix(label) { return label }
-        }
-        return "Unavailable"
-    }
+
 }
 
 struct WelcomeView: View {
@@ -102,7 +79,7 @@ struct DataControls: View {
             HStack {
                 Button("Export board…") {
                     let panel = NSSavePanel(); panel.nameFieldStringValue = "kanbanana-board.json"; panel.allowedContentTypes = [.json]
-                    if panel.runModal() == .OK, let url = panel.url { store.exportBoard(to: url) }
+                    if panel.runModal() == .OK, let url = panel.url { Task { await store.exportBoard(to: url) } }
                 }
                 Button("Restore…") {
                     let panel = NSOpenPanel(); panel.allowedContentTypes = [.json]; panel.allowsMultipleSelection = false
@@ -110,7 +87,7 @@ struct DataControls: View {
                 }
                 Button("Diagnostics…") {
                     let panel = NSSavePanel(); panel.nameFieldStringValue = "kanbanana-diagnostics.json"; panel.allowedContentTypes = [.json]
-                    if panel.runModal() == .OK, let url = panel.url { store.exportDiagnostics(to: url) }
+                    if panel.runModal() == .OK, let url = panel.url { Task { await store.exportDiagnostics(to: url) } }
                 }
             }
             HStack {
@@ -119,7 +96,7 @@ struct DataControls: View {
             }
             if let text = store.dataStatus { Text(text).font(.caption).textSelection(.enabled) }
         }.confirmationDialog("Replace this board with the selected export? Your current board will be backed up first. Cloud summaries will be switched off.", isPresented: Binding(get: { restoreURL != nil }, set: { if !$0 { restoreURL = nil } }), titleVisibility: .visible) {
-            Button("Restore board", role: .destructive) { if let url = restoreURL { store.restoreBoard(from: url) }; restoreURL = nil }
+            Button("Restore board", role: .destructive) { if let url = restoreURL { Task { await store.restoreBoard(from: url) } }; restoreURL = nil }
             Button("Cancel", role: .cancel) { restoreURL = nil }
         }
     }

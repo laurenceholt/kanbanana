@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import AppKit
 import XCTest
 @testable import AgentKanban

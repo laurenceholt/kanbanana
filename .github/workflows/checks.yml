@@ -22,7 +22,7 @@ jobs:
       - name: Select Swift 6 toolchain on macOS 14
         if: matrix.os == 'macos-14'
         run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-      - run: swift test
+      - run: swift test -Xswiftc -warnings-as-errors
       - run: zsh scripts/fetch-runtime.zsh
       - run: .build/runtime/python/bin/python3 -I -B -m unittest discover -s tests -v
       - run: zsh scripts/build.zsh
@@ -31,5 +31,5 @@ jobs:
         run: |
           smoke_home=$(mktemp -d)
           trap 'rm -rf "$smoke_home"' EXIT
-          dist/kanbanana.app/Contents/Resources/Python/bin/python3 -I -B Resources/reader.py --codex-home "$smoke_home" --disable-provider claude > "$smoke_home/result.json"
+          dist/kanbanana.app/Contents/Resources/Python/bin/python3 -I -B dist/kanbanana.app/Contents/Resources/reader.py --codex-home "$smoke_home" --disable-provider claude > "$smoke_home/result.json"
           dist/kanbanana.app/Contents/Resources/Python/bin/python3 -I -B -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["cards"] == []; assert d["health"]["claude"] == "Disabled"' "$smoke_home/result.json"

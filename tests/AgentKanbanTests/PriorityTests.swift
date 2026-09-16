@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import XCTest
 @testable import AgentKanban
 
@@ -8,22 +10,22 @@ final class PriorityTests: XCTestCase {
                      reason: "", response: "", eventID: "delivered", eventTime: time, url: "")
     }
 
-    @MainActor func testPriorityIsIndependentOfEveryStateAndOldBoardsDecode() throws {
+    @MainActor func testPriorityIsIndependentOfEveryStateAndOldBoardsDecode() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let legacy = Data(#"{"assignmentLocked":true,"parked":false,"parkedManually":false,"restoredAt":0}"#.utf8)
         XCTAssertNil(try JSONDecoder().decode(Disposition.self, from: legacy).priority)
-        let project = Project(name: "Project", note: "Near-term goal")
-        store.saved.projects = [project]
+        let project = Project(name: "Project", note: "Near-term goal", colorIndex: 0, symbolIndex: 0)
+        try await store.installFixture { state in state.projects = [project] }
         for state in Column.allCases {
             let c = card(state.rawValue, state: state)
-            store.saved.cards.append(c)
+            try await store.installFixture { state in state.cards.append(c) }
             var d = Disposition(projectID: project.id, assignmentLocked: true)
             d.todoNote = "Next round"
             if state == .todo { d.manualColumn = .todo; d.todoRequestID = c.requests.last?.id }
             if state == .dealtWith { d.acknowledgedRevision = c.revision }
-            store.saved.dispositions[c.id] = d
+            try await store.installFixture { state in state.dispositions[c.id] = d }
             let previous = store.column(c)
             store.togglePriority(c.id)
             XCTAssertEqual(store.disposition(c).priority, true)
@@ -35,10 +37,10 @@ final class PriorityTests: XCTestCase {
         XCTAssertNil(store.todoNoteCard, "Priority does not open a note editor or start work")
     }
 
-    @MainActor func testPrioritySurvivesNewRequestsParkingAndRelaunch() throws {
+    @MainActor func testPrioritySurvivesNewRequestsParkingAndRelaunch() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         var c = card("important")
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: 100))
         store.togglePriority(c.id)
@@ -49,22 +51,23 @@ final class PriorityTests: XCTestCase {
         XCTAssertEqual(store.column(c), .running)
         XCTAssertEqual(store.disposition(c).priority, true)
         store.park(c, true)
-        store.persist()
-        let restored = BoardStore(root: root, start: false)
+        await store.persist()
+        let restored = await BoardStore.loaded(root: root, start: false)
         XCTAssertEqual(restored.disposition(c).priority, true)
         XCTAssertTrue(restored.disposition(c).parked)
         restored.togglePriority(c.id)
         XCTAssertTrue(restored.disposition(c).parked, "Unstarring must not restore parked work")
-        restored.persist()
-        XCTAssertNil(BoardStore(root: root, start: false).disposition(c).priority)
+        await restored.persist()
+        let finalReload = await BoardStore.loaded(root: root, start: false)
+        XCTAssertNil(finalReload.disposition(c).priority)
     }
 
-    @MainActor func testAllFlatListsUsePriorityThenActivityWithStableTies() throws {
+    @MainActor func testAllFlatListsUsePriorityThenActivityWithStableTies() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let cards = [card("newest", time: 400), card("b", time: 200), card("oldest", time: 10), card("a", time: 200)]
-        store.saved.cards = cards
+        try await store.installFixture { state in state.cards = cards }
         for id in ["oldest", "b", "a"] { store.togglePriority(id) }
         XCTAssertEqual(store.visible.map(\.id), ["a", "b", "oldest", "newest"])
         XCTAssertEqual(store.focusCards(in: .ready).map(\.id), store.visible.map(\.id))

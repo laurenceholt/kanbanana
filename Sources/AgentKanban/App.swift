@@ -1,3 +1,4 @@
+import KanbananaCore
 import AppKit
 import SwiftUI
 
@@ -12,29 +13,43 @@ import SwiftUI
     private var changingLayout = false
     private var frameName: String { layout.frameName }
     private var store: BoardStore!
+    private var demoRoot: URL?
+    private var preferences = UserDefaults.standard
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApplication.shared.setActivationPolicy(.accessory)
-        store = BoardStore()
+        if CommandLine.arguments.contains("--demo") {
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent("kanbanana-demo-" + UUID().uuidString)
+            demoRoot = root
+            preferences = UserDefaults(suiteName: root.lastPathComponent)!
+            preferences.set(BoardLayout.focus.rawValue, forKey: "boardLayout")
+            layout = .focus
+            store = BoardStore(root: root, start: false, initialState: DemoData.state(), credentials: DemoCredentials(),
+                               summarize: { _, _, _ in throw DemoCredentials.Disabled() })
+        } else { store = BoardStore() }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(toggle)
         boardWindow = BoardWindow(contentRect: NSRect(origin: .zero, size: layout.defaultSize), styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
-        boardWindow.title = "kanbanana"
-        boardWindow.titleVisibility = .hidden
+        boardWindow.title = demoRoot == nil ? "kanbanana" : "kanbanana · demo"
+        boardWindow.titleVisibility = demoRoot == nil ? .hidden : .visible
         boardWindow.titlebarAppearsTransparent = true
-        boardWindow.backgroundColor = NSColor(BoardAppearance.saved().canvas)
-        boardWindow.appearance = NSAppearance(named: BoardAppearance.saved().isDark ? .darkAqua : .aqua)
+        boardWindow.backgroundColor = NSColor(BoardAppearance.saved(in: preferences).canvas)
+        boardWindow.appearance = NSAppearance(named: BoardAppearance.saved(in: preferences).isDark ? .darkAqua : .aqua)
         boardWindow.isReleasedWhenClosed = false
         boardWindow.contentMinSize = layout.minimumSize
-        let host = NSHostingView(rootView: BoardView(store: store, layoutChanged: { [weak self] in self?.changeLayout($0) }, appearanceChanged: { [weak self] in self?.boardWindow.backgroundColor = NSColor($0.canvas); self?.boardWindow.appearance = NSAppearance(named: $0.isDark ? .darkAqua : .aqua) }))
+        let resources = Bundle.main.resourceURL?.appendingPathComponent("Photos")
+        let resourceRoot = resources.map { FileManager.default.fileExists(atPath: $0.path) } == true
+            ? Bundle.main.resourceURL : URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Resources")
+        let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: preferences, layoutChanged: { [weak self] in self?.changeLayout($0) }, appearanceChanged: { [weak self] in self?.boardWindow.backgroundColor = NSColor($0.canvas); self?.boardWindow.appearance = NSAppearance(named: $0.isDark ? .darkAqua : .aqua) }).environment(\.photoResourceRoot, resourceRoot))
         host.sizingOptions = []
         boardWindow.contentView = host
-        if !boardWindow.setFrameUsingName(frameName) { boardWindow.center() }
+        if demoRoot != nil || !boardWindow.setFrameUsingName(frameName) { boardWindow.center() }
         fitOnScreen()
-        boardWindow.setFrameAutosaveName(frameName)
+        if demoRoot == nil { boardWindow.setFrameAutosaveName(frameName) }
         boardWindow.delegate = self
         store.onChange = { [weak self] in self?.updateStatus() }
         updateStatus()
+        if demoRoot != nil { Task { await store.ready(); DemoData.showHealth(in: store) } }
         DispatchQueue.main.async { [weak self] in self?.showPanel() }
     }
     private func changeLayout(_ next: BoardLayout) {
@@ -42,15 +57,15 @@ import SwiftUI
         CardDragSession.cancel()
         changingLayout = true
         let previous = boardWindow.frame
-        boardWindow.saveFrame(usingName: frameName)
+        if demoRoot == nil { boardWindow.saveFrame(usingName: frameName) }
         boardWindow.setFrameAutosaveName("")
         layout = next
         boardWindow.contentMinSize = next.minimumSize
-        if !boardWindow.setFrameUsingName(frameName), let screen = boardWindow.screen ?? NSScreen.main {
+        if demoRoot != nil || !boardWindow.setFrameUsingName(frameName), let screen = boardWindow.screen ?? NSScreen.main {
             boardWindow.setFrame(next.initialFrame(beside: previous, on: screen.visibleFrame), display: true)
         }
         fitOnScreen()
-        boardWindow.setFrameAutosaveName(frameName)
+        if demoRoot == nil { boardWindow.setFrameAutosaveName(frameName) }
         changingLayout = false
         saveFrame()
     }
@@ -59,7 +74,7 @@ import SwiftUI
         boardWindow.setFrame(layout.fitting(boardWindow.frame, on: screen.visibleFrame), display: true)
     }
     private func saveFrame() {
-        guard !changingLayout else { return }
+        guard !changingLayout, demoRoot == nil else { return }
         boardWindow.saveFrame(usingName: frameName)
     }
     private func updateStatus() {
@@ -96,9 +111,19 @@ import SwiftUI
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         showPanel(); return false
     }
-    func applicationWillTerminate(_ notification: Notification) { store?.stop() }
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        Task { [weak self] in
+            await self?.store?.stop()
+            if let root = self?.demoRoot {
+                try? FileManager.default.removeItem(at: root)
+                self?.preferences.removePersistentDomain(forName: root.lastPathComponent)
+            }
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.saveFrame(usingName: frameName)
+        if demoRoot == nil { sender.saveFrame(usingName: frameName) }
         sender.orderOut(nil)
         return false
     }

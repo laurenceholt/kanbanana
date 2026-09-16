@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import XCTest
 @testable import AgentKanban
 
@@ -6,10 +8,10 @@ final class TodoTests: XCTestCase {
     private func card() -> Conversation {
         Conversation(id: "codex:todo", provider: "codex", nativeID: "todo", title: "Build installer", folder: "/example", updated: now, requests: [.init(id: "request-1", text: "Build it", time: now - 30)], state: .ready, reason: "", response: "", eventID: "delivered", eventTime: now, url: "codex://threads/todo")
     }
-    @MainActor func testManualReminderSurvivesPollingNewExecutionEventsAndSourceOutage() throws {
+    @MainActor func testManualReminderSurvivesPollingNewExecutionEventsAndSourceOutage() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         var c = card()
         func apply(_ card: Conversation, healthy: Bool = true, time: Double? = nil) {
             store.apply(.init(cards: [card], health: ["codex": healthy ? "Connected" : "Unavailable"], scannedAt: time ?? now))
@@ -33,10 +35,10 @@ final class TodoTests: XCTestCase {
         XCTAssertEqual(store.column(c), .todo)
         XCTAssertEqual(store.disposition(c).todoNote, "Check installation on a writer’s Mac")
     }
-    @MainActor func testNewRequestReleasesReminderAndLateNoteSaveDoesNotMoveCardBack() throws {
+    @MainActor func testNewRequestReleasesReminderAndLateNoteSaveDoesNotMoveCardBack() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let old = card()
         store.apply(.init(cards: [old], health: ["codex": "Connected"], scannedAt: now))
         store.mark(old, .todo)
@@ -55,13 +57,13 @@ final class TodoTests: XCTestCase {
         XCTAssertNotNil(store.disposition(next).todoNote)
         XCTAssertEqual(store.count(.todo), 0)
     }
-    @MainActor func testNotesAndManualPlacementReloadIndependentlyOfProjectGoal() throws {
+    @MainActor func testNotesAndManualPlacementReloadIndependentlyOfProjectGoal() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
-        let project = Project(name: "Math", note: "Ship the builder")
+        let store = await BoardStore.loaded(root: root, start: false)
+        let project = Project(name: "Math", note: "Ship the builder", colorIndex: 0, symbolIndex: 0)
         let c = card()
-        store.saved.projects = [project]; store.saved.cards = [c]
+        try await store.installFixture { state in state.projects = [project] }; try await store.installFixture { state in state.cards = [c] }
         store.assign(c, to: project.id)
         store.mark(c, .dealtWith)
         store.mark(c, .todo)
@@ -69,8 +71,8 @@ final class TodoTests: XCTestCase {
         store.setTodoNote(c.id, "  Try installation on a writer’s Mac\n")
         store.search = "writer’s Mac"
         XCTAssertEqual(store.visible.map(\.id), [c.id])
-        store.persist()
-        let reloaded = BoardStore(root: root, start: false)
+        await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
         let restored = try XCTUnwrap(reloaded.cards.first)
         XCTAssertEqual(reloaded.column(restored), .todo, "Reconnecting at launch must not hide a manual reminder")
         XCTAssertEqual(reloaded.disposition(restored).todoNote, "Try installation on a writer’s Mac")
@@ -96,13 +98,13 @@ final class TodoTests: XCTestCase {
         XCTAssertEqual(Column.board.first, .todo)
         XCTAssertEqual(Column.board.count, 5)
     }
-    @MainActor func testLaneDropOffersNoteOnceAndPreservesProjectGoals() throws {
+    @MainActor func testLaneDropOffersNoteOnceAndPreservesProjectGoals() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
-        let p = Project(name: "Math", note: "Ship the builder"), other = Project(name: "Writing", note: "Finish the article")
+        let store = await BoardStore.loaded(root: root, start: false)
+        let p = Project(name: "Math", note: "Ship the builder", colorIndex: 0, symbolIndex: 0), other = Project(name: "Writing", note: "Finish the article", colorIndex: 1, symbolIndex: 1)
         let c = card()
-        store.saved.projects = [p, other]; store.saved.cards = [c]; store.assign(c, to: p.id)
+        try await store.installFixture { state in state.projects = [p, other] }; try await store.installFixture { state in state.cards = [c] }; store.assign(c, to: p.id)
         XCTAssertTrue(store.moveToLane(c, projectID: other.id, column: .todo))
         XCTAssertEqual(store.column(c), .todo)
         XCTAssertEqual(store.disposition(c).projectID, other.id)

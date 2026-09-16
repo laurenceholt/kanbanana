@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0-beta.1
+
+- Separate Core, Services and macOS app targets; Swift 6 concurrency checking.
+- Independent provider workers, continuous freshness deadlines, bounded framing and orderly restart/shutdown.
+- Typed partial observations preserve last known evidence through unreadable histories.
+- Incremental JSONL parsing, cached SQLite results, changed-card updates and paged request history.
+- Backed-up v1 migration separates durable notes/choices from recoverable observations and the daily usage ledger.
+- Async repository writes, restore revision protection and cancellable summary scheduling.
+- Synthetic `--demo` mode, shared Python/Swift protocol fixture, fault tests and documented source-only installation.
+
+Source-only release; no paid developer membership is needed for a local build. Installed v2 documents require 0.3; portable exports remain v1. See recovery guidance before downgrading.
+
 ## 0.2.0-beta.1
 
 First public source beta.

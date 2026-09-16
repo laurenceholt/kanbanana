@@ -1,3 +1,4 @@
+import KanbananaCore
 import SwiftUI
 
 // A presentation only: identities, ordering and source state stay on each card.

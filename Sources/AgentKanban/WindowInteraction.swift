@@ -1,3 +1,4 @@
+import KanbananaCore
 import AppKit
 
 /// Window rectangles use Core Graphics screen coordinates throughout; this also
@@ -19,7 +20,7 @@ enum WindowCoverage {
             return !intersection.isNull && intersection.width > 2 && intersection.height > 2
         }
     }
-    static func isCovered(_ window: NSWindow) -> Bool {
+    @MainActor static func isCovered(_ window: NSWindow) -> Bool {
         guard let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return false }
         let entries = list.compactMap { item -> Entry? in
             guard let number = item[kCGWindowNumber as String] as? Int,

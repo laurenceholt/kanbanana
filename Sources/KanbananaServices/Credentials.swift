@@ -1,10 +1,11 @@
+import KanbananaCore
 import Foundation
 import LocalAuthentication
 import Security
 
-enum CredentialStatus: Equatable, Sendable {
+package enum CredentialStatus: Equatable, Sendable {
     case checking, saved, missing, accessNeeded
-    var message: String {
+    package var message: String {
         switch self {
         case .checking: "Checking saved key…"
         case .saved: "API key saved in macOS Keychain"
@@ -14,36 +15,38 @@ enum CredentialStatus: Equatable, Sendable {
     }
 }
 
-protocol CredentialStorage: Sendable {
+package protocol CredentialStorage: Sendable {
     func status() async -> CredentialStatus
     func load() async throws -> String
     func save(_ value: String) async throws
     func delete() async throws
 }
 
-extension CredentialStorage {
+package extension CredentialStorage {
     func delete() async throws { throw Keychain.Failure(status: errSecUnimplemented) }
 }
 
-struct KeychainCredentials: CredentialStorage {
-    func status() async -> CredentialStatus { await Task.detached(priority: .utility) { Keychain.status() }.value }
-    func load() async throws -> String { try await Task.detached(priority: .utility) { try Keychain.load() }.value }
-    func save(_ value: String) async throws { try await Task.detached(priority: .utility) { try Keychain.save(value) }.value }
-    func delete() async throws { try await Task.detached(priority: .utility) {
+package struct KeychainCredentials: CredentialStorage {
+    package init() {}
+    package func status() async -> CredentialStatus { await Task.detached(priority: .utility) { Keychain.status() }.value }
+    package func load() async throws -> String { try await Task.detached(priority: .utility) { try Keychain.load() }.value }
+    package func save(_ value: String) async throws { try await Task.detached(priority: .utility) { try Keychain.save(value) }.value }
+    package func delete() async throws { try await Task.detached(priority: .utility) {
         let status = SecItemDelete(Keychain.query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw Keychain.Failure(status: status) }
     }.value }
 }
 
-enum Keychain {
-    static let service = "com.laurenceholt.agent-kanban"
-    static var query: [String: Any] {
+package enum Keychain {
+    package static let service = "com.laurenceholt.agent-kanban"
+    package static var query: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: "openai"]
     }
-    struct Failure: LocalizedError {
-        let status: OSStatus
-        var isMissing: Bool { status == errSecItemNotFound }
-        var errorDescription: String? {
+    package struct Failure: LocalizedError {
+        package init(status: OSStatus) { self.status = status }
+        package let status: OSStatus
+        package var isMissing: Bool { status == errSecItemNotFound }
+        package var errorDescription: String? {
             switch status {
             case errSecItemNotFound: "No saved API key was found. Add a key in Settings."
             case errSecInteractionNotAllowed, errSecAuthFailed, errSecUserCanceled:
@@ -52,7 +55,7 @@ enum Keychain {
             }
         }
     }
-    static func status() -> CredentialStatus {
+    package static func status() -> CredentialStatus {
         var lookup = query
         lookup[kSecReturnAttributes as String] = true
         lookup[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -66,7 +69,7 @@ enum Keychain {
         default: return .accessNeeded
         }
     }
-    static func load() throws -> String {
+    package static func load() throws -> String {
         var lookup = query
         lookup[kSecReturnData as String] = true
         lookup[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -76,7 +79,7 @@ enum Keychain {
         guard let data = result as? Data, let key = String(data: data, encoding: .utf8), !key.isEmpty else { throw Failure(status: errSecItemNotFound) }
         return key
     }
-    static func save(_ value: String) throws {
+    package static func save(_ value: String) throws {
         let data = Data(value.utf8)
         let status = SecItemUpdate(query as CFDictionary, [kSecValueData as String: data] as CFDictionary)
         if status == errSecSuccess { return }

@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import AppKit
 import XCTest
 @testable import AgentKanban
@@ -15,17 +17,15 @@ final class PhotoLibraryTests: XCTestCase {
         XCTAssertTrue(PhotoBackdrop.photos.indices.contains(PhotoBackdrop.index(at: now, offset: -100, context: "")))
     }
 
-    func testAllLibraryAssetsDecodeAtBoundedSizesAndHaveCredits() throws {
-        let oldRoot = PhotoBackdrop.resourceRoot
-        PhotoBackdrop.resourceRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Resources")
-        defer { PhotoBackdrop.resourceRoot = oldRoot }
+    @MainActor func testAllLibraryAssetsDecodeAtBoundedSizesAndHaveCredits() async throws {
+        let resourceRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Resources")
         XCTAssertEqual(Set(PhotoBackdrop.assetNames).count, PhotoBackdrop.photos.count)
         for photo in PhotoBackdrop.photos {
             XCTAssertFalse(photo.credit.isEmpty)
             XCTAssertFalse(photo.license.isEmpty)
-            let thumbnail = try XCTUnwrap(PhotoBackdrop.image(for: photo, thumbnail: true), photo.filename)
+            let thumbnail = try XCTUnwrap(PhotoImageLoader.shared.image(for: photo, thumbnail: true, resourceRoot: resourceRoot), photo.filename)
             XCTAssertLessThanOrEqual(max(thumbnail.size.width, thumbnail.size.height), 400)
-            let full = try XCTUnwrap(PhotoBackdrop.image(for: photo), photo.filename)
+            let full = try XCTUnwrap(PhotoImageLoader.shared.image(for: photo, resourceRoot: resourceRoot), photo.filename)
             XCTAssertLessThanOrEqual(max(full.size.width, full.size.height), 2048)
             let bitmap = try XCTUnwrap(full.cgImage(forProposedRect: nil, context: nil, hints: nil))
             XCTAssertEqual(bitmap.colorSpace?.model, .monochrome)

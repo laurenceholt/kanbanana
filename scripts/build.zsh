@@ -12,6 +12,8 @@ app="$stage_dir/kanbanana.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp .build/release/AgentKanban "$app/Contents/MacOS/kanbanana"
 cp Resources/reader.py "$app/Contents/Resources/reader.py"
+mkdir -p "$app/Contents/Resources/kanbanana_reader"
+cp Resources/kanbanana_reader/*.py "$app/Contents/Resources/kanbanana_reader/"
 ditto --norsrc --noextattr .build/runtime/python "$app/Contents/Resources/Python"
 cp -R Resources/Branding "$app/Contents/Resources/Branding"
 cp -R Resources/PythonLicenses "$app/Contents/Resources/PythonLicenses"
@@ -37,8 +39,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>kanbanana</string>
 <key>CFBundleDisplayName</key><string>kanbanana</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
-<key>CFBundleVersion</key><string>2</string>
-<key>CFBundleShortVersionString</key><string>0.2.0-beta.1</string>
+<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>0.3.0-beta.1</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>LSUIElement</key><true/>
 <key>LSMinimumSystemVersion</key><string>14.0</string>

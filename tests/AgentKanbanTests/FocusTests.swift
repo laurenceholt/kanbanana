@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import AppKit
 import XCTest
 @testable import AgentKanban
@@ -9,17 +11,17 @@ final class FocusTests: XCTestCase {
                      reason: "", response: "", eventID: "event", eventTime: updated, url: "")
     }
 
-    @MainActor func testFocusIncludesAllProjectsAndIgnoresHiddenFilters() throws {
+    @MainActor func testFocusIncludesAllProjectsAndIgnoresHiddenFilters() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let first = Project(name: "First"), second = Project(name: "Second")
-        store.saved.projects = [first, second]
-        store.saved.cards = [card("older"), card("newer", updated: 200), card("parked"), card("running", state: .running)]
+        try await store.installFixture { state in state.projects = [first, second] }
+        try await store.installFixture { state in state.cards = [card("older"), card("newer", updated: 200), card("parked"), card("running", state: .running)] }
         var a = Disposition(); a.projectID = first.id
         var b = Disposition(); b.projectID = second.id
         var parked = a; parked.parked = true
-        store.saved.dispositions = ["older": a, "newer": b, "parked": parked]
+        try await store.installFixture { state in state.dispositions = ["older": a, "newer": b, "parked": parked] }
         store.selectedProject = first.id; store.search = "no matches"; store.parking = true
         XCTAssertTrue(store.visible.isEmpty)
         XCTAssertEqual(store.focusCards(in: .ready).map(\.id), ["newer", "older"])
@@ -27,10 +29,10 @@ final class FocusTests: XCTestCase {
         XCTAssertEqual(store.focusCards(in: .ready).count, store.count(.ready))
     }
 
-    @MainActor func testFocusTracksManualMovesAndNewRequests() throws {
+    @MainActor func testFocusTracksManualMovesAndNewRequests() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         var c = card("work")
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: 100))
         store.mark(c, .dealtWith)

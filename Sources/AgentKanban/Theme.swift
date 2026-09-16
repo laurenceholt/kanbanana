@@ -1,3 +1,4 @@
+import KanbananaCore
 import AppKit
 import SwiftUI
 
@@ -216,19 +217,13 @@ extension BoardStore {
         let index = project.colorIndex ?? saved.projects.firstIndex(where: { $0.id == project.id }) ?? 0
         return ProjectColor.palette[abs(index % ProjectColor.palette.count)]
     }
-    func setProjectColor(_ id: String, _ index: Int) {
-        guard ProjectColor.palette.indices.contains(index), let i = saved.projects.firstIndex(where: { $0.id == id }) else { return }
-        saved.projects[i].colorIndex = index; changed()
-    }
+
     func projectSymbol(_ project: Project?) -> ProjectSymbol {
         guard let project else { return .init(name: "Ungrouped", systemName: "square.dashed") }
         let index = project.symbolIndex ?? saved.projects.firstIndex(where: { $0.id == project.id }) ?? 0
         return ProjectSymbol.palette[abs(index % ProjectSymbol.palette.count)]
     }
-    func setProjectSymbol(_ id: String, _ index: Int) {
-        guard ProjectSymbol.palette.indices.contains(index), let i = saved.projects.firstIndex(where: { $0.id == id }) else { return }
-        saved.projects[i].symbolIndex = index; changed()
-    }
+
 }
 
 // Use the actual installed app icons, without copying vendor artwork into our bundle.

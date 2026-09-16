@@ -5,8 +5,12 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [.executable(name: "AgentKanban", targets: ["AgentKanban"])],
     targets: [
-        .executableTarget(name: "AgentKanban", path: "Sources/AgentKanban"),
-        .testTarget(name: "AgentKanbanTests", dependencies: ["AgentKanban"], path: "tests/AgentKanbanTests")
+        .target(name: "KanbananaCore"),
+        .target(name: "KanbananaServices", dependencies: ["KanbananaCore"]),
+        .executableTarget(name: "AgentKanban", dependencies: ["KanbananaCore", "KanbananaServices"], path: "Sources/AgentKanban"),
+        .testTarget(name: "AgentKanbanTests", dependencies: ["AgentKanban", "KanbananaCore", "KanbananaServices"], path: "tests/AgentKanbanTests"),
+        .testTarget(name: "KanbananaCoreTests", dependencies: ["KanbananaCore"], path: "tests/KanbananaCoreTests"),
+        .testTarget(name: "KanbananaServicesTests", dependencies: ["KanbananaCore", "KanbananaServices"], path: "tests/KanbananaServicesTests", resources: [.copy("Fixtures")])
     ],
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )

@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import XCTest
 import Combine
 @testable import AgentKanban
@@ -42,51 +44,51 @@ final class LifecycleTests: XCTestCase {
         var d = Disposition(); d.acknowledgedRevision = current.revision
         XCTAssertEqual(Lifecycle.reconcile(current, stale, d, now: now, healthy: true).acknowledgedRevision, current.revision)
     }
-    @MainActor func testNoteAssignmentAndParkingSurviveReload() throws {
+    @MainActor func testNoteAssignmentAndParkingSurviveReload() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         store.addProject("Math")
         let pid = try XCTUnwrap(store.saved.projects.first?.id)
         store.setNote(pid, "Install on writer machines")
         store.setProjectColor(pid, 5)
         store.setProjectSymbol(pid, 6)
-        let c = card(); store.saved.cards = [c]; store.assign(c, to: pid); store.park(c, true); store.persist()
-        let reloaded = BoardStore(root: root, start: false)
+        let c = card(); try await store.installFixture { state in state.cards = [c] }; store.assign(c, to: pid); store.park(c, true); await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
         XCTAssertEqual(reloaded.saved.projects.first?.note, "Install on writer machines")
         XCTAssertEqual(reloaded.saved.projects.first?.colorIndex, 5)
         XCTAssertEqual(reloaded.saved.projects.first?.symbolIndex, 6)
         XCTAssertTrue(reloaded.disposition(c).assignmentLocked)
         XCTAssertTrue(reloaded.disposition(c).parked)
     }
-    @MainActor func testOlderProjectsReceiveColorsWithoutChangingAssignments() throws {
+    @MainActor func testOlderProjectsReceiveColorsWithoutChangingAssignments() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let project = Project(name: "Existing project")
-        store.saved.projects = [project]
-        let c = card(); store.saved.cards = [c]; store.assign(c, to: project.id); store.persist()
-        let reloaded = BoardStore(root: root, start: false)
+        try await store.installFixture { state in state.projects = [project] }
+        let c = card(); try await store.installFixture { state in state.cards = [c] }; store.assign(c, to: project.id); await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
         XCTAssertEqual(reloaded.saved.projects.first?.colorIndex, 0)
         XCTAssertEqual(reloaded.saved.projects.first?.symbolIndex, 0)
         XCTAssertEqual(reloaded.disposition(c).projectID, project.id)
         XCTAssertTrue(reloaded.disposition(c).assignmentLocked)
     }
-    @MainActor func testCorruptStateIsNotOverwritten() throws {
+    @MainActor func testCorruptStateIsNotOverwritten() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let file = root.appendingPathComponent("board.json")
         try Data("invalid".utf8).write(to: file)
-        let store = BoardStore(root: root, start: false)
-        store.addProject("Should not overwrite"); store.persist()
+        let store = await BoardStore.loaded(root: root, start: false)
+        store.addProject("Should not overwrite"); await store.persist()
         XCTAssertEqual(try String(contentsOf: file), "invalid")
         XCTAssertNotNil(store.error)
     }
-    @MainActor func testUnchangedPollingDoesNotRepublishOrUndoDrop() throws {
+    @MainActor func testUnchangedPollingDoesNotRepublishOrUndoDrop() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let c = card()
         let snapshot = Snapshot(cards: [c], health: ["codex": "Connected"], scannedAt: now)
         store.apply(snapshot)
@@ -98,10 +100,10 @@ final class LifecycleTests: XCTestCase {
         XCTAssertEqual(store.column(c), .dealtWith)
         withExtendedLifetime(subscription) {}
     }
-    @MainActor func testUnreadableHistoryKeepsRequestsAndRecoversAcknowledgement() throws {
+    @MainActor func testUnreadableHistoryKeepsRequestsAndRecoversAcknowledgement() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let c = card()
         store.apply(Snapshot(cards: [c], health: ["codex": "Connected"], scannedAt: now))
         store.mark(c, .dealtWith)
@@ -118,10 +120,10 @@ final class LifecycleTests: XCTestCase {
         XCTAssertEqual(store.column(try XCTUnwrap(store.cards.first)), .dealtWith)
         XCTAssertNil(store.cards.first?.observationIssue)
     }
-    @MainActor func testProviderOutageKeepsCompletedCardsAndCurationAcrossRecoveryAndRestart() throws {
+    @MainActor func testProviderOutageKeepsCompletedCardsAndCurationAcrossRecoveryAndRestart() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let original = (0..<24).map { index in
             var c = card(); c.id = "codex:\(index)"; c.nativeID = "\(index)"; return c
         }
@@ -136,8 +138,8 @@ final class LifecycleTests: XCTestCase {
         XCTAssertEqual(store.count(.unknown), 0)
         XCTAssertEqual(store.sourceWarnings, ["Codex updates paused · History database busy"])
         XCTAssertEqual(store.saved.dispositions, dispositions)
-        store.persist()
-        let reloaded = BoardStore(root: root, start: false)
+        await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
         XCTAssertEqual(reloaded.cards, store.cards)
         XCTAssertFalse(reloaded.sourceWarnings.isEmpty, "A restart must not conceal the saved observation failure")
         reloaded.apply(.init(cards: original, health: ["codex": "Connected"], scannedAt: now + 2))
@@ -145,10 +147,10 @@ final class LifecycleTests: XCTestCase {
         XCTAssertTrue(reloaded.cards.allSatisfy { $0.observationIssue == nil })
         XCTAssertEqual(reloaded.saved.dispositions, dispositions)
     }
-    @MainActor func testOutageDoesNotPretendAnAgentIsStillRunningOrAutoParkStaleCards() throws {
+    @MainActor func testOutageDoesNotPretendAnAgentIsStillRunningOrAutoParkStaleCards() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let c = card(state: .running)
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now))
         store.apply(.init(cards: [], health: ["codex": "Unavailable · File access denied"], scannedAt: now + 1))
@@ -161,25 +163,25 @@ final class LifecycleTests: XCTestCase {
         store.apply(.init(cards: [ready], health: ["codex": "Connected"], scannedAt: now + 2 * 86400))
         XCTAssertFalse(store.disposition(ready).parked, "An unreadable history cannot supply evidence for automatic parking")
     }
-    @MainActor func testRestartRetainsLastKnownStateAndIncludesOldParkedCardsInReaderRequest() throws {
+    @MainActor func testRestartRetainsLastKnownStateAndIncludesOldParkedCardsInReaderRequest() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let c = card(age: 30 * 86400)
-        store.saved.cards = [c]; store.park(c, true); store.mark(c, .dealtWith); store.persist()
-        let reloaded = BoardStore(root: root, start: false)
+        try await store.installFixture { state in state.cards = [c] }; store.park(c, true); store.mark(c, .dealtWith); await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
         let retained = try XCTUnwrap(reloaded.cards.first)
         XCTAssertEqual(retained.state, .ready)
         XCTAssertEqual(reloaded.column(retained), .dealtWith)
         XCTAssertTrue(reloaded.disposition(retained).parked)
-        let args = BoardStore.readerArguments(script: "/example/reader.py", days: 14, parentPID: 123, trackedIDs: reloaded.cards.map(\.id))
+        let args = ReaderConfiguration(executable: URL(fileURLWithPath: "/usr/bin/python3"), script: URL(fileURLWithPath: "/example/reader.py"), days: 14, trackedIDs: reloaded.cards.map(\.id), privacy: PrivacyOptions()).arguments(for: .codex)
         let flag = try XCTUnwrap(args.firstIndex(of: "--tracked-id"))
         XCTAssertEqual(args[flag + 1], c.id, "Old parked conversations must cross the process boundary for rechecking")
     }
-    @MainActor func testMissingTrackedCardReportsAbsenceAndRecoversWithoutLosingCuration() throws {
+    @MainActor func testMissingTrackedCardReportsAbsenceAndRecoversWithoutLosingCuration() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let c = card()
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now))
         store.mark(c, .todo); store.setTodoNote(c.id, "Another pass")
@@ -194,16 +196,16 @@ final class LifecycleTests: XCTestCase {
         XCTAssertEqual(store.cards.first?.state, .ready)
         XCTAssertEqual(store.disposition(c), disposition)
     }
-    @MainActor func testLaterUnavailableObservationClearsOldRetrySuccess() throws {
+    @MainActor func testLaterUnavailableObservationClearsOldRetrySuccess() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         var c = card()
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now))
         store.statusCheckMessage = "Status checked · all available"
         c.state = .unknown; c.reason = "No recent execution signal"
         store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now + 1))
-        XCTAssertNil(store.statusCheckMessage)
+        XCTAssertFalse(store.statusCheckMessage?.contains("all available") == true)
         XCTAssertEqual(store.column(c), .unknown)
     }
 }

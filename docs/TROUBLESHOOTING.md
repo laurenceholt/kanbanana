@@ -12,7 +12,8 @@ If you use a custom `CODEX_HOME` or `CLAUDE_CONFIG_DIR`, enter it under Settings
 - **No local sessions:** the app exists but its local store has not been created. Create a local task and retry.
 - **Access denied:** macOS or filesystem permissions prevented reading. Review the relevant file-access prompt or permissions. Broad Full Disk Access is not a default requirement.
 - **Unsupported format:** a required schema is unknown. Check for a kanbanana update and attach sanitized diagnostics to an issue. Repeated retries cannot repair an incompatible schema.
-- **Unavailable / updates paused:** a temporary database or process failure. Retry status restarts the reader and clears its caches. Prior board data remains.
+- **Some histories unavailable:** a partial read, such as unreadable metadata or a transcript. Last observed task states and your notes remain intact; missing cards are not treated as confirmed deletions.
+- **Unavailable / updates paused:** a database or process failure. Each provider has an independent worker. A worker that stops responding is marked stale after 20 seconds and restarted. Retry status immediately restarts workers and clears their memory caches. Prior board data remains.
 - **No recent execution signal:** the store can be read but it does not establish whether that quiet task is still running. Open the source conversation to check.
 
 ## Summaries
@@ -23,9 +24,11 @@ An empty replacement-key field does not mean the saved key is missing; the statu
 
 ## Backup and restore
 
-Settings → Export board writes a complete board snapshot, excluding the API key and assistant responses. Keep it private. Settings → Restore validates a selected JSON export, backs up the current board, restores projects/notes/dispositions and turns cloud summaries off. Source apps are unchanged. A rescan can then update task activity.
+Settings → Export board writes a snapshot of the loaded board and cached requests, excluding the API key and assistant responses. Keep it private. Settings → Restore validates a selected JSON export, backs up the current board, restores projects/notes/dispositions and turns cloud summaries off. Source apps are unchanged. A rescan can then update task activity.
 
 Up to seven backups live in `~/Library/Application Support/Agent Kanban/Backups/`. Automatic backups are at most hourly; restoration forces a backup. Backups are previous snapshots, not a guarantee that the last edit before a force quit is present. Back up exports separately if you need longer retention.
+
+Version 0.3 separates curation from cached history and backs up old v1 boards before migration. If `observations.json` is damaged, projects, notes and assignments still load; the app rebuilds observations from native sources. Earlier history is loaded in pages. To roll back to 0.2, quit 0.3 and restore a portable v1 backup/export; 0.2 cannot directly read the installed v2 document.
 
 If the current board is corrupt or has an unsupported version, saving is disabled to preserve it. Restore a valid backup through Settings. The original unreadable file is preserved in `Recovery/` before replacement. Do not hand-edit a working board while the app is running.
 

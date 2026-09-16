@@ -1,3 +1,5 @@
+import KanbananaCore
+import KanbananaServices
 import XCTest
 @testable import AgentKanban
 
@@ -23,14 +25,14 @@ final class ProjectStackTests: XCTestCase {
         }
         XCTAssertEqual(ProjectStackRow.rows(cards: cards, projects: projects, stacked: false, expanded: ["math"]).flatMap(\.conversations), cards)
     }
-    @MainActor func testStacksFollowVisibleStatusAndProjectChangesWithoutSavingGrouping() throws {
+    @MainActor func testStacksFollowVisibleStatusAndProjectChangesWithoutSavingGrouping() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BoardStore(root: root, start: false)
+        let store = await BoardStore.loaded(root: root, start: false)
         let math = Project(name: "Math", note: "Install the builder"), boats = Project(name: "Boats")
         let first = card("first"), second = card("second", title: "Fix dragging"), running = card("running", state: .running)
-        store.saved.projects = [math, boats]
-        store.saved.cards = [first, second, running]
+        try await store.installFixture { state in state.projects = [math, boats] }
+        try await store.installFixture { state in state.cards = [first, second, running] }
         for card in store.cards { store.assign(card, to: math.id) }
         func readyRows() -> [ProjectStackRow] {
             let cards = store.visible.filter { store.column($0) == .ready }

@@ -1,10 +1,10 @@
 # Compatibility and limitations
 
-Status for the 0.2.0 source beta, 15 September 2026. Compatibility is based on observed stores and tests, not an official integration contract.
+Status for the 0.3.0 source beta, 16 September 2026. Compatibility is based on observed stores and tests, not an official integration contract.
 
 | Component | Evidence / support |
 | --- | --- |
-| Apple Silicon, macOS 26.1 | Local development, native UI use, bundled-runtime build and automated tests. |
+| Apple Silicon, macOS 26.1 | Local development and prior native UI use. Version 0.3: 86 Swift tests, 42 Python tests, synthetic UI rendering and bundled-runtime build; the live upgrade UI was not exercised while the development Mac was locked. |
 | macOS 14 / 15 | Apple Silicon CI build, Swift/Python suites and bundled-reader smoke test passed on 15 September 2026. This does not verify native provider transitions or GUI interactions on those OS versions. |
 | Intel Mac | Not packaged or tested in this beta. |
 | Claude Desktop Code 2.110.0 | Local session discovery and request history; previously verified exact local-session navigation. |

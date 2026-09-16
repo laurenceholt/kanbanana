@@ -8,11 +8,11 @@ See what's running in Claude Code and Codex, remember what you asked, and jump i
 
 <img src="docs/focus-beta.png" width="300" alt="Focus view with fictional projects">
 
-**0.2.0 beta · Apple Silicon · source release.** Built for Claude Desktop's **Code** section and Codex Desktop local sessions. Independently developed; not affiliated with Anthropic or OpenAI.
+**0.3.0 beta · Apple Silicon · source release.** Built for Claude Desktop's **Code** section and Codex Desktop local sessions. Independently developed; not affiliated with Anthropic or OpenAI.
 
 ## Get started
 
-This beta is available as source. A signed, notarized app download is planned; no unsigned release binary is advertised as notarized.
+This beta is distributed as source. **No paid Apple Developer membership or signing certificate is needed to build and run it locally.** The build uses ad-hoc signing. A future signed, notarized download would be a separate convenience; this release has no binary download.
 
 Requirements: Apple Silicon Mac, macOS 14 or later, Xcode command line tools with Swift 6.0 or newer (Xcode 16+), and at least one supported desktop app. See [tested compatibility and limitations](docs/COMPATIBILITY.md). The minimum OS is a build target, not a claim that every older version has been tested.
 
@@ -24,6 +24,10 @@ open dist/kanbanana.app
 ```
 
 The build downloads a pinned, checksum-verified Python runtime and bundles it in the app. Python does not need to be installed separately to run the resulting bundle. Keep the whole `.app` together; you can move it to Applications.
+
+You can also give your coding agent this instruction:
+
+> Clone https://github.com/laurenceholt/kanbanana, read README.md, check the macOS/Swift requirements, run the tests and `zsh scripts/build.zsh`, then open `dist/kanbanana.app`. Do not change provider permissions or read my API key.
 
 On first launch, choose which providers to monitor. Local conversations active in the last two weeks are discovered automatically. Cloud summaries are **off by default**; the board works with request excerpts and no API key.
 
@@ -59,7 +63,7 @@ Keys stay in macOS Keychain. Delete saved key stops summaries and removes the st
 
 ## Your data
 
-The board is local, in `~/Library/Application Support/Agent Kanban/board.json`. The historical folder name preserves existing installations. Notes, priorities and assignments survive relaunches. Seven rotating backups are stored alongside it.
+The board is local, in `~/Library/Application Support/Agent Kanban/`. `board.json` holds your notes, projects, settings and manual choices; `observations.json` is a rebuildable history cache; `summary-usage.json` records daily attempts. The historical folder name preserves existing installations. Seven rotating backups are stored alongside them. Existing boards migrate automatically after a backup.
 
 Settings provides **Export board**, **Restore**, **Open data folder**, and **Diagnostics**. Board exports include private request text; diagnostic reports include only versions, health categories and aggregate counts. [Backup, recovery and troubleshooting](docs/TROUBLESHOOTING.md).
 
@@ -75,6 +79,14 @@ zsh scripts/fetch-runtime.zsh
 .build/runtime/python/bin/python3 -I -B -m unittest discover -s tests -v
 zsh scripts/build.zsh
 ```
+
+Try the interface without connecting to any personal data:
+
+```zsh
+swift run AgentKanban --demo
+```
+
+Demo mode uses fictional conversations, temporary storage/preferences, and disabled provider/Keychain/network services. Changes are discarded when you quit. See [Architecture](docs/ARCHITECTURE.md) for module boundaries and the synthetic reader benchmark.
 
 [Contributing](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Release process](docs/RELEASING.md) · [Changelog](CHANGELOG.md) · [Report a security issue](SECURITY.md).
 
