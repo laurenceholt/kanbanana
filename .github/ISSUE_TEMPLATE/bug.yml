@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible problem using non-sensitive details.
+body:
+  - type: markdown
+    attributes:
+      value: 'Do not attach board.json, conversation transcripts, API keys or private screenshots. For security issues, use SECURITY.md.'
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce with fictional data
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Settings → Diagnostics exports versions and aggregate counts. Review before attaching.
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Affected integration
+      options: [Claude Desktop Code, Codex Desktop, Both, Neither / interface]

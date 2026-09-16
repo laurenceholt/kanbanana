@@ -1,0 +1,13 @@
+name: Feature suggestion
+description: Explain a workflow that kanbanana could support better.
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behavior

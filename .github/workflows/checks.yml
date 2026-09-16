@@ -1,0 +1,32 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: zsh {0}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: swift test
+      - run: zsh scripts/fetch-runtime.zsh
+      - run: .build/runtime/python/bin/python3 -I -B -m unittest discover -s tests -v
+      - run: zsh scripts/build.zsh
+      - run: zsh scripts/audit.zsh
+      - name: Bundled runtime and read-only adapter smoke check
+        run: |
+          smoke_home=$(mktemp -d)
+          trap 'rm -rf "$smoke_home"' EXIT
+          dist/kanbanana.app/Contents/Resources/Python/bin/python3 -I -B Resources/reader.py --codex-home "$smoke_home" --disable-provider claude > "$smoke_home/result.json"
+          dist/kanbanana.app/Contents/Resources/Python/bin/python3 -I -B -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["cards"] == []; assert d["health"]["claude"] == "Disabled"' "$smoke_home/result.json"

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "leaves",
+    "page": "https://commons.wikimedia.org/wiki/File:Ansel_Adams_-_National_Archives_79-AA-E23.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/7/70/Ansel_Adams_-_National_Archives_79-AA-E23.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 1353400
+  },
+  {
+    "id": "earthrise",
+    "page": "https://commons.wikimedia.org/wiki/File:AS08-13-2329.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/0/09/AS08-13-2329.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 641360
+  },
+  {
+    "id": "tetons",
+    "page": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/2/21/Adams_The_Tetons_and_the_Snake_River.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 1865607
+  },
+  {
+    "id": "medusa",
+    "page": "https://commons.wikimedia.org/wiki/File:Lion%27s_mane_jellyfish_in_Gullmarn_fjord_at_S%C3%A4mstad_3.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Lion%27s_mane_jellyfish_in_Gullmarn_fjord_at_S%C3%A4mstad_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 8374234
+  },
+  {
+    "id": "moonwalk",
+    "page": "https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Aldrin_Apollo_11.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 2554296
+  },
+  {
+    "id": "lightning",
+    "page": "https://commons.wikimedia.org/wiki/File:Lightning_over_Oradea_Romania_3.jpg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/1/13/Lightning_over_Oradea_Romania_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "bytes": 2606904
+  }
+]

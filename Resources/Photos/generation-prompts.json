@@ -1,0 +1,38 @@
+[
+  {
+    "id": "puppy",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. A very cute young scruffy terrier puppy staring straight into the lens, comically solemn, one ear up and one ear flopped, enormous soulful eyes and small damp nose. Close, tactile fine-art animal portrait, dark seamless studio backdrop, puppy head in lower middle of portrait, a little spare darkness above. Heart-melting without being sugary. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "owl",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. A small burrowing owl peering straight into the camera around the edge of a monumental rough stone pillar, with one enormous round eye and half its feathery face visible. Deadpan, curious, slightly absurd. Wide negative space, dark backdrop, exact feather detail. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "jellyfish",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. One luminous translucent jellyfish hanging in utterly black ocean water, long impossibly delicate filaments curling down like silver calligraphy. Underwater fine-art photograph, ghostly and striking, glowing whites against deep blacks, no extra marine life. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "chair",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. One antique bentwood caf\u00e9 chair standing alone in a shallow mirror of water on an empty salt flat. Its reflection is almost more solid than the chair. A huge pale misty horizon, beautiful uncanny stillness, exquisitely real materials. Surreal editorial photograph rather than illustration. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "balloon",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. A single enormous spherical white balloon hovering just above a small deserted rooftop, tethered by an almost invisible thread. The sphere resembles a moon that has come down to visit. Stark architectural geometry, black sky, sharp low sun, dreamlike yet physically photographed. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "snail",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. An extreme macro portrait of a tiny snail balanced at the tip of a thin curved blade of grass, both eye stalks pointed inquisitively at the viewer. Oversized world of elegant dew spheres, creamy out-of-focus highlights, very shallow depth of field, humorous and beautiful. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "horse",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. A white horse standing chest-deep in pale dawn mist looking directly at the camera, its ears sharply upright, dark forest dissolving behind it, intensely calm eye contact. Silvery, cinematic and slightly otherworldly, no rider, no tack. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "umbrella",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. An upside-down black umbrella resting on pale snow, filled with a perfect small mound of fresh snow; one solitary curved handle pointing skyward. Minimal, very graphic, odd and elegant, diagonal low winter shadows, no people. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  },
+  {
+    "id": "telephone",
+    "prompt": "Use case: photorealistic-natural. Asset: monochrome photographic background for a narrow macOS productivity window. Portrait 2:3, 1024x1536. A vintage black rotary telephone sitting on a very tall narrow concrete plinth in an empty windswept desert, its coiled cord dangling elegantly. No numerals readable. Serious gallery-quality surreal photography, vast empty sky and silvery dunes, beautifully composed and dryly funny. Strictly black and white, no warm tint. Rich silver-gelatin tonal range, beautiful photographic realism, natural texture. The main subject must remain identifiable in the central 38% vertical strip because a narrow panel crops the sides. No text, watermark, graphic border, UI, collage or lettering. This is the photograph itself, not a mockup."
+  }
+]
