@@ -43,7 +43,7 @@ struct WelcomeView: View {
             }
             Text("Reads local session history without changing either app. The first import covers the last two weeks. Requests and your notes are saved on this Mac. Parked cards remain recoverable.").font(.callout)
             Text("Optional cloud summaries").font(.headline)
-            Text("You can add an OpenAI API key in Settings later. Summaries stay off until you enable them. Enabling sends request text directly to OpenAI and incurs charges on your API account; a ChatGPT subscription does not supply API credit. Project notes are never sent.").font(.callout)
+            Text("You can add an OpenAI API key in Settings later. Summaries stay off until you enable them. Enabling sends request text and the latest agent report directly to OpenAI and incurs charges on your API account; a ChatGPT subscription does not supply API credit. Project notes are never sent.").font(.callout)
             Link("Read the privacy details", destination: URL(string: "https://github.com/laurenceholt/kanbanana/blob/main/PRIVACY.md")!)
             Button("Open my board") { store.completeOnboarding() }.buttonStyle(.borderedProminent)
         }.padding(24).frame(width: 470).background(appearance.canvas).foregroundStyle(appearance.ink)

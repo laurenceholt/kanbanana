@@ -14,6 +14,11 @@ struct ConversationCard: View, Equatable {
     var latestSummary: String? { presentation.latestSummary }
     var compact: Bool { presentation.compact }
     var opensProjectBoard: Bool { presentation.opensProjectBoard }
+    private var summaryInput: SummaryInput? { card.cardSummaryInput(in: displayedColumn) }
+    private var missingSummaryText: String {
+        if displayedColumn == .needsMe { return card.reason.isEmpty ? "Open the conversation to see what is needed." : card.reason }
+        return displayedColumn == .ready ? "Agent response unavailable. Open the conversation to check." : "Request history unavailable"
+    }
     let showProject: ((String) -> Void)?
     let showHistory: () -> Void
 
@@ -85,9 +90,9 @@ struct ConversationCard: View, Equatable {
                                     }
                                 }
                                 if !collapsed {
-                                    if let r = card.requests.last {
-                                        Text(latestSummary ?? String(r.text.prefix(220))).font(appearance.font(11)).lineSpacing(1).lineLimit(3).foregroundStyle(appearance.ink.opacity(0.76))
-                                    } else { Text("Request history unavailable").font(appearance.font(10)).foregroundStyle(appearance.muted) }
+                                    if let input = summaryInput {
+                                        Text(latestSummary ?? String(input.text.prefix(220))).font(appearance.font(11)).lineSpacing(1).lineLimit(3).foregroundStyle(appearance.ink.opacity(0.76))
+                                    } else { Text(missingSummaryText).font(appearance.font(10)).foregroundStyle(appearance.muted) }
                                 }
                             }.contentShape(Rectangle())
                         }.buttonStyle(.plain).padding(.top, compact ? 5 : collapsed ? 2 : 5).help("Open \(card.title) in \(card.providerName)")
@@ -133,7 +138,7 @@ struct ConversationCard: View, Equatable {
                         HStack(spacing: 6) {
                             providerButton
                             Text(activityLabel(card.updated)).font(BoardStyle.label(8)).foregroundStyle(appearance.muted).lineLimit(1)
-                            if !card.requests.isEmpty && latestSummary == nil { Text("excerpt").font(appearance.font(8)).foregroundStyle(appearance.muted) }
+                            if summaryInput != nil && latestSummary == nil { Text("excerpt").font(appearance.font(8)).foregroundStyle(appearance.muted) }
                             Spacer(minLength: 0)
                             Button(action: showHistory) { Image(systemName: "text.alignleft").font(.system(size: 11)) }.buttonStyle(.plain).help("Expand request history").accessibilityLabel("Request history for \(card.title)")
                             Menu { actions } label: { Image(systemName: "ellipsis").font(.system(size: 11)) }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Conversation actions").accessibilityLabel("Actions for \(card.title)")

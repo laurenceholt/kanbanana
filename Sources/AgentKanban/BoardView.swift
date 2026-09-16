@@ -229,7 +229,7 @@ struct BoardView: View {
         ) { cardView($0) }
     }
     private func cardView(_ card: Conversation, compact: Bool = false, opensProjectBoard: Bool = false) -> some View {
-        ConversationCard(store: store, card: card, project: store.project(card), projects: store.saved.projects, disposition: store.disposition(card), displayedColumn: store.column(card), latestSummary: card.requests.last.flatMap { store.summary(card, $0) }, compact: compact, opensProjectBoard: opensProjectBoard, showProject: { id in
+        ConversationCard(store: store, card: card, project: store.project(card), projects: store.saved.projects, disposition: store.disposition(card), displayedColumn: store.column(card), latestSummary: store.cardSummary(card), compact: compact, opensProjectBoard: opensProjectBoard, showProject: { id in
             store.selectProject(id)
             if opensProjectBoard { store.parking = false; layout = .projects }
         }, showHistory: { detail = card }).equatable()

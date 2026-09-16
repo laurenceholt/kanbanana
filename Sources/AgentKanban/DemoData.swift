@@ -49,7 +49,15 @@ enum DemoData {
         for (index, s) in samples.enumerated() {
             let now = now - Double(index * 400)
             let r = RequestItem(id: "request-\(index)", text: s.2, time: now)
-            let card = Conversation(id: "demo-\(index)", provider: s.1, nativeID: "demo", title: s.0, folder: "", updated: now, requests: [r], state: s.3 == .dealtWith || s.3 == .todo ? .ready : s.3, reason: s.3 == .needsMe ? "Permission needed" : "", response: "", eventID: "event", eventTime: now, url: "")
+            let reports = ["Compare shortlisted boats": "Compared the shortlist: two fit the marina limits; one needs a berth check.",
+                           "Polish article": "Revised the opening and shortened the conclusion. Ready for your review.",
+                           "Review the builder installer": "Installer works on a clean Mac. The first-launch instructions need a final read.",
+                           "Apply accessibility updates": "Added keyboard navigation and focus indicators. Screen-reader testing is still pending.",
+                           "Review the new rubric": "Found two missing edge cases in the rubric; proposed examples for each.",
+                           "Check Weekend atlas appointments": "Verified appointment times. One overlaps with the ferry departure.",
+                           "Fix dragging": "Needs your permission to run the touch simulator before testing the drag fix."]
+            let report = reports[s.0] ?? ""
+            let card = Conversation(id: "demo-\(index)", provider: s.1, nativeID: "demo", title: s.0, folder: "", updated: now, requests: [r], state: s.3 == .dealtWith || s.3 == .todo ? .ready : s.3, reason: s.3 == .needsMe ? "Permission needed" : "", response: report, eventID: "event", eventTime: now, url: "")
             state.cards.append(card)
             var d = Disposition(); d.projectID = s.4
             if mode == "parking" { d.parked = true }
@@ -61,6 +69,9 @@ enum DemoData {
             }
             state.dispositions[card.id] = d
             state.summaries[card.id + ":" + r.id] = Summary(text: r.text, inputHash: BoardStore.hash(r.text))
+            if !report.isEmpty {
+                state.summaries[card.reportSummaryKey] = Summary(text: report, inputHash: BoardStore.hash(report), styleVersion: SummaryStyle.version)
+            }
         }
         if mode == "outage" {
             for i in state.cards.indices where state.cards[i].provider == "codex" {

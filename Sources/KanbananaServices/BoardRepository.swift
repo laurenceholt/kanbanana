@@ -111,11 +111,11 @@ private struct ObservationCache: Codable {
         self.generation = generation
         cards = state.cards.map { original in
             var card = original
-            card.response = ""
+            card.response = String(card.response.suffix(20000))
             card.requests = Array(card.requests.suffix(100))
             return card
         }
-        let keys = Set(cards.flatMap { card in card.requests.map { card.id + ":" + $0.id } })
+        let keys = Set(cards.flatMap { card in card.requests.map { card.id + ":" + $0.id } + [card.reportSummaryKey] })
         summaries = state.summaries.filter { keys.contains($0.key) }
     }
 }

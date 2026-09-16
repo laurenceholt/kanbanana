@@ -29,7 +29,7 @@ import KanbananaServices
     private let repository: any BoardRepository
     private let monitor: any SessionMonitoring
     private let credentials: any CredentialStorage
-    private let summarize: @Sendable (String, String, String) async throws -> String
+    private let summarize: @Sendable (SummaryInput, String, String) async throws -> String
     private let clock: ServiceClock
     private let monitoringEnabled: Bool
     private var storageWritable = true
@@ -57,7 +57,7 @@ import KanbananaServices
     init(root: URL? = nil, start: Bool = true, initialState: SavedState? = nil,
          repository: (any BoardRepository)? = nil, monitor: (any SessionMonitoring)? = nil,
          credentials: any CredentialStorage = KeychainCredentials(), clock: ServiceClock = ServiceClock(),
-         summarize: @escaping @Sendable (String, String, String) async throws -> String = { try await GPT.summarize($0, model: $1, key: $2) }) {
+         summarize: @escaping @Sendable (SummaryInput, String, String) async throws -> String = { try await GPT.summarize($0, model: $1, key: $2) }) {
         let root = root ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Agent Kanban", isDirectory: true)
         self.root = root
         self.repository = repository ?? FileBoardRepository(root: root)
@@ -72,7 +72,7 @@ import KanbananaServices
 
     static func loaded(root: URL? = nil, start: Bool = true, initialState: SavedState? = nil,
                        credentials: any CredentialStorage = KeychainCredentials(),
-                       summarize: @escaping @Sendable (String, String, String) async throws -> String = { try await GPT.summarize($0, model: $1, key: $2) }) async -> BoardStore {
+                       summarize: @escaping @Sendable (SummaryInput, String, String) async throws -> String = { try await GPT.summarize($0, model: $1, key: $2) }) async -> BoardStore {
         let store = BoardStore(root: root, start: start, initialState: initialState, credentials: credentials, summarize: summarize)
         await store.ready()
         return store
@@ -145,8 +145,16 @@ import KanbananaServices
     nonisolated static func hash(_ text: String) -> String { RequestDigest.hash(text) }
     func summary(_ card: Conversation, _ request: RequestItem) -> String? {
         let id = card.id + ":" + request.id
+        return cachedSummary(id, text: request.text)
+    }
+    func cardSummary(_ card: Conversation) -> String? {
+        guard let input = card.cardSummaryInput(in: column(card)) else { return nil }
+        let id = input.kind == .agentReport ? card.reportSummaryKey : card.id + ":" + (card.requests.last?.id ?? "")
+        return cachedSummary(id, text: input.text)
+    }
+    private func cachedSummary(_ id: String, text: String) -> String? {
         guard let summary = saved.summaries[id] else { return nil }
-        if requestHashes[id]?.text != request.text { requestHashes[id] = (request.text, Self.hash(request.text)) }
+        if requestHashes[id]?.text != text { requestHashes[id] = (text, Self.hash(text)) }
         return summary.inputHash == requestHashes[id]?.hash ? summary.text : nil
     }
 
@@ -176,6 +184,7 @@ import KanbananaServices
         guard !isLoading else { return }
         saved.apply(command, now: clock.now().timeIntervalSince1970)
         changed()
+        queueSummaries()
     }
     func setNote(_ id: String, _ text: String) { send(.projectNote(id, text)) }
     func setTodoNote(_ id: String, _ text: String) { send(.todoNote(id, text)) }

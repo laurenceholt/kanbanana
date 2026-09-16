@@ -20,9 +20,10 @@ class DeltaEncoder:
         current = {}
         for card in result["cards"]:
             # Live monitoring needs only the latest request. History is paged on
-            # demand; assistant response bodies never cross the app boundary.
-            observation = {key: value for key, value in card.items() if key not in ("response", "provider")}
+            # demand. Include only the bounded latest report for card summaries.
+            observation = {key: value for key, value in card.items() if key != "provider"}
             observation["requests"] = card["requests"][-1:]
+            observation["response"] = card.get("response", "")[-20000:] if card["state"] in ("ready", "needsMe") else ""
             signature = hashlib.sha256(json.dumps(observation, sort_keys=True).encode()).digest()
             current[card["id"]] = signature
             if self.signatures.get(card["id"]) != signature:

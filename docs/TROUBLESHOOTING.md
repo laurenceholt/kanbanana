@@ -24,7 +24,7 @@ An empty replacement-key field does not mean the saved key is missing; the statu
 
 ## Backup and restore
 
-Settings → Export board writes a snapshot of the loaded board and cached requests, excluding the API key and assistant responses. Keep it private. Settings → Restore validates a selected JSON export, backs up the current board, restores projects/notes/dispositions and turns cloud summaries off. Source apps are unchanged. A rescan can then update task activity.
+Settings → Export board writes a snapshot of the loaded board and cached requests, including request/report summaries but excluding the API key and raw assistant responses. Keep it private. Settings → Restore validates a selected JSON export, backs up the current board, restores projects/notes/dispositions and turns cloud summaries off. Source apps are unchanged. A rescan can then update task activity.
 
 Up to seven backups live in `~/Library/Application Support/Agent Kanban/Backups/`. Automatic backups are at most hourly; restoration forces a backup. Backups are previous snapshots, not a guarantee that the last edit before a force quit is present. Back up exports separately if you need longer retention.
 
@@ -38,4 +38,4 @@ Closing the window does not quit. Click its menu-bar item to reopen. Quit from S
 
 ## Safe bug reports
 
-Settings → Diagnostics exports app/OS/provider versions, aggregate counts and fixed health categories. Review the file before attaching. Never attach `board.json`, backups, raw reader output, transcripts, keys or screenshots with private cards. The reader's stdout is a private application data pipe and contains request text.
+Settings → Diagnostics exports app/OS/provider versions, aggregate counts and fixed health categories. Review the file before attaching. Never attach `board.json`, backups, raw reader output, transcripts, keys or screenshots with private cards. The reader's stdout is a private application data pipe and contains request text and the bounded latest agent report.

@@ -101,7 +101,7 @@ final class SummaryTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let credentials = MemoryCredentials("test-only")
         let api = SummaryStub(); await api.setAPIError(true)
-        let store = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text) })
+        let store = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text.text) })
         try await store.installFixture { state in state.cards = [card("a", "Fix labels")] }
         store.setAIEnabled(true)
         await settle(store)
@@ -121,7 +121,7 @@ final class SummaryTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
         let api = SummaryStub()
-        let store = await BoardStore.loaded(root: root, start: false, credentials: MemoryCredentials("test-only"), summarize: { text, _, _ in try await api.summarize(text) })
+        let store = await BoardStore.loaded(root: root, start: false, credentials: MemoryCredentials("test-only"), summarize: { text, _, _ in try await api.summarize(text.text) })
         try await store.installFixture { state in state.cards = [card("a", String(repeating: "x", count: 30001)), card("b", "Fix labels")] }
         store.setAIEnabled(true)
         await settle(store)
@@ -137,7 +137,7 @@ final class SummaryTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let api = SummaryStub()
         let credentials = MemoryCredentials("test-only")
-        let store = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text) })
+        let store = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text.text) })
         var conversation = card("a", "Fix labels")
         let oldRequest = RequestItem(id: "old", text: "Proceed", time: 0)
         let untouched = RequestItem(id: "unrequested", text: "An older request", time: 0)
@@ -159,7 +159,7 @@ final class SummaryTests: XCTestCase {
         XCTAssertNil(store.saved.summaries["a:unrequested"])
         XCTAssertEqual(store.saved.cards, [conversation])
         await store.persist()
-        let reloaded = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text) })
+        let reloaded = await BoardStore.loaded(root: root, start: false, credentials: credentials, summarize: { text, _, _ in try await api.summarize(text.text) })
         reloaded.queueSummaries()
         await settle(reloaded)
         let count = await api.calls
@@ -169,7 +169,7 @@ final class SummaryTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
         let api = SummaryStub(); await api.setAPIError(true)
-        let store = await BoardStore.loaded(root: root, start: false, credentials: MemoryCredentials("test-only"), summarize: { text, _, _ in try await api.summarize(text) })
+        let store = await BoardStore.loaded(root: root, start: false, credentials: MemoryCredentials("test-only"), summarize: { text, _, _ in try await api.summarize(text.text) })
         let conversation = card("a", "Proceed")
         let old = Summary(text: "The user asks to proceed.", inputHash: BoardStore.hash("Proceed"))
         try await store.installFixture { state in state.cards = [conversation] }; try await store.installFixture { state in state.summaries["a:r"] = old }

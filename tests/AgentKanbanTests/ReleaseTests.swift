@@ -49,15 +49,17 @@ final class ReleaseTests: XCTestCase {
     @MainActor func testDailyLimitAndProjectExclusionApplyToAllQueuesAndPersist() async throws {
         let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }
         let api = ReleaseSummarizer()
-        let store = await BoardStore.loaded(root: root, start: false, credentials: ReleaseCredentials(), summarize: { text, _, _ in await api.summarize(text) })
+        let store = await BoardStore.loaded(root: root, start: false, credentials: ReleaseCredentials(), summarize: { text, _, _ in await api.summarize(text.text) })
         try await store.installFixture { state in state.cards = [card("excluded"), card("a"), card("b")] }
         var options = PrivacyOptions(); options.dailySummaryLimit = 1; options.excludedSummaryProjects = ["private"]
         try await store.installFixture { state in state.privacy = options }
         try await store.installFixture { state in state.dispositions["excluded"] = Disposition(projectID: "private") }
+        store.apply(.init(cards: [card("excluded"), card("a"), card("b")], health: ["codex": "Connected"], scannedAt: 100))
         store.setAIEnabled(true)
         for _ in 0..<100 { if !store.isSummarizing { break }; try await Task.sleep(nanoseconds: 5_000_000) }
         let calls = await api.calls; XCTAssertEqual(calls, 1)
         XCTAssertNil(store.saved.summaries["excluded:r"])
+        XCTAssertNil(store.saved.summaries[card("excluded").reportSummaryKey])
         XCTAssertEqual(store.summaryAttemptsToday, 1)
         await store.persist()
         let loaded = await BoardStore.loaded(root: root, start: false)

@@ -9,7 +9,7 @@ import time
 from collections import OrderedDict
 from contextlib import closing
 from urllib.parse import quote
-from .parsers import (stamp, text_content, clean_request, request, delivered_state,
+from .parsers import (stamp, text_content, clean_request, request, delivered_state, question_text,
                       parse_claude, parse_codex_legacy, BACKGROUND_TASK_MAX_QUIET_SECONDS)
 from .jsonl import read_jsonl
 
@@ -156,7 +156,8 @@ def codex_paginated(con, tid, generation=None):
         return PAGINATED_CACHE[cache_key]
     require_columns(con, "thread_items", ["item_id", "created_at_ms", "item_json", "thread_id", "turn_id", "item_type", "rollout_ordinal"])
     require_columns(con, "thread_turns", ["thread_id", "turn_id", "status", "completed_at", "started_at", "rollout_ordinal"])
-    rows = con.execute("SELECT item_id,created_at_ms,item_json FROM thread_items WHERE thread_id=? AND item_type IN ('userMessage','agentMessage') ORDER BY rollout_ordinal", (tid,))
+    turn = con.execute("SELECT * FROM thread_turns WHERE thread_id=? ORDER BY rollout_ordinal DESC LIMIT 1", (tid,)).fetchone()
+    rows = con.execute("SELECT item_id,created_at_ms,item_json,turn_id FROM thread_items WHERE thread_id=? AND item_type IN ('userMessage','agentMessage') ORDER BY rollout_ordinal", (tid,))
     requests, seen, response = [], set(), ""
     for row in rows:
         d = json.loads(row["item_json"])
@@ -165,9 +166,8 @@ def codex_paginated(con, tid, generation=None):
             if text and row["item_id"] not in seen:
                 requests.append(request(row["item_id"], text, stamp(row["created_at_ms"])))
                 seen.add(row["item_id"])
-        elif d.get("phase") == "final_answer":
+        elif d.get("phase") == "final_answer" and turn and row["turn_id"] == turn["turn_id"]:
             response = d.get("text", "")
-    turn = con.execute("SELECT * FROM thread_turns WHERE thread_id=? ORDER BY rollout_ordinal DESC LIMIT 1", (tid,)).fetchone()
     if not turn:
         return requests, "unknown", "Status unavailable", response, 0, ""
     state = {"completed": "ready", "failed": "needsMe", "interrupted": "needsMe", "inProgress": "running"}.get(turn["status"], "unknown")
@@ -182,6 +182,7 @@ def codex_paginated(con, tid, generation=None):
             item = json.loads(row[0])
             if item.get("status") == "inProgress" and item.get("tool", "").split(".")[-1] == "request_user_input":
                 state, reason = "needsMe", "Question"
+                response = question_text(item.get("arguments"))
                 break
     result = requests, state, reason, response, when, turn["turn_id"] + ":" + turn["status"]
     if generation is not None:

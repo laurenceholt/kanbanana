@@ -1,8 +1,32 @@
 """Pure incremental classification. No filesystem, network, or UI dependencies."""
 import datetime as dt
+import json
 import re
 
 BACKGROUND_TASK_MAX_QUIET_SECONDS = 24 * 60 * 60
+
+def question_text(arguments):
+    """Only human-facing questions/options, never arbitrary tool arguments."""
+    if isinstance(arguments, str):
+        try:
+            arguments = json.loads(arguments)
+        except ValueError:
+            return ""
+    if not isinstance(arguments, dict):
+        return ""
+    lines = []
+    for question in arguments.get("questions", []):
+        if not isinstance(question, dict):
+            continue
+        text = question.get("question") or question.get("title")
+        if isinstance(text, str):
+            lines.append(text)
+        for option in question.get("options", []):
+            label = option.get("label") if isinstance(option, dict) else option
+            if isinstance(label, str):
+                lines.append("- " + label)
+    return "\n".join(lines)
+
 
 def stamp(value):
     if isinstance(value, (int, float)):
@@ -133,6 +157,7 @@ class ClaudeParser:
             tools = [x.get("name") for x in blocks if isinstance(x, dict) and x.get("type") == "tool_use"]
             if "AskUserQuestion" in tools:
                 self.state, self.reason = "needsMe", "Question"
+                self.response = "\n".join(filter(None, [text_content(blocks)] + [question_text(block.get("input")) for block in blocks if isinstance(block, dict) and block.get("name") == "AskUserQuestion"]))
             elif tools:
                 self.state, self.reason = "running", ""
             output = text_content(blocks)
@@ -140,7 +165,7 @@ class ClaudeParser:
                 self.state, self.reason = delivered_state(output)
                 self.response = output
             if item.get("isApiErrorMessage"):
-                self.state, self.reason = "needsMe", "Agent error"
+                self.state, self.reason, self.response = "needsMe", "Agent error", output
         if self.pending_tasks and self.state in ("running", "ready"):
             self.state, self.reason, self.response = "running", "Waiting for background task", ""
 
@@ -173,6 +198,8 @@ class CodexParser:
             text = clean_request(text_content(p.get("content")))
             if text and key not in self.seen:
                 self.requests.append(request(key, text, when)); self.seen.add(key)
+                self.state, self.reason, self.response = "running", "", ""
+                self.event_time, self.event_id = when, key
         if typ == "event_msg":
             if kind in ("task_started", "user_message"):
                 self.input_call = None
@@ -184,6 +211,7 @@ class CodexParser:
                 self.event_time, self.event_id = when, str(self.index)
             elif kind in ("turn_aborted", "error"):
                 self.state, self.reason = "needsMe", "Interrupted" if kind == "turn_aborted" else "Agent error"
+                self.response = text_content(p.get("message"))
                 self.event_time, self.event_id = when, str(self.index)
         if typ == "response_item" and kind == "message" and p.get("role") == "assistant" and p.get("phase") == "final_answer":
             self.response = text_content(p.get("content"))
@@ -191,11 +219,12 @@ class CodexParser:
                 self.state, self.reason = delivered_state(self.response)
         if typ == "response_item" and kind == "function_call" and p.get("name", "").split(".")[-1] == "request_user_input":
             self.input_call = p.get("call_id")
+            self.response = question_text(p.get("arguments"))
             self.state, self.reason = "needsMe", "Question"
             self.event_time, self.event_id = when, key
         elif typ == "response_item" and kind == "function_call_output" and self.input_call and p.get("call_id") == self.input_call:
             self.input_call = None
-            self.state, self.reason = "running", ""
+            self.state, self.reason, self.response = "running", "", ""
             self.event_time, self.event_id = when, key
 
     def result(self):

@@ -6,12 +6,12 @@ kanbanana is a local macOS companion. It has no account system, analytics SDK, t
 
 After onboarding, the selected integrations read local conversation metadata and histories from Claude Desktop Code and Codex. Source databases are opened read-only; native settings, permissions and conversations are not modified. Other products such as Claude Chat/Cowork are outside this beta's scope.
 
-The local board stores conversation titles, identifiers, folder paths, user request text, summaries, project notes, assignments and manual states. Assistant response text is used transiently inside the reader to classify status and is omitted from live messages to the app and saved board files. Source histories may contain tool records needed to interpret execution; those records are not sent to the summary API.
+The local board stores conversation titles, identifiers, folder paths, user request text, summaries, project notes, assignments and manual states. The latest agent report, including human-facing questions from input tools, is also retained in the rebuildable observation cache (at most 20,000 characters per conversation). Full assistant-response history is not copied. Raw reports are omitted from portable exports and backups; their summaries can be included. Source histories may contain tool records needed to interpret execution; those records are not sent to the summary API.
 
 `~/Library/Application Support/Agent Kanban/` contains:
 
 - `board.json`: projects, notes, manual choices and settings.
-- `observations.json`: rebuildable observations, up to 100 cached requests per conversation and their summaries. Earlier requests can be fetched from the source.
+- `observations.json`: rebuildable observations, up to 100 cached requests per conversation, the bounded latest agent report, and their summaries. Earlier requests can be fetched from the source.
 - `summary-usage.json`: the daily summary-attempt ledger, retained across board restoration.
 - `Backups/`: up to seven previous valid boards. At most one automatic backup per hour; restoration forces another backup.
 - `Recovery/`: original files preserved during recovery. Older installations may also have a bounded `status-health.json` diagnostic log; current monitoring does not update it.
@@ -20,13 +20,13 @@ Board files use owner-only permissions, but are not independently encrypted. You
 
 ## Optional cloud processing
 
-Cloud summaries are off until you explicitly enable them in Settings. Saving a key does not enable processing. When enabled, each request selected for summarization is sent to `https://api.openai.com/v1/responses`, with a short summarization instruction, your selected model and your API key for authorization. This includes text you pasted into the request. Treat anything in that request as eligible to be sent.
+Cloud summaries are off until you explicitly enable them in Settings. Saving a key does not enable processing. When enabled, each request or latest agent report selected for summarization is sent to `https://api.openai.com/v1/responses`, with a short summarization instruction, your selected model and your API key for authorization. This includes text pasted into requests or quoted in agent reports. Treat anything in the selected text as eligible to be sent.
 
-Project notes, To do notes, source credentials, tool outputs and assistant responses are not part of the summary input. Excluded projects and disabled providers are omitted from new summary work. Exclusion does not recall a request already sent or delete a cached summary.
+Project notes, To do notes, source credentials and raw tool outputs are not part of the summary input. Human-facing questions from input tools are treated as agent reports; other tool arguments are not sent. Excluded projects and disabled providers are omitted from new summary work. Exclusion does not recall a request already sent or delete a cached summary.
 
 The API request uses `store: false`. This does **not** promise zero retention: OpenAI's default abuse-monitoring retention can still apply. Consult [OpenAI's current data controls](https://platform.openai.com/docs/guides/your-data) and your account's terms. kanbanana cannot override that policy.
 
-Latest requests are summarized automatically. Older unsummarized history is opt-in. Existing cached summaries may be refreshed after a summary-format update. A persistent daily attempt cap covers automatic summaries, history and refreshes. An attempt can retry once; prices depend on request length and model. OpenAI bills your API account directly.
+Latest requests and agent reports are summarized automatically. Ready to check and Needs me cards show report summaries; other states show the latest request summary. Request history continues to summarize your asks. Older unsummarized history is opt-in. Existing cached summaries may be refreshed after a summary-format update. A persistent daily attempt cap covers automatic summaries, history and refreshes. An attempt can retry once; prices depend on request length and model. OpenAI bills your API account directly.
 
 ## Other network activity
 
@@ -36,6 +36,6 @@ Building from source downloads a pinned Python runtime from GitHub. Development 
 
 ## Export, diagnostics and deletion
 
-Board exports and backups contain private cached request text and notes; they are not complete exports of native conversation history. Do not attach them to public issues. Settings → Diagnostics exports only app/OS/provider versions, counts and a fixed connection-health vocabulary; no titles, IDs, paths, requests, notes, key or arbitrary error strings.
+Board exports and backups contain private cached request text, summaries (including report summaries) and notes; they are not complete exports of native conversation history. Do not attach them to public issues. Settings → Diagnostics exports only app/OS/provider versions, counts and a fixed connection-health vocabulary; no titles, IDs, paths, requests, notes, key or arbitrary error strings.
 
 To remove the key, choose Settings → Delete saved key. To remove all local board data, quit kanbanana, remove `~/Library/Application Support/Agent Kanban/`, and remove the app if you no longer want it. Remove board exports wherever you saved them and account for your own system backups. Source conversations are unaffected. Relaunching an installed app can rediscover local sessions after onboarding.

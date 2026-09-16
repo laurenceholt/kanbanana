@@ -52,7 +52,7 @@ Python modules under `Resources/kanbanana_reader/` separate pure classification 
 
 ## History and bounded work
 
-Live observations carry only the latest request. Expanding history asks for pages of 50 requests; stable IDs deduplicate pages and preserve source order at equal timestamps. Assistant responses stay inside the reader for classification and do not enter live IPC or persisted history.
+Live observations carry only the latest request. Expanding history asks for pages of 50 requests; stable IDs deduplicate pages and preserve source order at equal timestamps. Live observations also carry the latest report (at most 20,000 characters) for Ready to check and Needs me. Structured input tools contribute only human-facing question/option text. The rebuildable cache retains this one report, not assistant-response history; failed observations preserve the last known report.
 
 Unchanged JSONL files reuse parsed state. An append validates the full previous byte prefix before feeding only new complete records. Rotation, truncation and rewritten prefixes cause reparsing; partial trailing records wait for completion. This deliberately spends I/O on prefix validation rather than trusting an append assumption.
 
@@ -67,7 +67,7 @@ One `FileBoardRepository` actor owns all disk operations. The historical install
 | File | Meaning |
 | --- | --- |
 | `board.json` (v2) | User-owned projects, notes, assignments, manual states, privacy/settings and cache generation |
-| `observations.json` (v1) | Rebuildable observations and summaries for cached requests |
+| `observations.json` (v1) | Rebuildable observations, bounded latest reports and separate request/report summaries |
 | `summary-usage.json` | Small installation-owned daily attempt ledger |
 | `Backups/` | Up to seven complete portable board archives |
 | `Recovery/` | Originals preserved during recovery; never silently overwritten |
@@ -76,11 +76,11 @@ Old v1 boards are validated and backed up before migration. Unsupported future d
 
 Each file is atomically replaced with owner-only permissions. The observation cache is written first; the board document is the commit point. A crash between them produces a detectable cache-generation mismatch, not mixed curation. The cache can be rebuilt. Autosaves debounce for 250 ms; epoch/revision tokens reject stale writes after restore. Graceful quit flushes pending state. Force quit can lose an edit not yet saved.
 
-Exports and backups are complete logical snapshots of the loaded board in the portable v1 format, including cached requests but excluding keys and assistant responses. They are not an export of all native history. Restore disables cloud processing and retains the installation's spending ledger. Automatic backups are at most hourly, with forced backups before migration/restoration; seven managed backups are retained. Unmanaged files are left alone.
+Exports and backups are complete logical snapshots of the loaded board in the portable v1 format, including cached requests and request/report summaries but excluding keys and raw assistant responses. They are not an export of all native history. Restore disables cloud processing and retains the installation's spending ledger. Automatic backups are at most hourly, with forced backups before migration/restoration; seven managed backups are retained. Unmanaged files are left alone.
 
 ## Cloud and cancellation
 
-`SummaryScheduler` owns one cancellable queue; it receives current value snapshots and emits completed summaries. `CredentialStorage`, `BoardRepository`, a clock and the summarizer are injected at actual side-effect boundaries.
+`SummaryScheduler` owns one cancellable queue; it receives current value snapshots and emits completed summaries. `CredentialStorage`, `BoardRepository`, a clock and the summarizer are injected at actual side-effect boundaries. Typed summary inputs choose request or report instructions. Visible reports take queue priority; request summaries remain independent for the history log. Report caches use one replaceable key per conversation plus a content hash. In-flight reports must still match the current revision, text and displayed state before acceptance.
 
 Eligibility is rechecked after awaited credential/usage work and before accepting API output. Generation IDs discard cancelled results. Provider/project exclusions apply to automatic, history and format-refresh queues. The repository durably reserves an attempt before any outbound summary call; unreadable or unwritable usage fails closed. An attempt permits at most one HTTP retry. A request already sent cannot be recalled, and an abandoned reserved attempt is still counted.
 

@@ -29,7 +29,7 @@ You can also give your coding agent this instruction:
 
 > Clone https://github.com/laurenceholt/kanbanana, read README.md, check the macOS/Swift requirements, run the tests and `zsh scripts/build.zsh`, then open `dist/kanbanana.app`. Do not change provider permissions or read my API key.
 
-On first launch, choose which providers to monitor. Local conversations active in the last two weeks are discovered automatically. Cloud summaries are **off by default**; the board works with request excerpts and no API key.
+On first launch, choose which providers to monitor. Local conversations active in the last two weeks are discovered automatically. Cloud summaries are **off by default**; the board works with request/report excerpts and no API key.
 
 Click the banana and counts in the menu bar to reopen the window. Closing the window leaves monitoring running. Settings → Quit ends it. Double-click the app to restart.
 
@@ -55,9 +55,9 @@ Quiet cards are parked after seven days; To do reminders stay. Use the archive-b
 
 ## Optional summaries
 
-Settings → save an OpenAI API key → explicitly enable request summaries. Saving a key alone does not enable them. Requests are sent directly to OpenAI and billed to your API account. A ChatGPT subscription is separate.
+Settings → save an OpenAI API key → explicitly enable summaries. Saving a key alone does not enable them. Selected requests and latest agent reports are sent directly to OpenAI and billed to your API account. A ChatGPT subscription is separate.
 
-Choose the model, exclude sensitive projects, and set a daily limit (100 summary attempts by default). Each attempt can make up to two calls; this is **not a dollar budget**. Latest requests are summarized automatically. Summarizing older history requires a button; cached summaries may be refreshed when the wording format changes.
+Choose the model, exclude sensitive projects, and set a daily limit (100 summary attempts by default). Each attempt can make up to two calls; this is **not a dollar budget**. Ready to check and Needs me cards summarize what the agent reported; other states summarize your latest ask. Request history stays focused on your asks. Both types are summarized automatically. Summarizing older history requires a button; cached summaries may be refreshed when the wording format changes.
 
 Keys stay in macOS Keychain. Delete saved key stops summaries and removes the stored credential. [Privacy and retention details](PRIVACY.md).
 

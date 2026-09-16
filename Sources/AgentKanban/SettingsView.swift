@@ -13,7 +13,7 @@ struct SettingsView: View {
             HStack { Text("Settings").font(.title2.bold()); Spacer(); Button("Done") { dismiss() }.keyboardShortcut(.cancelAction) }
             ScrollView { VStack(alignment: .leading, spacing: 14) {
             Text("OpenAI summaries").font(.headline)
-            Text("When enabled, request text goes directly to OpenAI using your paid API key. Project notes stay on your Mac. The key is stored in macOS Keychain. Saving a key does not enable summaries.").font(.caption).foregroundStyle(.secondary)
+            Text("When enabled, request text and the latest agent report go directly to OpenAI using your paid API key. Project notes stay on your Mac. The key is stored in macOS Keychain. Saving a key does not enable summaries.").font(.caption).foregroundStyle(.secondary)
             Label(store.credentialStatus.message, systemImage: store.credentialStatus == .saved ? "checkmark.shield" : "key")
                 .font(appearance.font(12, weight: .semibold)).foregroundStyle(store.credentialStatus == .saved ? appearance.accent(ProjectColor.palette[0].accent) : appearance.ink)
             HStack {
@@ -29,7 +29,7 @@ struct SettingsView: View {
                 Button("Apply") { store.setModel(model) }.disabled(model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model == store.saved.model)
             }
             Button("Delete saved key", role: .destructive) { Task { await store.deleteKey() } }.disabled(store.credentialStatus == .missing || store.savingKey)
-            Toggle("Enable request summaries", isOn: Binding(get: { store.saved.aiEnabled }, set: { store.setAIEnabled($0) })).disabled(store.savingKey)
+            Toggle("Enable summaries", isOn: Binding(get: { store.saved.aiEnabled }, set: { store.setAIEnabled($0) })).disabled(store.savingKey)
             HStack(alignment: .top) {
                 Text(store.aiStatus).font(.caption).foregroundStyle(appearance.muted).frame(maxWidth: .infinity, alignment: .leading)
                 Button("Retry summaries") { store.retrySummaries() }.disabled(store.savingKey || store.isSummarizing)

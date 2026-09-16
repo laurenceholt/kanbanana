@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "Resources"))
 from kanbanana_reader import adapters, jsonl, worker
-from kanbanana_reader.parsers import parse_claude
+from kanbanana_reader.parsers import parse_claude, parse_codex_legacy
 
 
 def user(key, text="Build an example"):
@@ -24,7 +24,7 @@ class ReaderProtocolTests(unittest.TestCase):
     def test_python_encoder_matches_swift_golden_fixture(self):
         path = Path(__file__).parent / "KanbananaServicesTests/Fixtures/provider-frame-v1.json"
         golden = json.loads(path.read_text())
-        card = {**golden["cards"][0], "provider": "claude", "response": "Assistant text stays out of IPC"}
+        card = {**golden["cards"][0], "provider": "claude", "response": golden["cards"][0]["response"]}
         card["requests"] = [{"id": "request-1", "text": "Build it", "time": 90}] + card["requests"]
         result = {**golden, "cards": [card], "inventoryComplete": True}
         encoder = worker.DeltaEncoder("claude")
@@ -34,7 +34,7 @@ class ReaderProtocolTests(unittest.TestCase):
         self.assertEqual(frames[1]["cards"], [])
         steady = list(encoder.frames(result))
         self.assertEqual(len(steady), 1)
-        self.assertNotIn("Assistant text", json.dumps(frames))
+        self.assertEqual(frames[0]["cards"][0]["response"], "Added labels; tests were not run.")
         self.assertNotIn("Build it", json.dumps(frames))
 
     def test_history_pages_are_bounded_ordered_and_nonoverlapping(self):
@@ -48,6 +48,47 @@ class ReaderProtocolTests(unittest.TestCase):
             self.assertFalse(oldest["hasMore"])
             with self.assertRaises(ValueError):
                 worker.history_page("claude", "claude:x", "removed")
+
+    def test_latest_report_is_bounded_and_changes_emit_a_delta(self):
+        golden = json.loads((Path(__file__).parent / "KanbananaServicesTests/Fixtures/provider-frame-v1.json").read_text())
+        card = golden["cards"][0]
+        card["response"] = "x" * 25000
+        encoder = worker.DeltaEncoder("claude")
+        self.assertEqual(len(list(encoder.frames(golden))[0]["cards"][0]["response"]), 20000)
+        card["response"] = "Corrected the result."
+        self.assertEqual(list(encoder.frames(golden))[0]["cards"][0]["response"], card["response"])
+        card["state"] = "running"
+        self.assertEqual(list(encoder.frames(golden))[0]["cards"][0]["response"], "")
+
+    def test_questions_become_reports_and_new_requests_clear_them(self):
+        args = {"questions": [{"question": "Which repository should I use?", "options": [{"label": "Example"}]}]}
+        claude = {"type": "assistant", "uuid": "q", "timestamp": 100, "message": {"content": [
+            {"type": "tool_use", "name": "AskUserQuestion", "input": args}]}}
+        codex = {"type": "response_item", "timestamp": 100, "payload": {"type": "function_call",
+            "name": "functions.request_user_input", "call_id": "q", "arguments": json.dumps(args)}}
+        for report in [parse_claude([claude]), parse_codex_legacy([codex])]:
+            self.assertEqual(report[1], "needsMe")
+            self.assertIn("Which repository", report[3])
+            self.assertIn("Example", report[3])
+        self.assertEqual(parse_claude([claude, user("next")])[3], "")
+        answer = {"type": "response_item", "timestamp": 101, "payload": {"type": "function_call_output", "call_id": "q"}}
+        self.assertEqual(parse_codex_legacy([codex, answer])[3], "")
+
+    def test_paginated_report_cannot_come_from_an_older_turn(self):
+        with sqlite3.connect(":memory:") as con:
+            con.row_factory = sqlite3.Row
+            con.execute("CREATE TABLE thread_turns(thread_id,turn_id,status,started_at,completed_at,rollout_ordinal)")
+            con.execute("CREATE TABLE thread_items(thread_id,turn_id,item_id,created_at_ms,item_json,item_type,rollout_ordinal)")
+            con.execute("INSERT INTO thread_turns VALUES('x','old','completed',1,2,1)")
+            con.execute("INSERT INTO thread_items VALUES('x','old','final',2,?,'agentMessage',1)",
+                        (json.dumps({"type": "agentMessage", "phase": "final_answer", "text": "Old success"}),))
+            con.execute("INSERT INTO thread_turns VALUES('x','new','failed',3,4,2)")
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Agent error", ""))
+            con.execute("UPDATE thread_turns SET status='inProgress' WHERE turn_id='new'")
+            tool = {"type": "dynamicToolCall", "tool": "request_user_input", "status": "inProgress",
+                    "arguments": {"questions": [{"question": "Which file?"}]}}
+            con.execute("INSERT INTO thread_items VALUES('x','new','question',4,?,'dynamicToolCall',2)", (json.dumps(tool),))
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Question", "Which file?"))
 
     def test_append_decodes_only_new_records_and_unchanged_decodes_none(self):
         with tempfile.TemporaryDirectory() as root:

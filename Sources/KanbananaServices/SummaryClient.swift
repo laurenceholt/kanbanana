@@ -6,10 +6,10 @@ package enum GPT {
         case tokenLimit, empty, refused, tooLong, api(Int), invalidResponse
         package var errorDescription: String? {
             switch self {
-            case .tokenLimit: "The model used its response allowance before finishing a summary. The original request remains available."
-            case .empty: "The model returned no summary. The original request remains available."
-            case .refused: "The model declined to summarize this request. The original remains available."
-            case .tooLong: "This request exceeds the 30,000-character summary limit. The original remains available."
+            case .tokenLimit: "The model used its response allowance before finishing a summary. The original text remains available."
+            case .empty: "The model returned no summary. The original text remains available."
+            case .refused: "The model declined to summarize this text. The original remains available."
+            case .tooLong: "This text exceeds the 30,000-character summary limit. The original remains available."
             case .api(401): "OpenAI rejected the saved API key. Replace it in Settings."
             case .api(429): "OpenAI's quota or rate limit was reached. Check your API account, then retry."
             case .api(400), .api(403), .api(404): "OpenAI could not use the selected model. Check its name and your API account access, then retry."
@@ -24,6 +24,10 @@ package enum GPT {
 
     package typealias Transport = @Sendable (URLRequest) async throws -> (Data, URLResponse)
     package static func summarize(_ text: String, model: String, key: String, transport: Transport = { try await URLSession.shared.data(for: $0) }) async throws -> String {
+        try await summarize(SummaryInput(text), model: model, key: key, transport: transport)
+    }
+    package static func summarize(_ input: SummaryInput, model: String, key: String, transport: Transport = { try await URLSession.shared.data(for: $0) }) async throws -> String {
+        let text = input.text
         guard text.count <= 30000 else { throw Failure.tooLong }
         // The limit includes reasoning, not just the short visible summary. Retry once
         // with room for reasoning if the API reports an incomplete or empty result.
@@ -33,7 +37,7 @@ package enum GPT {
             request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             var body: [String: Any] = ["model": model, "store": false, "max_output_tokens": allowance,
-                "instructions": SummaryStyle.instructions,
+                "instructions": input.kind == .agentReport ? SummaryStyle.reportInstructions : SummaryStyle.instructions,
                 "input": text]
             if model == "gpt-5.6-luna" || model.hasPrefix("gpt-5.6-luna-") { body["reasoning"] = ["effort": "none"] }
             request.httpBody = try JSONSerialization.data(withJSONObject: body)

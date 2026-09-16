@@ -53,6 +53,20 @@ private func card(_ provider: String = "claude") -> Conversation {
     #expect(RequestHistory.merging([first], [earlier, first, second], older: true).map(\.id) == ["x", "z", "a"])
 }
 
+@Test func unreadableObservationPreservesLatestReportUntilNewEvidenceArrives() {
+    var saved = SavedState(); var previous = card()
+    previous.state = .ready; previous.response = "Built it; tests are pending."
+    saved.cards = [previous]
+    var failed = card(); failed.observationIssue = "Access denied"
+    let next = BoardReconciler.apply(ProviderSnapshot(provider: .claude, cards: [failed], health: ProviderHealth(.partial),
+        inventoryComplete: false, knownIDs: [previous.id], scannedAt: 101), to: saved)
+    #expect(next.cards[0].response == previous.response)
+    var running = card(); running.eventID = "new-request"
+    let resumed = BoardReconciler.apply(ProviderSnapshot(provider: .claude, cards: [running], health: ProviderHealth(.connected),
+        inventoryComplete: true, knownIDs: [previous.id], scannedAt: 102), to: next)
+    #expect(resumed.cards[0].response.isEmpty)
+}
+
 @Test func commandsAcknowledgeCurrentRevision() {
     var saved = SavedState(); saved.cards = [card()]
     saved.cards[0].eventID = "new-event"

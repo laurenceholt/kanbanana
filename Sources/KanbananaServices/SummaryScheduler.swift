@@ -20,7 +20,7 @@ package enum RequestDigest {
 
     private let credentials: any CredentialStorage
     private let repository: any BoardRepository
-    private let summarize: @Sendable (String, String, String) async throws -> String
+    private let summarize: @Sendable (SummaryInput, String, String) async throws -> String
     private let state: @MainActor () -> SavedState
     private let received: @MainActor (String, Summary) -> Void
     private let reserved: @MainActor (SummaryUsage) -> Void
@@ -32,7 +32,7 @@ package enum RequestDigest {
 
     package init(credentials: any CredentialStorage, repository: any BoardRepository,
                  clock: ServiceClock = ServiceClock(),
-                 summarize: @escaping @Sendable (String, String, String) async throws -> String,
+                 summarize: @escaping @Sendable (SummaryInput, String, String) async throws -> String,
                  state: @escaping @MainActor () -> SavedState,
                  received: @escaping @MainActor (String, Summary) -> Void,
                  reserved: @escaping @MainActor (SummaryUsage) -> Void) {
@@ -110,16 +110,32 @@ package enum RequestDigest {
 
     private struct Job {
         let cardID: String
-        let request: RequestItem
-        var id: String { cardID + ":" + request.id }
+        let input: SummaryInput
+        let requestID: String?
+        let reportRevision: String?
+        var id: String { requestID.map { cardID + ":" + $0 } ?? "agent-report:" + cardID }
+        init(cardID: String, request: RequestItem) {
+            self.cardID = cardID; input = SummaryInput(request.text)
+            requestID = request.id; reportRevision = nil
+        }
+        init?(report card: Conversation, column: Column) {
+            guard let input = card.cardSummaryInput(in: column), input.kind == .agentReport else { return nil }
+            cardID = card.id; self.input = input; requestID = nil; reportRevision = card.revision
+        }
     }
     private func pending(_ job: Job, state: SavedState) -> Bool {
-        guard let card = state.cards.first(where: { $0.id == job.cardID }), Self.allowed(card, in: state),
-              card.requests.contains(where: { $0.id == job.request.id && $0.text == job.request.text }) else { return false }
-        let hash = RequestDigest.hash(job.request.text)
+        guard let card = state.cards.first(where: { $0.id == job.cardID }), Self.allowed(card, in: state) else { return false }
+        if let requestID = job.requestID {
+            guard card.requests.contains(where: { $0.id == requestID && $0.text == job.input.text }) else { return false }
+        } else {
+            let column = Lifecycle.column(card, state.dispositions[card.id] ?? Disposition())
+            guard card.revision == job.reportRevision, card.cardSummaryInput(in: column) == job.input else { return false }
+        }
+        let hash = RequestDigest.hash(job.input.text)
         guard skipped[job.id] != hash else { return false }
         guard let summary = state.summaries[job.id] else { return true }
-        return summary.inputHash != hash || SummaryStyle.needsRefresh(summary)
+        return summary.inputHash != hash || (job.input.kind == .agentReport
+            ? summary.styleVersion != SummaryStyle.version : SummaryStyle.needsRefresh(summary))
     }
     package func queue(history cardID: String? = nil) {
         let current = state()
@@ -129,7 +145,12 @@ package enum RequestDigest {
         if let cardID {
             jobs = (cards.first { $0.id == cardID }?.requests.reversed() ?? []).map { Job(cardID: cardID, request: $0) }
         } else {
-            jobs = cards.compactMap { card in card.requests.last.map { Job(cardID: card.id, request: $0) } }
+            jobs = cards.compactMap { card in
+                Job(report: card, column: Lifecycle.column(card, current.dispositions[card.id] ?? Disposition()))
+            }
+            // Reports currently visible on cards take priority; request summaries
+            // remain independent so the history log continues to describe asks.
+            jobs += cards.compactMap { card in card.requests.last.map { Job(cardID: card.id, request: $0) } }
             for card in cards {
                 jobs += card.requests.dropLast().reversed().compactMap { request in
                     let job = Job(cardID: card.id, request: request)
@@ -141,7 +162,7 @@ package enum RequestDigest {
         }
         jobs = jobs.filter { pending($0, state: current) }
         guard !jobs.isEmpty else {
-            status = skipped.isEmpty ? "Latest requests summarized." : "Summaries up to date; \(skipped.count) requests kept as excerpts. Retry to try them again."
+            status = skipped.isEmpty ? "Card summaries up to date." : "Summaries up to date; \(skipped.count) items kept as excerpts. Retry to try them again."
             return
         }
         let token = UUID()
@@ -169,18 +190,18 @@ package enum RequestDigest {
                     self.reserved(usage)
                     guard !Task.isCancelled, self.generation == token, self.state().aiEnabled,
                           self.pending(job, state: self.state()) else { return }
-                    self.status = cardID == nil ? "Summarizing latest requests…" : "Summarizing request history…"
+                    self.status = cardID == nil ? "Summarizing cards…" : "Summarizing request history…"
                     do {
-                        let text = try await self.summarize(job.request.text, model, key)
+                        let text = try await self.summarize(job.input, model, key)
                         guard !Task.isCancelled, self.generation == token, self.state().aiEnabled else { return }
-                        // A request may have been edited or its project excluded during the call.
+                        // Reject edited asks, superseded reports and newly excluded projects.
                         guard self.pending(job, state: self.state()) else { continue }
-                        self.received(job.id, Summary(text: text, inputHash: RequestDigest.hash(job.request.text), styleVersion: SummaryStyle.version))
+                        self.received(job.id, Summary(text: text, inputHash: RequestDigest.hash(job.input.text), styleVersion: SummaryStyle.version))
                     } catch let error as GPT.Failure where error.requestOnly {
-                        self.skipped[job.id] = RequestDigest.hash(job.request.text)
+                        self.skipped[job.id] = RequestDigest.hash(job.input.text)
                     }
                 }
-                self.status = "Latest requests summarized."
+                self.status = "Card summaries up to date."
             } catch {
                 guard !Task.isCancelled, self.generation == token else { return }
                 if let error = error as? Keychain.Failure { self.credentialStatus = error.isMissing ? .missing : .accessNeeded }

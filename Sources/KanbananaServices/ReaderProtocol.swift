@@ -51,6 +51,7 @@ private struct ObservedCard: Decodable, Sendable {
     var requests: [RequestItem]
     var state: ObservedState
     var reason: String
+    var response: String?
     var eventID: String
     var eventTime: Double
     var url: String
@@ -63,6 +64,7 @@ private struct ObservedCard: Decodable, Sendable {
               Set(requests.map(\.id)).count == requests.count else { throw ReaderFailure.malformed }
         return Conversation(id: id, provider: provider.rawValue, nativeID: nativeID, title: title,
             folder: folder, updated: updated, requests: requests, state: state.column, reason: reason,
+            response: String((response ?? "").suffix(20000)),
             eventID: eventID, eventTime: eventTime, url: url, observationIssue: observationIssue)
     }
 }

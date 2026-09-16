@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ready to check and Needs me cards summarize the latest agent report, with separate request-history summaries and cached report excerpts.
+
 - Add a compact, left-aligned banana mark and kanbanana title to Focus mode.
 - Tighten the gap between project and conversation titles, and add a one-click Dealt with action to every card.
 - Apply pipe backpressure during startup bursts so a busy interface cannot drop reader updates or misreport a size-limit failure.

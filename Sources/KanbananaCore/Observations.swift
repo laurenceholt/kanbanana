@@ -70,11 +70,12 @@ package enum BoardReconciler {
                 card.eventTime = old.eventTime
                 card.state = old.state
                 card.reason = old.reason
+                card.response = old.response
             } else if !snapshot.completeHistory, let old {
                 card.requests = RequestHistory.merging(old.requests, card.requests)
             }
-            // Responses are classified inside the reader and are never retained here.
-            card.response = ""
+            // Keep only the bounded latest report, never a full response history.
+            card.response = String(card.response.suffix(20000))
             var disposition = Lifecycle.reconcile(old, card, next.dispositions[card.id] ?? Disposition(),
                 now: snapshot.scannedAt, healthy: snapshot.health.canObserve && card.observationIssue == nil)
             if disposition.projectID == nil {
