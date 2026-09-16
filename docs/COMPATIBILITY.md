@@ -5,7 +5,7 @@ Status for the 0.3.0 source beta, 16 September 2026. Compatibility is based on o
 | Component | Evidence / support |
 | --- | --- |
 | Apple Silicon, macOS 26.1 | Local development and prior native UI use. Version 0.3: 86 Swift tests, 42 Python tests, synthetic UI rendering and bundled-runtime build; the live upgrade UI was not exercised while the development Mac was locked. |
-| macOS 14 / 15 | Apple Silicon CI build, Swift/Python suites and bundled-reader smoke test passed on 15 September 2026. This does not verify native provider transitions or GUI interactions on those OS versions. |
+| macOS 14 / 15 | Apple Silicon CI: all 86 Swift tests and 42 Python tests, strict concurrency, app packaging, secret audit and bundled-reader smoke check passed on 16 September 2026 ([run](https://github.com/laurenceholt/kanbanana/actions/runs/35054817955)). This does not verify native provider transitions or GUI interactions on those OS versions. |
 | Intel Mac | Not packaged or tested in this beta. |
 | Claude Desktop Code 2.110.0 | Local session discovery and request history; previously verified exact local-session navigation. |
 | Codex desktop bundle `com.openai.codex`, version 26.901.31953 | Local discovery, legacy and paginated histories. The installed app may be named ChatGPT; integration uses its bundle identity. |
