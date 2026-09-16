@@ -30,9 +30,17 @@ struct FocusBoard<CardContent: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack(spacing: 5) {
+                BananaMark().frame(width: 16, height: 16)
+                Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
+            }
+            .foregroundStyle(appearance.ink)
+            .frame(maxWidth: .infinity).frame(height: 28)
+            .accessibilityElement(children: .combine)
+
             HStack(spacing: 2) {
                 ForEach(columns, id: \.self) { column in columnHeader(column) }
-            }.padding(.horizontal, 8).padding(.top, 25).padding(.bottom, 3)
+            }.padding(.horizontal, 8).padding(.bottom, 3)
 
             HStack(spacing: 4) {
                 Text(expanded.title.uppercased()).font(BoardStyle.label(8)).lineLimit(1).tracking(0.7).foregroundStyle(appearance.muted)

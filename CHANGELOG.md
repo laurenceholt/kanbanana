@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add the banana mark and kanbanana title to Focus mode without taking space from the card list.
+- Apply pipe backpressure during startup bursts so a busy interface cannot drop reader updates or misreport a size-limit failure.
+
 ## 0.3.0-beta.1
 
 - Separate Core, Services and macOS app targets; Swift 6 concurrency checking.

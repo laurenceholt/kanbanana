@@ -138,3 +138,33 @@ private func config(disabled: Set<String> = []) -> ReaderConfiguration {
     #expect(kill(child, 0) == -1)
     #expect(errno == ESRCH)
 }
+
+@Test func startupBurstWaitsForSlowConsumerWithoutDroppingData() async throws {
+    let expected = 4 * 1024 * 1024
+    let connection = ProcessReaderConnection(executable: URL(fileURLWithPath: "/usr/bin/python3"),
+        arguments: ["-I", "-B", "-u", "-c", "import sys; sys.stdout.buffer.write(b'x' * \(expected)); sys.stdout.flush()"])
+    var received = 0
+    do {
+        // Let the worker fill its pipe before consumption begins, as on startup.
+        try await Task.sleep(for: .milliseconds(50))
+        for try await chunk in connection.output {
+            received += chunk.count
+            try await Task.sleep(for: .milliseconds(1))
+        }
+    } catch {
+        await connection.stop()
+        throw error
+    }
+    await connection.stop()
+    #expect(received == expected)
+}
+
+@Test func stopCanReapWorkerWithoutAnyConsumer() async throws {
+    let connection = ProcessReaderConnection(executable: URL(fileURLWithPath: "/usr/bin/python3"),
+        arguments: ["-I", "-B", "-u", "-c", "import sys; sys.stdout.buffer.write(b'x' * (16 * 1024 * 1024)); sys.stdout.flush()"])
+    try await Task.sleep(for: .milliseconds(50))
+    await connection.stop()
+    var receivedAfterStop = 0
+    for try await chunk in connection.output { receivedAfterStop += chunk.count }
+    #expect(receivedAfterStop == 0)
+}

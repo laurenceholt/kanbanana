@@ -42,7 +42,7 @@ The shared contract fixture is `tests/KanbananaServicesTests/Fixtures/provider-f
 - A continuous 20-second freshness deadline applies after every successful frame, including the first. Stalls become visibly stale and trigger reconnection.
 - Retry and configuration changes cancel the previous generation and await worker termination before replacements start. Shutdown also waits for termination and pending storage.
 - A dedicated dispatch queue reads each pipe. Swift's UI and cooperative executor never block on pipe reads. Stop sends TERM and escalates to KILL after 0.5 seconds, then reaps the child.
-- Frames are limited to 8 MiB, and the pipe stream buffers at most 32 chunks. Overflow stops the worker rather than allowing unchecked buffering.
+- Frames are limited to 8 MiB. Pipe reads are demand-driven: a busy consumer applies OS pipe backpressure, so startup bursts remain bounded without dropping valid messages.
 - Failures back off from 2 to 30 seconds. One failing provider cannot suppress the other's updates.
 - Only a complete inventory establishes absence. Unreadable Claude metadata marks an inventory partial; unreadable transcripts identify the affected card. Error categories omit private paths and text.
 

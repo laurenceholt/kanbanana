@@ -46,15 +46,28 @@ package protocol ReaderConnection: Sendable {
     func stop() async
 }
 
-/// A narrow Foundation boundary. Launch/cancel state is lock-protected; the pipe is
-/// read on a dedicated queue (never on Swift's cooperative executor or the UI).
-/// The completion group is left only after waitUntilExit has reaped the child.
+/// A narrow Foundation boundary. Launch/cancel is lock-protected; launch errors
+/// and pipe reads belong to one dedicated queue. Reads are demand-driven, so a
+/// busy consumer applies OS pipe backpressure instead of dropping valid bytes.
+/// stop() reaps the child and closes the pipe before a replacement can start.
 package final class ProcessReaderConnection: ReaderConnection, @unchecked Sendable {
-    package let output: AsyncThrowingStream<Data, Error>
+    package var output: AsyncThrowingStream<Data, Error> {
+        AsyncThrowingStream(unfolding: { [self] in
+            try await withTaskCancellationHandler {
+                try Task.checkCancellation()
+                return try await nextChunk()
+            } onCancel: { self.cancel() }
+        })
+    }
     private let process: Process
+    private let pipe: Pipe
+    private let queue = DispatchQueue(label: "kanbanana.reader.pipe", qos: .utility)
     private let lock = NSLock()
     private let finished = DispatchGroup()
     private var cancelled = false
+    // Accessed only on queue, after its initial launch operation.
+    private var launchError: (any Error)?
+    private var closed = false
 
     package init(executable: URL, arguments: [String]) {
         let process = Process()
@@ -65,34 +78,35 @@ package final class ProcessReaderConnection: ReaderConnection, @unchecked Sendab
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
         self.process = process
-        let (output, continuation) = AsyncThrowingStream<Data, Error>.makeStream(bufferingPolicy: .bufferingOldest(32))
-        self.output = output
+        self.pipe = pipe
         finished.enter()
-        continuation.onTermination = { [weak self] _ in self?.cancel() }
-        DispatchQueue(label: "kanbanana.reader.pipe", qos: .utility).async { [self] in
-            defer {
-                try? pipe.fileHandleForReading.close()
-                try? pipe.fileHandleForWriting.close()
-                finished.leave()
-            }
+        queue.async { [self] in
             do {
                 try lock.withLock {
                     guard !cancelled else { throw CancellationError() }
                     try process.run()
                 }
-                while true {
-                    let data = pipe.fileHandleForReading.availableData
-                    if data.isEmpty { break }
-                    if case .dropped = continuation.yield(data) {
-                        cancel()
-                        process.waitUntilExit()
-                        continuation.finish(throwing: ReaderFailure.oversized)
-                        return
-                    }
+                // Reaping must not depend on another read being requested: the
+                // consumer may cancel while the worker is blocked on a full pipe.
+                DispatchQueue.global(qos: .utility).async { [self] in
+                    process.waitUntilExit()
+                    finished.leave()
                 }
-                process.waitUntilExit()
-                continuation.finish()
-            } catch { continuation.finish(throwing: error) }
+            } catch {
+                launchError = error
+                finished.leave()
+            }
+        }
+    }
+
+    private func nextChunk() async throws -> Data? {
+        try await withCheckedThrowingContinuation { continuation in
+            queue.async { [self] in
+                if closed { continuation.resume(returning: nil); return }
+                if let launchError { continuation.resume(throwing: launchError); return }
+                let data = pipe.fileHandleForReading.availableData
+                continuation.resume(returning: data.isEmpty ? nil : data)
+            }
         }
     }
 
@@ -110,7 +124,14 @@ package final class ProcessReaderConnection: ReaderConnection, @unchecked Sendab
     package func stop() async {
         cancel()
         await withCheckedContinuation { continuation in
-            finished.notify(queue: .global(qos: .utility)) { continuation.resume() }
+            finished.notify(queue: queue) { [self] in
+                if !closed {
+                    try? pipe.fileHandleForReading.close()
+                    try? pipe.fileHandleForWriting.close()
+                    closed = true
+                }
+                continuation.resume()
+            }
         }
     }
 }
