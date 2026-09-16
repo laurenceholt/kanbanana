@@ -14,7 +14,7 @@ See what's running in Claude Code and Codex, remember what you asked, and jump i
 
 This beta is available as source. A signed, notarized app download is planned; no unsigned release binary is advertised as notarized.
 
-Requirements: Apple Silicon Mac, macOS 14 or later, Xcode command line tools with Swift 5.10 or newer, and at least one supported desktop app. See [tested compatibility and limitations](docs/COMPATIBILITY.md). The minimum OS is a build target, not a claim that every older version has been tested.
+Requirements: Apple Silicon Mac, macOS 14 or later, Xcode command line tools with Swift 6.0 or newer (Xcode 16+), and at least one supported desktop app. See [tested compatibility and limitations](docs/COMPATIBILITY.md). The minimum OS is a build target, not a claim that every older version has been tested.
 
 ```zsh
 git clone https://github.com/laurenceholt/kanbanana.git

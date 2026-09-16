@@ -436,7 +436,7 @@ def scan(days=14, tracked_ids=()):
                 detail, retryable = read_failure(error)
                 if detail in ("Unsupported format", "Access denied"):
                     health[provider] = detail
-                elif isinstance(error, FileNotFoundError) or (isinstance(error, sqlite3.Error) and not (codex_root() / "state_5.sqlite").exists()):
+                elif isinstance(error, FileNotFoundError):
                     app_names = ["Claude.app"] if provider == "claude" else ["Codex.app", "ChatGPT.app"]
                     installed = any((base / name).exists() for base in [Path("/Applications"), HOME / "Applications"] for name in app_names)
                     # A newer database is a schema change, not a missing installation.

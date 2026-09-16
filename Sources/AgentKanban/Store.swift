@@ -57,7 +57,8 @@ import Foundation
             }
         } catch { self.error = "Could not load saved board. Your existing file has been preserved; saving is disabled until recovery."; storageWritable = false }
         if saved.aiEnabled { aiStatus = "Waiting for conversations…" }
-        needsOnboarding = start && !FileManager.default.fileExists(atPath: dataFile.path)
+        if !FileManager.default.fileExists(atPath: dataFile.path) { saved.onboardingComplete = false }
+        needsOnboarding = start && saved.onboardingComplete == false
         if start && storageWritable && !needsOnboarding {
             startReader()
             Task { [weak self] in await self?.refreshKeyStatus() }
@@ -358,6 +359,9 @@ import Foundation
         return true
     }
     func deleteKey() async {
+        guard !savingKey else { return }
+        savingKey = true
+        defer { savingKey = false }
         cancelSummaries(); saved.aiEnabled = false; changed()
         do {
             try await credentials.delete(); cachedKey = nil; credentialStatus = .missing

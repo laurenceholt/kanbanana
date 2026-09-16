@@ -259,7 +259,7 @@ struct BoardView: View {
                 Text("Summarizing…").font(appearance.font(9))
             }
             if store.statusCheckMessage == nil && !store.scanning {
-                Text("LOCAL PREVIEW").font(BoardStyle.label(8)).tracking(0.9).foregroundStyle(appearance.muted.opacity(0.65))
+                Text("LOCAL BETA").font(BoardStyle.label(8)).tracking(0.9).foregroundStyle(appearance.muted.opacity(0.65))
             }
             Rectangle().fill(appearance.line).frame(width: 1, height: 10).padding(.horizontal, 3)
             Text(store.scanning ? "Reading source history…" : store.statusCheckMessage ?? store.updatedAt.map { "Synced " + $0.formatted(date: .omitted, time: .shortened) } ?? "Connecting…")
@@ -542,7 +542,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var key = ""
     @State private var model = ""
-    @State private var restoreURL: URL?
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack { Text("Settings").font(.title2.bold()); Spacer(); Button("Done") { dismiss() }.keyboardShortcut(.cancelAction) }

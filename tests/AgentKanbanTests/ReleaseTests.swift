@@ -28,6 +28,10 @@ final class ReleaseTests: XCTestCase {
         XCTAssertTrue(store.needsOnboarding)
         XCTAssertTrue(store.health.isEmpty)
         XCTAssertFalse(store.saved.aiEnabled)
+        store.stop()
+        let relaunched = BoardStore(root: root)
+        XCTAssertTrue(relaunched.needsOnboarding)
+        XCTAssertTrue(relaunched.health.isEmpty)
     }
     @MainActor func testSavingKeyDoesNotEnableCloudAndDeletionDisablesIt() async throws {
         let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }

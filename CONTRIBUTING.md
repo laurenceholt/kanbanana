@@ -2,7 +2,7 @@
 
 This is an early, independently maintained macOS utility. Small fixes, reproducible reports and synthetic integration fixtures are especially useful. Open an issue before a substantial feature or architecture change.
 
-Use zsh for shell examples. Build on Apple Silicon with Xcode command line tools (Swift 5.10+). Run the commands in README before submitting a pull request. CI builds the app and runs both Swift and Python suites. Tests must not require a real API key or a user's session stores.
+Use zsh for shell examples. Build on Apple Silicon with Xcode command line tools (Swift 6.0+). Run the commands in README before submitting a pull request. CI builds the app and runs both Swift and Python suites. Tests must not require a real API key or a user's session stores.
 
 - Keep source integrations read-only. Never fix monitoring by editing another app's database or configuration.
 - Preserve user notes, dispositions and cached history when observations fail. Unknown status must not imply completion.

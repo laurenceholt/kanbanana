@@ -12,7 +12,8 @@ struct ProjectSymbol {
     static let categories = ["Essentials", "Work", "Technology", "Learning", "Travel", "Home", "Nature", "Leisure", "Shapes"]
     // Saved projects refer to these indices. Keep the original 24 first and
     // append new choices; filter unavailable symbols without renumbering them.
-    static let palette: [ProjectSymbol] = [
+    static let palette: [ProjectSymbol] = {
+        var values: [ProjectSymbol] = [
         .init(name: "Layers", systemName: "square.stack.3d.up.fill"),
         .init(name: "Pencil", systemName: "pencil", keywords: "writing drawing edit"),
         .init(name: "Folder", systemName: "folder.fill"),
@@ -37,7 +38,8 @@ struct ProjectSymbol {
         .init(name: "Heart", systemName: "heart.fill"),
         .init(name: "Headphones", systemName: "headphones"),
         .init(name: "Cup", systemName: "cup.and.saucer.fill")
-    ] + group("Work", """
+        ]
+        values += group("Work", """
     Briefcase|briefcase.fill|job business office
     Calendar|calendar|date schedule appointment
     Checklist|checklist|tasks todo
@@ -62,7 +64,8 @@ struct ProjectSymbol {
     Tag|tag.fill|label category
     Megaphone|megaphone.fill|marketing announcement
     Stamp|seal.fill|approval badge
-    """) + group("Technology", """
+    """)
+        values += group("Technology", """
     Desktop|desktopcomputer|computer mac monitor
     Laptop|laptopcomputer|computer mac
     Phone|iphone|mobile ios app
@@ -87,7 +90,8 @@ struct ProjectSymbol {
     Bug|ladybug.fill|testing debug code
     Shield|shield.fill|security protection
     Lock|lock.fill|security password
-    """) + group("Learning", """
+    """)
+        values += group("Learning", """
     Open book|book.fill|reading library study
     Books|books.vertical.fill|library research
     Textbook|text.book.closed.fill|school study
@@ -112,7 +116,8 @@ struct ProjectSymbol {
     Infinity|infinity|math mathematics
     Geometry|triangle.righthalf.filled|math mathematics shapes
     Search|magnifyingglass|research find
-    """) + group("Travel", """
+    """)
+        values += group("Travel", """
     Airplane|airplane|flight airport holiday
     Takeoff|airplane.departure|flight airport holiday
     Landing|airplane.arrival|flight airport
@@ -137,7 +142,8 @@ struct ProjectSymbol {
     Globe grid|globe|world international
     Ticket|ticket.fill|booking event travel
     Identity card|person.text.rectangle.fill|passport travel
-    """) + group("Home", """
+    """)
+        values += group("Home", """
     Bed|bed.double.fill|bedroom sleep hotel
     Sofa|sofa.fill|living room furniture
     Chair|chair.fill|furniture office
@@ -162,7 +168,8 @@ struct ProjectSymbol {
     Stove|cooktop.fill|kitchen cooking
     Bin|trash.fill|recycling cleaning
     Shipping box|shippingbox.fill|delivery packing storage
-    """) + group("Nature", """
+    """)
+        values += group("Nature", """
     Sun|sun.max.fill|day weather summer
     Moon|moon.fill|night astronomy space
     Stars|moon.stars.fill|night astronomy space
@@ -187,7 +194,8 @@ struct ProjectSymbol {
     Tortoise|tortoise.fill|animals turtle
     Hare|hare.fill|animals rabbit
     Ant|ant.fill|animals insect
-    """) + group("Leisure", """
+    """)
+        values += group("Leisure", """
     Music|music.note|song audio
     Guitar|guitars.fill|music instrument
     Piano|pianokeys|music instrument
@@ -212,7 +220,8 @@ struct ProjectSymbol {
     Party|party.popper.fill|celebration birthday
     Food|fork.knife|restaurant meal cooking
     Wine|wineglass.fill|drink tasting restaurant
-    """) + group("Shapes", """
+    """)
+        values += group("Shapes", """
     Circle|circle.fill|shape round
     Square|square.fill|shape
     Triangle|triangle.fill|shape geometry
@@ -238,6 +247,8 @@ struct ProjectSymbol {
     Grid|square.grid.2x2.fill|layout dashboard
     Pin|pin.fill|important saved
     """)
+        return values
+    }()
     private static func group(_ category: String, _ rows: String) -> [ProjectSymbol] {
         rows.split(separator: "\n").map { row in
             let parts = row.split(separator: "|", omittingEmptySubsequences: false).map(String.init)
