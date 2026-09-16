@@ -5,7 +5,7 @@ Status for the 0.2.0 source beta, 15 September 2026. Compatibility is based on o
 | Component | Evidence / support |
 | --- | --- |
 | Apple Silicon, macOS 26.1 | Local development, native UI use, bundled-runtime build and automated tests. |
-| macOS 14 / 15 | Build target and CI matrix. Check the current Checks run for results; a green build does not verify native provider transitions on that OS. |
+| macOS 14 / 15 | Apple Silicon CI build, Swift/Python suites and bundled-reader smoke test passed on 15 September 2026. This does not verify native provider transitions or GUI interactions on those OS versions. |
 | Intel Mac | Not packaged or tested in this beta. |
 | Claude Desktop Code 2.110.0 | Local session discovery and request history; previously verified exact local-session navigation. |
 | Codex desktop bundle `com.openai.codex`, version 26.901.31953 | Local discovery, legacy and paginated histories. The installed app may be named ChatGPT; integration uses its bundle identity. |

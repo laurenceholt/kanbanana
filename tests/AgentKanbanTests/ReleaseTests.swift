@@ -87,6 +87,19 @@ final class ReleaseTests: XCTestCase {
         XCTAssertThrowsError(try StatePersistence.decode(JSONEncoder().encode(state)))
         XCTAssertEqual(try Data(contentsOf: file), before)
     }
+    func testUnmanagedBackupDoesNotTriggerContinuousRotationOrGetPruned() throws {
+        let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }
+        let folder = root.appendingPathComponent("Backups")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let manual = folder.appendingPathComponent("board-before-repair.json")
+        try Data("keep these original bytes".utf8).write(to: manual)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 0)], ofItemAtPath: manual.path)
+        let persistence = StatePersistence(); let file = root.appendingPathComponent("board.json")
+        for _ in 0..<10 { XCTAssertTrue(persistence.writeSync(SavedState(), to: file)) }
+        let files = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+        XCTAssertEqual(files.count, 2)
+        XCTAssertEqual(try String(contentsOf: manual), "keep these original bytes")
+    }
     @MainActor func testRestorePreservesPreviousBoardDisablesAIAndKeepsUsage() throws {
         let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }
         let store = BoardStore(root: root, start: false)

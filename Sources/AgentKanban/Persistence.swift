@@ -49,7 +49,7 @@ final class StatePersistence: @unchecked Sendable {
             _ = try decode(data) // Never overwrite good backups with corrupt data.
             let folder = url.deletingLastPathComponent().appendingPathComponent("Backups", isDirectory: true)
             try fm.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-            let files = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey]).filter { $0.lastPathComponent.hasPrefix("board-") && $0.pathExtension == "json" }.sorted { $0.lastPathComponent > $1.lastPathComponent }
+            let files = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey]).filter { $0.lastPathComponent.range(of: #"^board-[0-9]+-[0-9A-Fa-f-]+\.json$"#, options: .regularExpression) != nil }.sorted { $0.lastPathComponent > $1.lastPathComponent }
             if !force, let latest = files.first, let time = try latest.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate, Date().timeIntervalSince(time) < 3600 { return true }
             let name = "board-\(Int(Date().timeIntervalSince1970 * 1_000_000))-\(UUID().uuidString).json"
             let target = folder.appendingPathComponent(name)
