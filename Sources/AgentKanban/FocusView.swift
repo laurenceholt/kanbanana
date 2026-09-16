@@ -35,7 +35,8 @@ struct FocusBoard<CardContent: View>: View {
                 Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
             }
             .foregroundStyle(appearance.ink)
-            .frame(maxWidth: .infinity).frame(height: 28)
+            .frame(maxWidth: .infinity, alignment: .leading).frame(height: 28)
+            .padding(.horizontal, 18).padding(.top, 23)
             .accessibilityElement(children: .combine)
 
             HStack(spacing: 2) {

@@ -68,30 +68,34 @@ struct ConversationCard: View, Equatable {
                         .accessibilityLabel("\(detailsExpanded ? "Collapse" : "Expand") \(displayedColumn == .todo ? "To do" : "dealt-with") card: \(card.title)")
                         .accessibilityValue(detailsExpanded ? "Expanded" : "Collapsed")
                 }
-            }.padding(.horizontal, compact ? 8 : 10).padding(.vertical, compact ? 6 : 8)
+            }.padding(.horizontal, compact ? 8 : 10)
+                .padding(.top, compact ? 6 : 8).padding(.bottom, compact ? 6 : 4)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(appearance.theme == .brutalist ? Color.black : Color.clear)
-                .padding(.bottom, appearance.theme == .brutalist ? 8 : 0)
+                .padding(.bottom, appearance.theme == .brutalist ? (compact ? 8 : 4) : 0)
             if !compact || !collapsed {
                 VStack(alignment: .leading, spacing: 0) {
-                    Button { store.open(card) } label: {
-                        VStack(alignment: .leading, spacing: 7) {
-                            if !compact {
-                                HStack(spacing: 5) {
-                                    if collapsed { ProviderIcon(provider: card.provider, size: 15) }
-                                    Text(card.title).font(appearance.font(12, weight: .semibold)).tracking(-0.1).lineSpacing(1).lineLimit(2).foregroundStyle(appearance.ink).frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(alignment: .bottom, spacing: 6) {
+                        Button { store.open(card) } label: {
+                            VStack(alignment: .leading, spacing: 7) {
+                                if !compact {
+                                    HStack(spacing: 5) {
+                                        if collapsed { ProviderIcon(provider: card.provider, size: 15) }
+                                        Text(card.title).font(appearance.font(12, weight: .semibold)).tracking(-0.1).lineSpacing(1).lineLimit(2).foregroundStyle(appearance.ink).frame(maxWidth: .infinity, alignment: .leading)
+                                    }
                                 }
+                                if !collapsed {
+                                    if let r = card.requests.last {
+                                        Text(latestSummary ?? String(r.text.prefix(220))).font(appearance.font(11)).lineSpacing(1).lineLimit(3).foregroundStyle(appearance.ink.opacity(0.76))
+                                    } else { Text("Request history unavailable").font(appearance.font(10)).foregroundStyle(appearance.muted) }
+                                }
+                            }.contentShape(Rectangle())
+                        }.buttonStyle(.plain).padding(.top, compact ? 5 : collapsed ? 2 : 5).help("Open \(card.title) in \(card.providerName)")
+                            .onDrag { NSItemProvider(object: card.id as NSString) } preview: {
+                                Text(card.title).font(appearance.font(12, weight: .semibold)).lineLimit(1).padding(10).frame(width: 200).background(color.wash, in: RoundedRectangle(cornerRadius: 8))
                             }
-                            if !collapsed {
-                                if let r = card.requests.last {
-                                    Text(latestSummary ?? String(r.text.prefix(220))).font(appearance.font(11)).lineSpacing(1).lineLimit(3).foregroundStyle(appearance.ink.opacity(0.76))
-                                } else { Text("Request history unavailable").font(appearance.font(10)).foregroundStyle(appearance.muted) }
-                            }
-                        }.contentShape(Rectangle())
-                    }.buttonStyle(.plain).padding(.top, compact ? 5 : collapsed ? 4 : 10).help("Open \(card.title) in \(card.providerName)")
-                        .onDrag { NSItemProvider(object: card.id as NSString) } preview: {
-                            Text(card.title).font(appearance.font(12, weight: .semibold)).lineLimit(1).padding(10).frame(width: 200).background(color.wash, in: RoundedRectangle(cornerRadius: 8))
-                        }
+                        if collapsed { dealtWithButton }
+                    }
                     if !collapsed {
                         if displayedColumn == .todo || disposition.todoNote != nil {
                             HStack(alignment: .top, spacing: 4) {
@@ -133,6 +137,7 @@ struct ConversationCard: View, Equatable {
                             Spacer(minLength: 0)
                             Button(action: showHistory) { Image(systemName: "text.alignleft").font(.system(size: 11)) }.buttonStyle(.plain).help("Expand request history").accessibilityLabel("Request history for \(card.title)")
                             Menu { actions } label: { Image(systemName: "ellipsis").font(.system(size: 11)) }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Conversation actions").accessibilityLabel("Actions for \(card.title)")
+                            dealtWithButton
                         }.foregroundStyle(appearance.muted)
                         if disposition.parked {
                             Button { store.park(card, false) } label: { Label("Restore to board", systemImage: "arrow.uturn.backward").font(appearance.font(10, weight: .medium)) }.buttonStyle(.plain).foregroundStyle(appearance.ink).padding(.top, 9)
@@ -141,7 +146,7 @@ struct ConversationCard: View, Equatable {
                 }.padding(.horizontal, compact ? 8 : 10).padding(.bottom, compact ? 2 : collapsed ? 8 : 11)
             }
             if compact && collapsed {
-                HStack { providerButton; Spacer(minLength: 0) }
+                HStack { providerButton; Spacer(minLength: 0); dealtWithButton }
                     .padding(.horizontal, 8).padding(.bottom, 2)
             }
         }.background(appearance.paper)
@@ -165,6 +170,22 @@ struct ConversationCard: View, Equatable {
             .help(disposition.priority == true ? "Remove priority" : "Make priority — keep at the top of lists")
             .accessibilityLabel("\(disposition.priority == true ? "Remove priority from" : "Make priority:") \(card.title)")
             .accessibilityValue(disposition.priority == true ? "Priority" : "Not priority")
+    }
+    private var dealtWithButton: some View {
+        let isDealtWith = displayedColumn == .dealtWith && !disposition.parked
+        return Button {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
+                store.mark(card, .dealtWith)
+                if disposition.parked { store.park(card, false) }
+            }
+        } label: {
+            Image(systemName: isDealtWith ? "checkmark.circle.fill" : "checkmark.circle")
+                .font(.system(size: 13, weight: .medium)).frame(width: 22, height: 20)
+                .contentShape(Rectangle())
+        }.buttonStyle(.plain).foregroundStyle(appearance.muted)
+            .disabled(isDealtWith)
+            .help(isDealtWith ? "Already dealt with" : "Move to Dealt with")
+            .accessibilityLabel("\(isDealtWith ? "Already dealt with:" : "Move to Dealt with:") \(card.title)")
     }
     private var providerButton: some View {
         Button { store.open(card) } label: { ProviderIcon(provider: card.provider, size: 15).frame(width: 20, height: 20).contentShape(Rectangle()) }

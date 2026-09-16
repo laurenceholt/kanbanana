@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Add the banana mark and kanbanana title to Focus mode without taking space from the card list.
+- Add a compact, left-aligned banana mark and kanbanana title to Focus mode.
+- Tighten the gap between project and conversation titles, and add a one-click Dealt with action to every card.
 - Apply pipe backpressure during startup bursts so a busy interface cannot drop reader updates or misreport a size-limit failure.
 
 ## 0.3.0-beta.1
