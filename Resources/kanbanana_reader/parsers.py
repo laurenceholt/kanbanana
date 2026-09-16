@@ -207,4 +207,3 @@ def parse_codex_legacy(records):
     for item in records:
         parser.feed(item)
     return parser.result()
-

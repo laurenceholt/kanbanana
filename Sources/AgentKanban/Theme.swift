@@ -227,7 +227,7 @@ extension BoardStore {
 }
 
 // Use the actual installed app icons, without copying vendor artwork into our bundle.
-enum ProviderArtwork {
+@MainActor enum ProviderArtwork {
     static let claude = load("com.anthropic.claudefordesktop")
     static let codex = load("com.openai.codex")
     private static func load(_ bundleID: String) -> NSImage? {

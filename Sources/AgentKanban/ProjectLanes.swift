@@ -82,7 +82,9 @@ struct ProjectSwimlanes<CardContent: View>: View {
             }
             .coordinateSpace(name: scrollSpace)
             .onPreferenceChange(LaneHeaderFrames.self) { frames in
-                if headerFrames != frames { headerFrames = frames }
+                Task { @MainActor in
+                    if headerFrames != frames { headerFrames = frames }
+                }
             }
             .overlay(alignment: .top) {
                 if let pinned = PinnedLaneHeader.resolve(order: lanes.map(\.id), frames: headerFrames),

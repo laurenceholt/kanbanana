@@ -40,4 +40,3 @@ struct TodoNoteView: View {
             .onAppear { focused = true }
     }
 }
-

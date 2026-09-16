@@ -342,5 +342,3 @@ class HealthLog:
             temporary.replace(self.path)
         except OSError:
             pass  # A diagnostic write must never stop status monitoring.
-
-

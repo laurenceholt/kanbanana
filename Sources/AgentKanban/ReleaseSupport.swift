@@ -2,7 +2,7 @@ import KanbananaCore
 import AppKit
 import SwiftUI
 
-enum BrandArtwork {
+@MainActor enum BrandArtwork {
     static let image: NSImage? = {
         let urls = [Bundle.main.resourceURL?.appendingPathComponent("Branding/banana.png"),
                     URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Resources/Branding/banana.png")]

@@ -18,4 +18,3 @@ package struct SummaryUsage: Codable, Sendable, Equatable {
         return formatter.string(from: date)
     }
 }
-

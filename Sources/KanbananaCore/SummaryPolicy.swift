@@ -15,4 +15,3 @@ package enum SummaryStyle {
             options: [.regularExpression, .caseInsensitive]) != nil
     }
 }
-

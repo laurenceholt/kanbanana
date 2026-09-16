@@ -46,4 +46,3 @@ struct HistoryView: View {
             .task(id: cardID) { await store.loadHistory(cardID) }
     }
 }
-

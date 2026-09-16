@@ -286,4 +286,3 @@ struct StatusRetryButton: View {
             .help("Reread Claude and Codex history for every tracked conversation, including parked cards. " + (store.statusCheckMessage ?? ""))
     }
 }
-
