@@ -4,7 +4,7 @@ Status for the 0.3.0 source beta, 16 September 2026. Compatibility is based on o
 
 | Component | Evidence / support |
 | --- | --- |
-| Apple Silicon, macOS 26.1 | Local development and prior native UI use. Version 0.3: 86 Swift tests, 42 Python tests, synthetic UI rendering and bundled-runtime build; the live upgrade UI was not exercised while the development Mac was locked. |
+| Apple Silicon, macOS 26.1 | Local development and native UI use. On 16 September 2026, the refactored app was installed and launched over an existing v1 board: v2 migration preserved project records, assignments, priorities, to-do notes and summary settings; both readers connected and summaries resumed with the existing Keychain credential. Focus branding was checked in the running app. All 88 Swift tests, synthetic UI rendering and bundled-runtime build passed locally; 42 Python tests passed for the source beta. |
 | macOS 14 / 15 | Apple Silicon CI: all 86 Swift tests and 42 Python tests, strict concurrency, app packaging, secret audit and bundled-reader smoke check passed on 16 September 2026 ([run](https://github.com/laurenceholt/kanbanana/actions/runs/35054817955)). This does not verify native provider transitions or GUI interactions on those OS versions. |
 | Intel Mac | Not packaged or tested in this beta. |
 | Claude Desktop Code 2.110.0 | Local session discovery and request history; previously verified exact local-session navigation. |
