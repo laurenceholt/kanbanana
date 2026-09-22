@@ -44,7 +44,7 @@ The shared contract fixture is `tests/KanbananaServicesTests/Fixtures/provider-f
 - A dedicated dispatch queue reads each pipe. Swift's UI and cooperative executor never block on pipe reads. Stop sends TERM and escalates to KILL after 0.5 seconds, then reaps the child.
 - Frames are limited to 8 MiB. Pipe reads are demand-driven: a busy consumer applies OS pipe backpressure, so startup bursts remain bounded without dropping valid messages.
 - Failures back off from 2 to 30 seconds. One failing provider cannot suppress the other's updates.
-- Only a complete inventory establishes absence. Unreadable Claude metadata marks an inventory partial; unreadable transcripts identify the affected card. Error categories omit private paths and text.
+- Only a complete inventory establishes absence. Unreadable Claude metadata marks an inventory partial; unreadable transcripts identify the affected card. Confirmed absence is stored separately from observation failures and permits seven-day automatic parking, preserving curation and cached history. To do reminders and the seven-day grace period after manual restoration still apply. Missing cards remain tracked so new source activity can restore them. Error categories omit private paths and text.
 
 The narrow `ProcessReaderConnection` Foundation bridge has a documented `@unchecked Sendable` conformance: launch/cancel state is lock-protected and completion is signalled only after reaping. Other service ownership is enforced by actors or immutable Sendable values.
 

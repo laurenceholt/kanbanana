@@ -211,6 +211,11 @@ import KanbananaServices
     }
     func park(_ card: Conversation, _ value: Bool) { send(.park(card.id, value)) }
     func open(_ card: Conversation) {
+        let card = cards.first { $0.id == card.id } ?? card
+        guard card.sourceMissing != true else {
+            error = "This conversation is no longer in \(card.providerName)’s local history. Its saved request history and notes are still available in kanbanana."
+            return
+        }
         guard let url = card.navigationURL else { error = "This conversation has an invalid link. Retry status to reload it."; return }
         if !NSWorkspace.shared.open(url) { error = "Could not open \(card.providerName). Check that it is installed." }
     }
@@ -250,8 +255,13 @@ import KanbananaServices
             changed()
         } else { onChange?() }
         if !scanning {
-            let unreadable = cards.filter { $0.observationIssue != nil || column($0) == .unknown }.count
-            let message = unreadable == 0 ? "Status checked · all available" : "\(unreadable) histories unavailable · retrying automatically"
+            let active = cards.filter { !disposition($0).parked }
+            let missing = active.filter { $0.sourceMissing == true }.count
+            let unreadable = active.filter { $0.sourceMissing != true && ($0.observationIssue != nil || column($0) == .unknown) }.count
+            var details: [String] = []
+            if missing > 0 { details.append("\(missing) conversation\(missing == 1 ? "" : "s") no longer in source") }
+            if unreadable > 0 { details.append("\(unreadable) histories unavailable · retrying automatically") }
+            let message = details.isEmpty ? "Status checked · all available" : details.joined(separator: " · ")
             if statusCheckMessage != message { statusCheckMessage = message }
         }
         queueSummaries()

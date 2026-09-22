@@ -126,10 +126,10 @@ struct ConversationCard: View, Equatable {
                             }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
                                 .background(appearance.ink.opacity(0.035), in: RoundedRectangle(cornerRadius: 6)).padding(.top, 8)
                         }
-                        if displayedColumn == .needsMe || displayedColumn == .unknown || card.observationIssue != nil {
+                        if displayedColumn == .needsMe || displayedColumn == .unknown || card.observationIssue != nil || card.sourceMissing == true {
                             HStack(spacing: 4) {
                                 Image(systemName: displayedColumn == .needsMe ? "exclamationmark.circle.fill" : "questionmark.circle")
-                                Text(card.observationIssue == nil ? card.reason : "Updates paused").lineLimit(1)
+                                Text(card.sourceMissing == true ? "No longer in \(card.providerName)" : card.observationIssue == nil ? card.reason : "Updates paused").lineLimit(1)
                             }.font(appearance.font(9, weight: .medium)).foregroundStyle(appearance.ink.opacity(0.8)).padding(.horizontal, 6).padding(.vertical, 4)
                                 .background(appearance.ink.opacity(0.035), in: RoundedRectangle(cornerRadius: 5)).padding(.top, 9)
                                 .help(card.observationIssue.map { "\($0). Last observed state: \(card.state.title)." } ?? card.reason)

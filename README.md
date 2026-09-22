@@ -51,7 +51,7 @@ Click the banana and counts in the menu bar to reopen the window. Closing the wi
 
 Click a title to open its native conversation; expand history to see earlier requests. Star any card to keep it near the top. Project assignments and notes belong to kanbanana and never change the source app.
 
-Quiet cards are parked after seven days; To do reminders stay. Use the archive-box button in the full board to find and restore parked cards. Focus's expand arrows open Projects.
+Quiet cards are parked after seven days; To do reminders stay. Conversations confirmed missing from the source follow the same rule, preserving their saved history and notes. Temporary read failures never trigger automatic parking. Use the archive-box button in the full board to find and restore parked cards. Focus's expand arrows open Projects.
 
 ## Optional summaries
 

@@ -50,8 +50,12 @@ package struct Conversation: Codable, Sendable, Identifiable, Equatable {
     package var url: String
     // A failed observation is separate from the last observed task state.
     package var observationIssue: String? = nil
+    // Set only by a complete source inventory. Optional for older saved boards.
+    // Unlike a read failure, confirmed absence can age into the parking lot.
+    package var sourceMissing: Bool? = nil
     package var providerName: String { provider == "claude" ? "Claude" : "Codex" }
     package var navigationURL: URL? {
+        guard sourceMissing != true else { return nil }
         // Desktop's local IDs use the continue endpoint. /code/<id> accepts
         // cloud session IDs only. Resolve at click time to repair cached cards too.
         if provider == "claude", nativeID.hasPrefix("local_") {
@@ -168,7 +172,8 @@ package enum Lifecycle {
             d.parked = false
             d.parkedManually = false
         }
-        if d.manualColumn != .todo && healthy && new.state != .unknown && new.state != .running && now - max(new.updated, d.restoredAt) >= 7 * 86400 {
+        let canAgeOut = new.state != .running && (new.state != .unknown || new.sourceMissing == true)
+        if d.manualColumn != .todo && healthy && canAgeOut && now - max(new.updated, d.restoredAt) >= 7 * 86400 {
             d.parked = true
         }
         return d

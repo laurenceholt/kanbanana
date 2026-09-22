@@ -15,6 +15,7 @@ If you use a custom `CODEX_HOME` or `CLAUDE_CONFIG_DIR`, enter it under Settings
 - **Some histories unavailable:** a partial read, such as unreadable metadata or a transcript. Last observed task states and your notes remain intact; missing cards are not treated as confirmed deletions.
 - **Unavailable / updates paused:** a database or process failure. Each provider has an independent worker. A worker that stops responding is marked stale after 20 seconds and restarted. Retry status immediately restarts workers and clears their memory caches. Prior board data remains.
 - **No recent execution signal:** the store can be read but it does not establish whether that quiet task is still running. Open the source conversation to check.
+- **No longer in Claude / Codex:** a complete inventory no longer contains that conversation. After seven days without activity it moves to the parking lot, retaining saved request history, notes and project assignment. To do reminders stay on the board; restoring a parked card gives it another seven days. These records do not count as retryable read failures. If new activity appears for the same source conversation, its card returns automatically. A renamed or replacement conversation with a different ID remains a separate card.
 
 ## Summaries
 

@@ -64,12 +64,14 @@ package enum BoardReconciler {
         var byID = Dictionary(uniqueKeysWithValues: state.cards.map { ($0.id, $0) })
         for var card in snapshot.cards {
             let old = byID[card.id]
+            // Metadata proves the conversation exists even if its history is unreadable.
+            card.sourceMissing = nil
             if card.observationIssue != nil, let old {
                 card.requests = old.requests
                 card.eventID = old.eventID
                 card.eventTime = old.eventTime
                 card.state = old.state
-                card.reason = old.reason
+                if old.sourceMissing != true { card.reason = old.reason }
                 card.response = old.response
             } else if !snapshot.completeHistory, let old {
                 card.requests = RequestHistory.merging(old.requests, card.requests)
@@ -101,6 +103,9 @@ package enum BoardReconciler {
                 card.state = .unknown
                 card.reason = "Conversation not found in source history"
                 card.observationIssue = nil
+                card.sourceMissing = true
+                next.dispositions[id] = Lifecycle.reconcile(card, card, next.dispositions[id] ?? Disposition(),
+                    now: snapshot.scannedAt, healthy: true)
             } else if !changedIDs.contains(id) {
                 // A delta heartbeat can restore transport health without resending history.
                 // Partial inventories cannot clear an individual read failure.

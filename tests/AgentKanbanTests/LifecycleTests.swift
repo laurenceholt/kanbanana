@@ -208,4 +208,34 @@ final class LifecycleTests: XCTestCase {
         XCTAssertFalse(store.statusCheckMessage?.contains("all available") == true)
         XCTAssertEqual(store.column(c), .unknown)
     }
+    @MainActor func testOldMissingCardLeavesActiveCountsAndPersistsInParkingLot() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = await BoardStore.loaded(root: root, start: false)
+        let c = card(state: .unknown, age: 8 * 86400)
+        store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now))
+        store.apply(.init(cards: [], health: ["codex": "Connected"], scannedAt: now + 1))
+        XCTAssertEqual(store.count(.unknown), 0)
+        XCTAssertEqual(store.parkedCount, 1)
+        XCTAssertTrue(store.visible.isEmpty)
+        XCTAssertEqual(store.statusCheckMessage, "Status checked · all available")
+        store.open(c) // A stale view must not launch the now-missing native conversation.
+        XCTAssertTrue(store.error?.contains("no longer in Codex") == true)
+        await store.persist()
+        let reloaded = await BoardStore.loaded(root: root, start: false)
+        reloaded.parking = true
+        XCTAssertEqual(reloaded.visible.first?.id, c.id)
+        XCTAssertEqual(reloaded.visible.first?.sourceMissing, true)
+        XCTAssertEqual(reloaded.visible.first?.requests, c.requests)
+    }
+    @MainActor func testRecentMissingCardIsNotAdvertisedAsRetryableHistoryFailure() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = await BoardStore.loaded(root: root, start: false)
+        let c = card()
+        store.apply(.init(cards: [c], health: ["codex": "Connected"], scannedAt: now))
+        store.apply(.init(cards: [], health: ["codex": "Connected"], scannedAt: now + 1))
+        XCTAssertEqual(store.count(.unknown), 1)
+        XCTAssertEqual(store.statusCheckMessage, "1 conversation no longer in source")
+    }
 }
