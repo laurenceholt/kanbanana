@@ -20,7 +20,7 @@ Native schemas and deep links are private implementation details and can change.
 
 ## What status can and cannot establish
 
-- Running uses stored execution evidence. Background tasks are tracked beyond the parent's interim response.
+- Running uses stored execution evidence. Background tasks are tracked beyond the parent's interim response. Both user-record and queued-attachment task notifications settle pending work; a subsequent parent report establishes delivery. Cold replay and incremental reads use the same classifier.
 - Ordinary unfinished turns without a fresh signal for two minutes become unavailable; explicit background tasks have a one-day quiet limit. Quiet is never interpreted as delivery.
 - Needs me detects structured questions/errors and conservative required-input text. Some native permission dialogs never reach the stored history and cannot be reliably detected.
 - Ready to check means a response appears delivered, not that the implementation is correct or pushed to GitHub.

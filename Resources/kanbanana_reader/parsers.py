@@ -85,12 +85,39 @@ def delivered_state(text):
     return "ready", "Response ready"
 
 
+def claude_task_notification(content, origin):
+    """Read the typed notification envelope, never task-shaped quoted prose."""
+    if not isinstance(origin, dict) or origin.get("kind") != "task-notification" or not isinstance(content, str):
+        return []
+    envelope = re.match(r"\s*<task-notification>(.*?)</task-notification>", content, re.S)
+    if not envelope:
+        return []
+    task_id = re.search(r"<task-id>([^<]+)</task-id>", envelope[1])
+    status = re.search(r"<status>([^<]+)</status>", envelope[1])
+    return [(task_id[1].strip(), status[1].strip())] if task_id and status else []
+
+
 class ClaudeParser:
     def __init__(self):
         self.requests, self.seen = [], set()
         self.pending_tasks = {}
         self.state, self.reason, self.response, self.event_time, self.event_id = "unknown", "Status unavailable", "", 0, ""
         self.index = -1
+
+    def apply_task_events(self, events, when, key):
+        for task_id, status in events:
+            if status in ("running", "pending", "in_progress"):
+                self.pending_tasks[task_id] = when
+                self.state, self.reason, self.response = "running", "Waiting for background task", ""
+                self.event_time, self.event_id = when or self.event_time, key
+            elif status in ("completed", "failed", "stopped", "killed", "cancelled") and task_id in self.pending_tasks:
+                self.pending_tasks.pop(task_id)
+                # Child completion wakes the parent; it is not itself the
+                # parent's delivery. Wait for its subsequent final response.
+                self.state = "running" if status == "completed" else "needsMe"
+                self.reason = "" if status == "completed" else "Background task failed" if status == "failed" else "Background task stopped"
+                self.response = ""
+                self.event_time, self.event_id = when or self.event_time, key
 
     def feed(self, item):
         self.index += 1
@@ -117,29 +144,8 @@ class ClaudeParser:
                 task = result.get("task")
                 if isinstance(task, dict) and task.get("task_id"):
                     task_events.append((task["task_id"], task.get("status")))
-            origin = item.get("origin")
-            if isinstance(origin, dict) and origin.get("kind") == "task-notification" and isinstance(content, str):
-                # Read only the transport envelope. Quoted XML in a user's
-                # ordinary request must not finish a real background task.
-                envelope = content.strip().split("</task-notification>", 1)[0]
-                if envelope.startswith("<task-notification>"):
-                    task_id = re.search(r"<task-id>([^<]+)</task-id>", envelope)
-                    status = re.search(r"<status>([^<]+)</status>", envelope)
-                    if task_id and status:
-                        task_events.append((task_id[1].strip(), status[1].strip()))
-            for task_id, status in task_events:
-                if status in ("running", "pending", "in_progress"):
-                    self.pending_tasks[task_id] = when
-                    self.state, self.reason, self.response = "running", "Waiting for background task", ""
-                    self.event_time, self.event_id = when or self.event_time, key
-                elif status in ("completed", "failed", "stopped", "killed", "cancelled") and task_id in self.pending_tasks:
-                    self.pending_tasks.pop(task_id)
-                    # Child completion wakes the parent; it is not itself the
-                    # parent's delivery. Wait for its subsequent final response.
-                    self.state = "running" if status == "completed" else "needsMe"
-                    self.reason = "" if status == "completed" else "Background task failed" if status == "failed" else "Background task stopped"
-                    self.response = ""
-                    self.event_time, self.event_id = when or self.event_time, key
+            task_events.extend(claude_task_notification(content, item.get("origin")))
+            self.apply_task_events(task_events, when, key)
             if not is_tool and not item.get("isMeta"):
                 text = clean_request(text_content(content))
                 if text and key not in self.seen:
@@ -149,6 +155,13 @@ class ClaudeParser:
                     self.requests.append(request(key, text, when)); self.seen.add(key)
                     self.state, self.reason, self.response = "running", "", ""
                     self.event_time, self.event_id = when, key
+        elif typ == "attachment":
+            # Desktop can deliver background completions as queued attachments
+            # during an active turn. They are not user requests. Queue-operation
+            # records only describe the queue, not delivery to the parent.
+            attachment = item.get("attachment") or {}
+            if attachment.get("type") == "queued_command":
+                self.apply_task_events(claude_task_notification(attachment.get("prompt"), attachment.get("origin")), when, key)
         elif typ == "assistant":
             blocks = msg.get("content", [])
             if not isinstance(blocks, list):

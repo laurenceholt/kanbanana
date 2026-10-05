@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Recognize Claude background-task completions delivered as queued attachments, preventing finished conversations from remaining Running or Status unavailable after history replay.
 - Park old conversations confirmed missing from a complete source inventory, preserving their history and notes while keeping genuine read failures visible.
 - Ready to check and Needs me cards summarize the latest agent report, with separate request-history summaries and cached report excerpts.
 

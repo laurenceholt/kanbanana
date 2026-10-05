@@ -175,6 +175,12 @@ class ReaderTests(unittest.TestCase):
     def task_notification(self, task_id, status="completed"):
         return self.user("notify-" + task_id, f"<task-notification>\n<task-id>{task_id}</task-id>\n<status>{status}</status>\n<summary>Private child summary</summary>\n</task-notification>", origin={"kind": "task-notification"})
 
+    def queued_notification(self, task_id, status="completed"):
+        notice = self.task_notification(task_id, status)
+        return {"type": "attachment", "uuid": "queued-" + task_id, "timestamp": notice["timestamp"],
+                "attachment": {"type": "queued_command", "prompt": notice["message"]["content"],
+                               "origin": {"kind": "task-notification", "producer": "session-task"}}}
+
     def final_response(self, key="final", text="The build agent is working; I will send it when verified."):
         return {"type": "assistant", "uuid": key, "timestamp": "2026-09-08T12:00:01Z", "message": {"stop_reason": "end_turn", "content": [{"type": "text", "text": text}]}}
 
@@ -208,6 +214,60 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual(r.parse_claude(records)[1:4], ("ready", "Response ready", "Built and verified."))
         self.assertEqual(len(r.parse_claude(records)[0]), 1)
         self.assertEqual(r.parse_claude(records + [self.task_notification("b")])[1], "ready", "Duplicate notifications must not reactivate a finished conversation")
+
+    def test_claude_queued_completions_wait_for_all_work_and_parent_report(self):
+        records = [self.user("request", "Build and test it"), self.async_agent("builder"), self.async_shell("tests"), self.final_response()]
+        records += [self.queued_notification("builder"), self.final_response("update", "The build is ready; tests are still running.")]
+        self.assertEqual(r.parse_claude(records)[1:4], ("running", "Waiting for background task", ""))
+        records.append(self.queued_notification("tests"))
+        self.assertEqual(r.parse_claude(records)[1], "running")
+        records.append(self.final_response("delivered", "Built and verified."))
+        parsed = r.parse_claude(records)
+        self.assertEqual(parsed[1:4], ("ready", "Response ready", "Built and verified."))
+        self.assertEqual([x["id"] for x in parsed[0]], ["request"])
+        self.assertNotIn("Private child summary", json.dumps(parsed))
+        self.assertEqual(r.parse_claude(records + [self.queued_notification("tests"), self.task_notification("builder")]), parsed)
+
+    def test_claude_queued_failure_and_stop_need_attention(self):
+        for terminal in ("failed", "stopped", "killed", "cancelled"):
+            with self.subTest(status=terminal):
+                records = [self.async_agent("a"), self.final_response(), self.queued_notification("a", terminal)]
+                self.assertEqual(r.parse_claude(records)[1], "needsMe")
+                self.assertEqual(r.parse_claude(records + [self.final_response("handled", "Handled it.")])[1], "ready")
+
+    def test_claude_only_typed_delivered_attachments_complete_background_work(self):
+        notice = self.queued_notification("a")
+        invalid = []
+        for change in ({"origin": None}, {"origin": {"kind": "user"}}, {"type": "edited_text_file"},
+                       {"prompt": "Quoted example: " + notice["attachment"]["prompt"]},
+                       {"prompt": notice["attachment"]["prompt"].replace("</task-notification>", "")}):
+            invalid.append({**notice, "attachment": {**notice["attachment"], **change}})
+        invalid.append({**notice, "isSidechain": True})
+        invalid.append({"type": "queue-operation", "operation": "enqueue", "content": notice["attachment"]["prompt"]})
+        invalid.append(self.queued_notification("unrelated-task"))
+        for record in invalid:
+            with self.subTest(record=record):
+                self.assertEqual(r.parse_claude([self.async_agent("a"), record, self.final_response()])[1], "running")
+
+    def test_claude_queued_completion_is_identical_after_incremental_read_and_restart(self):
+        with tempfile.TemporaryDirectory() as d:
+            logs = Path(d) / ".claude/projects/example"; logs.mkdir(parents=True)
+            metadata = Path(d) / "Library/Application Support/Claude/claude-code-sessions"; metadata.mkdir(parents=True)
+            (metadata / "session.json").write_text(json.dumps({"sessionId": "local_example", "cliSessionId": "example", "lastActivityAt": 100}))
+            path = logs / "example.jsonl"
+            initial = [self.user("request", "Build it"), self.async_agent("a"), self.final_response()]
+            path.write_text("".join(json.dumps(record) + "\n" for record in initial))
+            self.assertEqual(r.read_jsonl(path, r.parse_claude)[1], "running")
+            with path.open("a") as stream:
+                for record in [self.queued_notification("a"), self.final_response("done", "Built and verified.")]:
+                    stream.write(json.dumps(record) + "\n")
+            warm = r.read_jsonl(path, r.parse_claude)
+            self.assertEqual(warm[1:4], ("ready", "Response ready", "Built and verified."))
+            output = subprocess.check_output([sys.executable, str(READER_ENTRY), "--days", "14", "--tracked-id", "claude:local_example"],
+                                             env={**os.environ, "HOME": d}, text=True, timeout=10)
+            restarted = json.loads(output)["cards"][0]
+            self.assertEqual((restarted["state"], restarted["reason"], restarted["response"]), warm[1:4])
+            self.assertEqual(restarted["requests"], warm[0])
 
     def test_claude_background_failure_and_question_need_attention(self):
         for terminal in ("failed", "stopped", "killed", "cancelled"):
