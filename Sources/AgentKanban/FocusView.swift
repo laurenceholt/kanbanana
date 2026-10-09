@@ -15,8 +15,8 @@ struct FocusBoard<CardContent: View>: View {
     @Binding var background: BoardBackground
     @Binding var cardPaper: CardPaper
     @Binding var theme: BoardTheme
-    @Binding var photoOffset: Int
-    let photoContext: String
+    @Binding var artOffset: Int
+    let artContext: String
     let changeLayout: (BoardLayout) -> Void
     let cardContent: (Conversation) -> CardContent
     @State private var expanded: Column = .ready
@@ -58,7 +58,7 @@ struct FocusBoard<CardContent: View>: View {
                     Image(systemName: "arrow.clockwise").opacity(store.scanning ? 0.35 : 1)
                 }.buttonStyle(QuietIconButton()).disabled(store.scanning).accessibilityLabel("Retry status")
                     .help(store.scanning ? "Checking status…" : "Retry status. " + (store.statusCheckMessage ?? ""))
-                AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, photoOffset: $photoOffset, photoContext: photoContext)
+                AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext)
                 Button { changeLayout(.projects) } label: {
                     Image(systemName: "arrow.up.left.and.arrow.down.right").frame(width: 24, height: 24)
                 }.buttonStyle(.plain)
@@ -66,7 +66,7 @@ struct FocusBoard<CardContent: View>: View {
             }.font(.system(size: 11)).padding(.horizontal, 12).padding(.bottom, 3)
 
             ScrollView {
-                VStack(spacing: appearance.theme == .photos ? 12 : 8) {
+                VStack(spacing: appearance.theme == .art ? 12 : 8) {
                     ForEach(store.focusCards(in: expanded)) { card in cardContent(card) }
                     if store.focusCards(in: expanded).isEmpty {
                         VStack(spacing: 8) {

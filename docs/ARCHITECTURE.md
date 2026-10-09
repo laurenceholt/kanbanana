@@ -24,7 +24,7 @@ flowchart TB
 
 Cross-target types use package access. Core cannot import either outer target. The app's `BoardStore` is a main-actor coordinator with read-only published saved state; views issue commands instead of editing the graph. Provider observations pass through `BoardReconciler`. Manual commands operate on the coordinator's current revision, rather than a potentially stale card captured by a view. Settings and integration controls are explicit coordinator methods.
 
-`BoardView`, `ConversationCard`, `HistoryView`, `ProjectsView` and `SettingsView` own their respective surfaces. `FocusView`, `ProjectLanes` and `ProjectStacks` project the same state. Photo decoding/caching is main-actor owned; preview resource locations are injected through the environment. Card equality compares a Sendable presentation value without reading an actor-isolated store.
+`BoardView`, `ConversationCard`, `HistoryView`, `ProjectsView` and `SettingsView` own their respective surfaces. `FocusView`, `ProjectLanes` and `ProjectStacks` project the same state. Art image decoding/caching is main-actor owned; preview resource locations are injected through the environment. Card equality compares a Sendable presentation value without reading an actor-isolated store.
 
 ## Observations are not user decisions
 

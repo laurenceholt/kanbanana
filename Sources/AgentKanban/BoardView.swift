@@ -14,7 +14,7 @@ struct BoardView: View {
     @AppStorage private var background: BoardBackground
     @AppStorage private var cardPaper: CardPaper
     @AppStorage private var theme: BoardTheme
-    @AppStorage private var photoOffset: Int
+    @AppStorage private var artOffset: Int
     @State private var detail: Conversation?
     @State private var settings = false
     @State private var projects = false
@@ -23,7 +23,7 @@ struct BoardView: View {
     private let layoutChanged: (BoardLayout) -> Void
     private let appearanceChanged: (BoardAppearance) -> Void
     private var appearance: BoardAppearance { .init(background: background, cards: cardPaper, theme: theme) }
-    private var photoContext: String {
+    private var artContext: String {
         store.saved.projects.filter { p in store.cards.contains { !store.disposition($0).parked && store.disposition($0).projectID == p.id } }.map(\.name).joined(separator: " ")
     }
     init(store: BoardStore, initiallyStacked: Bool = false, layoutPreferences: UserDefaults = .standard, layoutChanged: @escaping (BoardLayout) -> Void = { _ in }, appearanceChanged: @escaping (BoardAppearance) -> Void = { _ in }) {
@@ -35,18 +35,18 @@ struct BoardView: View {
         _background = AppStorage(wrappedValue: .brightYellow, BoardBackground.preferenceKey, store: layoutPreferences)
         _cardPaper = AppStorage(wrappedValue: .cream, CardPaper.preferenceKey, store: layoutPreferences)
         _theme = AppStorage(wrappedValue: .classic, BoardTheme.preferenceKey, store: layoutPreferences)
-        _photoOffset = AppStorage(wrappedValue: 0, "photoOffset", store: layoutPreferences)
+        _artOffset = AppStorage(wrappedValue: 0, "photoOffset", store: layoutPreferences)
     }
     var body: some View {
         Group {
             if layout == .focus {
-                FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, photoOffset: $photoOffset, photoContext: photoContext, changeLayout: { store.parking = false; layout = $0 }) { card in
+                FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext, changeLayout: { store.parking = false; layout = $0 }) { card in
                     cardView(card, opensProjectBoard: true)
                 }
             } else { fullBoard }
         }
         .frame(minWidth: layout.minimumSize.width, maxWidth: .infinity, minHeight: layout.minimumSize.height, maxHeight: .infinity)
-        .background { BoardBackdrop(appearance: appearance, photoOffset: photoOffset, context: photoContext) }
+        .background { BoardBackdrop(appearance: appearance, artOffset: artOffset, context: artContext) }
         .ignoresSafeArea(.container, edges: .top)
         .foregroundStyle(appearance.ink)
         .tint(appearance.ink)
@@ -168,7 +168,7 @@ struct BoardView: View {
                     guard let card = store.cards.first(where: { $0.id == id }) else { return false }
                     store.park(card, true); return true
                 }
-            AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, photoOffset: $photoOffset, photoContext: photoContext)
+            AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext)
             Button { settings = true } label: { Image(systemName: "gearshape").font(.system(size: 13)) }.buttonStyle(QuietIconButton()).help("Settings").accessibilityLabel("Settings")
         }.padding(.horizontal, 18).padding(.vertical, 7).padding(.top, 23)
             .background(appearance.canvas)

@@ -69,7 +69,7 @@ Settings provides **Export board**, **Restore**, **Open data folder**, and **Dia
 
 ## Appearance
 
-Classic colors, Night, Brutalist and Photos. Photos includes 18 local backgrounds with a picker and hourly rotation; it makes no background network requests. [Photo credits](Resources/Photos/README.md) · [Asset and runtime notices](THIRD_PARTY_NOTICES.md).
+Classic colors, Night, Brutalist and Art details. Art details includes 24 close-ups from paintings, prints, textiles, ceramics, sculpture, stained glass, manuscripts and mosaics. Pick a detail or let the collection rotate hourly, in its original colors. Everything is bundled locally, with artist credits and links to the whole artwork. [Art collection and credits](Resources/Art/README.md) · [Asset and runtime notices](THIRD_PARTY_NOTICES.md).
 
 ## Development
 
@@ -90,4 +90,4 @@ Demo mode uses fictional conversations, temporary storage/preferences, and disab
 
 [Contributing](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Release process](docs/RELEASING.md) · [Changelog](CHANGELOG.md) · [Report a security issue](SECURITY.md).
 
-The code and generated banana mark are MIT licensed. Sourced photos and bundled runtime components retain their separate notices.
+The code and generated banana mark are MIT licensed. Museum artwork images and bundled runtime components retain their separate notices.

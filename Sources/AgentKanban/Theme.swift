@@ -63,24 +63,25 @@ enum CardPaper: String, CaseIterable {
 }
 
 enum BoardTheme: String, CaseIterable {
-    case classic, night, brutalist, photos
+    case classic, night, brutalist
+    case art = "photos" // Preserve the existing appearance preference when replacing the library.
     static let preferenceKey = "boardTheme"
-    var title: String { switch self { case .classic: "Classic"; case .night: "Night"; case .brutalist: "Brutalist"; case .photos: "Photos" } }
-    var symbol: String { switch self { case .classic: "paintpalette"; case .night: "moon.stars"; case .brutalist: "textformat.abc"; case .photos: "photo" } }
+    var title: String { switch self { case .classic: "Classic"; case .night: "Night"; case .brutalist: "Brutalist"; case .art: "Art details" } }
+    var symbol: String { switch self { case .classic: "paintpalette"; case .night: "moon.stars"; case .brutalist: "textformat.abc"; case .art: "paintbrush.pointed" } }
 }
 
 struct BoardAppearance: Equatable {
     var background: BoardBackground = .brightYellow
     var cards: CardPaper = .cream
     var theme: BoardTheme = .classic
-    var isDark: Bool { theme == .night || theme == .photos }
+    var isDark: Bool { theme == .night || theme == .art }
     var scheme: ColorScheme { isDark ? .dark : .light }
     var canvas: Color { isDark ? .black : theme == .brutalist ? Color(hex: 0xDEDCD4) : background.color }
-    var paper: Color { isDark ? Color(hex: 0x191B1E).opacity(theme == .photos ? 0.88 : 1) : theme == .brutalist ? Color(hex: 0xF2F0E7) : cards.color }
+    var paper: Color { isDark ? Color(hex: 0x191B1E).opacity(theme == .art ? 0.91 : 1) : theme == .brutalist ? Color(hex: 0xF2F0E7) : cards.color }
     var ink: Color { isDark ? Color(hex: 0xF5F5F2) : theme == .brutalist ? .black : BoardStyle.ink }
     var muted: Color { isDark ? Color(hex: 0xB9BDBF) : BoardStyle.muted }
     var line: Color { isDark ? Color.white.opacity(0.18) : theme == .brutalist ? .black : BoardStyle.line }
-    var shadow: Color { .black.opacity(theme == .photos ? 0.4 : theme == .brutalist ? 1 : 0.07) }
+    var shadow: Color { .black.opacity(theme == .art ? 0.4 : theme == .brutalist ? 1 : 0.07) }
     var cornerRadius: CGFloat { theme == .brutalist ? 0 : 10 }
     var borderWidth: CGFloat { theme == .brutalist ? 2 : 0.8 }
     func font(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
@@ -124,17 +125,17 @@ struct AppearanceMenu: View {
     @Binding var background: BoardBackground
     @Binding var cards: CardPaper
     @Binding var theme: BoardTheme
-    @Binding var photoOffset: Int
-    var photoContext: String = ""
-    @State private var photoLibrary = false
+    @Binding var artOffset: Int
+    var artContext: String = ""
+    @State private var artLibrary = false
     var body: some View {
         Menu {
             Picker("Appearance", selection: $theme) {
                 ForEach(BoardTheme.allCases, id: \.self) { option in Label(option.title, systemImage: option.symbol).tag(option) }
             }.pickerStyle(.inline)
-            if theme == .photos {
-                Button("Photo library…") { photoLibrary = true }
-                Button("Next photo") { photoOffset = (photoOffset + 1) % PhotoBackdrop.assetNames.count }
+            if theme == .art {
+                Button("Art library…") { artLibrary = true }
+                Button("Next artwork") { artOffset = (artOffset + 1) % ArtBackdrop.assetNames.count }
                 Text("Changes every hour · stored on this Mac")
             }
             Divider()
@@ -159,7 +160,7 @@ struct AppearanceMenu: View {
                 .background(appearance.ink.opacity(0.065), in: RoundedRectangle(cornerRadius: appearance.theme == .brutalist ? 0 : 8))
         }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
             .help("Appearance — background and card colors").accessibilityLabel("Appearance")
-            .sheet(isPresented: $photoLibrary) { PhotoLibraryView(photoOffset: $photoOffset, context: photoContext) }
+            .sheet(isPresented: $artLibrary) { ArtLibraryView(artOffset: $artOffset, context: artContext) }
     }
     private func swatch(_ color: Color) -> NSImage {
         NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in

@@ -12,6 +12,6 @@ Gitleaks is an MIT-licensed development/release-audit tool, not bundled with the
 
 `Resources/Branding/banana.png` is AI-generated pop-art-inspired artwork, offered with this project's MIT license. Its generation prompt is recorded beside the asset. It is not an official mark or endorsement of another artist, album or company.
 
-The eighteen photo backgrounds include twelve generated images and six sourced public-domain/CC0 selections. Attribution, source links, jurisdiction-specific copyright descriptions and generation information are in `Resources/Photos/README.md`. Those sourced photographs retain their documented status rather than being relicensed as source code. The app displays their credits.
+The 24 art backgrounds are images of artworks designated public domain by The Metropolitan Museum of Art, supplied through its Open Access program under CC0. The original downloaded JPEGs are bundled unchanged; the app displays curated crops, zooms and a contrast overlay. Full artwork titles, makers, dates, object IDs, credits, original download URLs, SHA-256 hashes and rights evidence are in `Resources/Art/catalog.json`; see `Resources/Art/README.md`. Display labels sometimes describe a detail rather than reproduce the museum's title. Museum artwork is not relicensed as source code. No museum endorsement is implied.
 
 Claude and Codex icons are read from the user's installed applications at runtime; their artwork is not bundled. Product names and marks belong to their respective owners. kanbanana is not affiliated with Anthropic or OpenAI.

@@ -28,7 +28,7 @@ Test the final downloaded artifact on a separate clean Mac, including source acc
 
 ## Release hygiene
 
-Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all photos are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. GitHub Releases is the update channel; this beta has no automatic updater.
+Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. GitHub Releases is the update channel; this beta has no automatic updater.
 
 ## Pilot checklist
 

@@ -22,20 +22,20 @@ import SwiftUI
         store.parking = mode == "parking"
         let boats = state.projects[1]
         if CommandLine.arguments.count > 2 { store.search = CommandLine.arguments[2] }
-        if let photoID = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_PHOTO"], let index = PhotoBackdrop.photos.firstIndex(where: { $0.id == photoID }) {
-            preferences.set(PhotoBackdrop.offset(selecting: index, at: .now, context: "Math interactives Weekend atlas Writing"), forKey: "photoOffset")
+        if let artID = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_ART"], let index = ArtBackdrop.artworks.firstIndex(where: { $0.id == artID }) {
+            preferences.set(ArtBackdrop.offset(selecting: index, at: .now, context: "Math interactives Weekend atlas Writing"), forKey: "photoOffset")
         }
         let content: AnyView
         switch mode {
-        case "photolibrary": content = AnyView(PhotoLibraryView(photoOffset: .constant(0), context: ""))
-        case "photocrops":
+        case "artlibrary": content = AnyView(ArtLibraryView(artOffset: .constant(0), context: ""))
+        case "artcrops":
             content = AnyView(VStack(alignment: .leading, spacing: 12) {
-                Text("kanbanana / eighteen little worlds").font(.system(size: 24, weight: .medium, design: .serif))
+                Text("kanbanana / art, up close").font(.system(size: 24, weight: .medium, design: .serif))
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
-                    ForEach(PhotoBackdrop.photos) { photo in
+                    ForEach(ArtBackdrop.artworks) { artwork in
                         VStack(alignment: .leading, spacing: 5) {
-                            CroppedPhotograph(photo: photo, thumbnail: true).frame(height: 300)
-                            Text(photo.title).font(.system(size: 10)).lineLimit(1)
+                            ArtDetail(artwork: artwork, thumbnail: true).frame(height: 300)
+                            Text(artwork.title).font(.system(size: 10)).lineLimit(1)
                         }
                     }
                 }
@@ -51,11 +51,11 @@ import SwiftUI
             content = AnyView(BoardView(store: store, layoutPreferences: preferences))
         default: content = AnyView(BoardView(store: store, layoutPreferences: preferences))
         }
-        let view = content.environment(\.photoResourceRoot, resources).environment(\.colorScheme, BoardAppearance.saved(in: preferences).scheme).environment(\.boardAppearance, BoardAppearance.saved(in: preferences))
+        let view = content.environment(\.artResourceRoot, resources).environment(\.colorScheme, BoardAppearance.saved(in: preferences).scheme).environment(\.boardAppearance, BoardAppearance.saved(in: preferences))
         let host = NSHostingView(rootView: view)
         let boardMode = ["board", "stacks", "lanes", "outage", "parking"].contains(mode)
         let width = Double(ProcessInfo.processInfo.environment["KANBAN_PREVIEW_WIDTH"] ?? (mode == "focus" ? "300" : boardMode ? "840" : "500")) ?? 840
-        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "photocrops" ? 1040 : mode == "photolibrary" ? 570 : mode == "focus" ? 740 : boardMode ? 574 : 450)
+        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "artcrops" ? 1360 : mode == "artlibrary" ? 570 : mode == "focus" ? 740 : boardMode ? 574 : 450)
         host.layoutSubtreeIfNeeded()
         guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
         host.cacheDisplay(in: host.bounds, to: rep)

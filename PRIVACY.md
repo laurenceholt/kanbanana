@@ -30,7 +30,7 @@ Latest requests and agent reports are summarized automatically. Ready to check a
 
 ## Other network activity
 
-Opening a conversation invokes the native app's URL scheme. Source/credit/documentation links open only when clicked. Photos are bundled and never downloaded or generated at runtime. There is no automatic update checker in this beta.
+Opening a conversation invokes the native app's URL scheme. Source/credit/documentation links open only when clicked. Artwork images are bundled and never downloaded or generated at runtime. There is no automatic update checker in this beta.
 
 Building from source downloads a pinned Python runtime from GitHub. Development tools and CI may also download their declared dependencies. These are build-time actions, not background app behavior.
 

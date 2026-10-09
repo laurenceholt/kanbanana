@@ -26,9 +26,9 @@ for size in 16 32 128 256 512; do
     sips -z $double $double Resources/Branding/banana.png --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
 done
 iconutil -c icns "$iconset" -o "$app/Contents/Resources/AppIcon.icns"
-if [[ -d Resources/Photos ]]; then
-    mkdir -p "$app/Contents/Resources/Photos"
-    cp Resources/Photos/*.{png,jpg,json,md}(N) "$app/Contents/Resources/Photos/"
+if [[ -d Resources/Art ]]; then
+    mkdir -p "$app/Contents/Resources/Art"
+    cp Resources/Art/*.{png,jpg,json,md}(N) "$app/Contents/Resources/Art/"
 fi
 cat > "$app/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -61,5 +61,7 @@ done < <(find "$app/Contents/Resources/Python" -type f -print0)
 codesign --force --sign "$sign_identity" "${sign_options[@]}" "$app"
 codesign --verify --deep --strict "$app"
 mkdir -p "${install_app:h}"
+# Replace the generated bundle so retired resources cannot survive a rebuild.
+if [[ -e "$install_app" ]]; then rm -rf "$install_app"; fi
 ditto --norsrc --noextattr "$app" "$install_app"
 print -r -- "Built $install_app"

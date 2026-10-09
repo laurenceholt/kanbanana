@@ -11,6 +11,9 @@ final class AppearanceTests: XCTestCase {
         defer { preferences.removePersistentDomain(forName: name) }
         preferences.set(BoardBackground.hiVisYellow.rawValue, forKey: BoardBackground.preferenceKey)
         preferences.set(CardPaper.mist.rawValue, forKey: CardPaper.preferenceKey)
+        // Existing photo-mode installations adopt the art library without resetting appearance.
+        preferences.set("photos", forKey: BoardTheme.preferenceKey)
+        XCTAssertEqual(BoardAppearance.saved(in: preferences).theme, .art)
         for theme in BoardTheme.allCases {
             preferences.set(theme.rawValue, forKey: BoardTheme.preferenceKey)
             let saved = BoardAppearance.saved(in: preferences)
@@ -20,7 +23,7 @@ final class AppearanceTests: XCTestCase {
         }
     }
     func testDarkThemesUseLightTextAndDarkCardsForEveryPaperChoice() {
-        for theme in [BoardTheme.night, .photos] {
+        for theme in [BoardTheme.night, .art] {
             for paper in CardPaper.allCases {
                 let appearance = BoardAppearance(cards: paper, theme: theme)
                 let ink = NSColor(appearance.ink).usingColorSpace(.sRGB)!
@@ -35,14 +38,14 @@ final class AppearanceTests: XCTestCase {
             }
         }
     }
-    func testPhotosStayStableWithinHourRotateAndSupportNext() {
+    func testArtStaysStableWithinHourRotateAndSupportNext() {
         let start = Date(timeIntervalSince1970: 3600 * 100 + 5)
         for context in ["Math interactives", "Cannes boats", "Writing a book", ""] {
-            let index = PhotoBackdrop.index(at: start, offset: 0, context: context)
-            XCTAssertEqual(index, PhotoBackdrop.index(at: start.addingTimeInterval(3500), offset: 0, context: context))
-            XCTAssertNotEqual(index, PhotoBackdrop.index(at: start.addingTimeInterval(3600), offset: 0, context: context))
-            XCTAssertNotEqual(index, PhotoBackdrop.index(at: start, offset: 1, context: context))
-            XCTAssertEqual(index, PhotoBackdrop.index(at: start.addingTimeInterval(Double(PhotoBackdrop.photos.count) * 3600), offset: 0, context: context))
+            let index = ArtBackdrop.index(at: start, offset: 0, context: context)
+            XCTAssertEqual(index, ArtBackdrop.index(at: start.addingTimeInterval(3500), offset: 0, context: context))
+            XCTAssertNotEqual(index, ArtBackdrop.index(at: start.addingTimeInterval(3600), offset: 0, context: context))
+            XCTAssertNotEqual(index, ArtBackdrop.index(at: start, offset: 1, context: context))
+            XCTAssertEqual(index, ArtBackdrop.index(at: start.addingTimeInterval(Double(ArtBackdrop.artworks.count) * 3600), offset: 0, context: context))
         }
     }
 }

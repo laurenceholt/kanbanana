@@ -12,5 +12,5 @@ swiftc -swift-version 6 -package-name "$package_identity" -parse-as-library -I "
     "${sources[@]}" scripts/render-preview.swift \
     "$build_dir"/KanbananaCore.build/*.swift.o "$build_dir"/KanbananaServices.build/*.swift.o \
     -o .build/render-preview
-KANBAN_PREVIEW_MODE=focus KANBAN_PREVIEW_THEME=photos KANBAN_PREVIEW_PHOTO=puppy .build/render-preview docs/focus-beta.png
+KANBAN_PREVIEW_MODE=focus KANBAN_PREVIEW_THEME=photos KANBAN_PREVIEW_ART=wave .build/render-preview docs/focus-beta.png
 KANBAN_PREVIEW_MODE=lanes KANBAN_PREVIEW_THEME=classic KANBAN_PREVIEW_BACKGROUND=butter .build/render-preview docs/projects-beta.png

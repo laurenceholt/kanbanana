@@ -37,10 +37,10 @@ import SwiftUI
         boardWindow.appearance = NSAppearance(named: BoardAppearance.saved(in: preferences).isDark ? .darkAqua : .aqua)
         boardWindow.isReleasedWhenClosed = false
         boardWindow.contentMinSize = layout.minimumSize
-        let resources = Bundle.main.resourceURL?.appendingPathComponent("Photos")
+        let resources = Bundle.main.resourceURL?.appendingPathComponent("Art")
         let resourceRoot = resources.map { FileManager.default.fileExists(atPath: $0.path) } == true
             ? Bundle.main.resourceURL : URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Resources")
-        let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: preferences, layoutChanged: { [weak self] in self?.changeLayout($0) }, appearanceChanged: { [weak self] in self?.boardWindow.backgroundColor = NSColor($0.canvas); self?.boardWindow.appearance = NSAppearance(named: $0.isDark ? .darkAqua : .aqua) }).environment(\.photoResourceRoot, resourceRoot))
+        let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: preferences, layoutChanged: { [weak self] in self?.changeLayout($0) }, appearanceChanged: { [weak self] in self?.boardWindow.backgroundColor = NSColor($0.canvas); self?.boardWindow.appearance = NSAppearance(named: $0.isDark ? .darkAqua : .aqua) }).environment(\.artResourceRoot, resourceRoot))
         host.sizingOptions = []
         boardWindow.contentView = host
         if demoRoot != nil || !boardWindow.setFrameUsingName(frameName) { boardWindow.center() }
