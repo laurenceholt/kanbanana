@@ -55,7 +55,7 @@ import SwiftUI
         let host = NSHostingView(rootView: view)
         let boardMode = ["board", "stacks", "lanes", "outage", "parking"].contains(mode)
         let width = Double(ProcessInfo.processInfo.environment["KANBAN_PREVIEW_WIDTH"] ?? (mode == "focus" ? "300" : boardMode ? "840" : "500")) ?? 840
-        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "artcrops" ? 1360 : mode == "artlibrary" ? 570 : mode == "focus" ? 740 : boardMode ? 574 : 450)
+        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "artcrops" ? Double((ArtBackdrop.artworks.count + 5) / 6 * 325 + 80) : mode == "artlibrary" ? 570 : mode == "focus" ? 740 : boardMode ? 574 : 450)
         host.layoutSubtreeIfNeeded()
         guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
         host.cacheDisplay(in: host.bounds, to: rep)

@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Replace Photos with Art details: 24 locally bundled museum artworks, curated close-ups in original color, hourly rotation and a credited art picker. Existing appearance preferences carry over.
+- Replace Photos with Art details: 42 recognizable works across art history, curated close-ups in original color, hourly rotation and a credited art picker. Existing appearance preferences carry over.
+- Identify the current background with a small, linked artwork/artist/date caption at the bottom of Focus and full-board views.
 
 - Recognize Claude background-task completions delivered as queued attachments, preventing finished conversations from remaining Running or Status unavailable after history replay.
 - Park old conversations confirmed missing from a complete source inventory, preserving their history and notes while keeping genuine read failures visible.

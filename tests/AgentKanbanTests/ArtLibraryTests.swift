@@ -29,7 +29,12 @@ final class ArtLibraryTests: XCTestCase {
             XCTAssertLessThanOrEqual(max(full.size.width, full.size.height), 2048)
             let bitmap = try XCTUnwrap(full.cgImage(forProposedRect: nil, context: nil, hints: nil))
             XCTAssertNotNil(bitmap.colorSpace)
-            XCTAssertEqual(artwork.source.host, "www.metmuseum.org")
+            XCTAssertEqual(artwork.source.host, "commons.wikimedia.org")
+            XCTAssertTrue(["en.wikipedia.org", "www.guggenheim-bilbao.eus"].contains(artwork.article.host ?? ""))
+            XCTAssertTrue(artwork.caption.contains(artwork.title))
+            XCTAssertTrue(artwork.caption.contains(artwork.credit))
+            XCTAssertTrue(artwork.caption.contains(artwork.date))
+            if artwork.license.hasPrefix("CC BY") { XCTAssertFalse(artwork.imageCredit.isEmpty) }
             XCTAssertFalse(artwork.medium.isEmpty)
             if artwork.id == "wave" { XCTAssertEqual(bitmap.colorSpace?.model, .rgb) }
         }

@@ -38,15 +38,21 @@ struct BoardView: View {
         _artOffset = AppStorage(wrappedValue: 0, "photoOffset", store: layoutPreferences)
     }
     var body: some View {
-        Group {
-            if layout == .focus {
-                FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext, changeLayout: { store.parking = false; layout = $0 }) { card in
-                    cardView(card, opensProjectBoard: true)
+        TimelineView(.periodic(from: .now, by: 60)) { tick in
+            let artwork = appearance.theme == .art ? ArtBackdrop.artworks[ArtBackdrop.index(at: tick.date, offset: artOffset, context: artContext)] : nil
+            VStack(spacing: 0) {
+                Group {
+                    if layout == .focus {
+                        FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext, changeLayout: { store.parking = false; layout = $0 }) { card in
+                            cardView(card, opensProjectBoard: true)
+                        }
+                    } else { fullBoard }
                 }
-            } else { fullBoard }
+                if let artwork { ArtworkCaption(artwork: artwork, compact: layout == .focus) }
+            }
+            .frame(minWidth: layout.minimumSize.width, maxWidth: .infinity, minHeight: layout.minimumSize.height, maxHeight: .infinity)
+            .background { BoardBackdrop(appearance: appearance, artwork: artwork) }
         }
-        .frame(minWidth: layout.minimumSize.width, maxWidth: .infinity, minHeight: layout.minimumSize.height, maxHeight: .infinity)
-        .background { BoardBackdrop(appearance: appearance, artOffset: artOffset, context: artContext) }
         .ignoresSafeArea(.container, edges: .top)
         .foregroundStyle(appearance.ink)
         .tint(appearance.ink)
