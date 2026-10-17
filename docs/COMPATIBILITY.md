@@ -18,6 +18,12 @@ Claude reads Desktop metadata under `~/Library/Application Support/Claude/claude
 
 Native schemas and deep links are private implementation details and can change. Known Codex tables and columns are checked before querying. Unsupported formats and denied access are reported explicitly. Neither app's data or configuration is edited.
 
+### Codex tasks outside projects (17 October 2026)
+
+Local top-level chats are discovered whether or not they have a saved Codex project. This includes user-started chats, agent-created top-level chats and scheduled runs; internal subagents and guardian reviews are excluded. Kanbanana initially groups a chat by its working folder, so its project label can differ from Codex's sidebar placement.
+
+Some newer tasks use cloud-backed (durable) conversation history while executing against files on a connected Mac. Selecting that Mac as the execution location does not guarantee a local `state_5.sqlite` / history record. These chats are not currently supported by the local-file reader, and moving them into a sidebar project does not itself make their histories local. Supporting them requires a separate authenticated integration; kanbanana does not read the desktop app's login tokens. See [OpenAI's explanation of conversation sync and local file access](https://learn.chatgpt.com/docs/projects).
+
 ## What status can and cannot establish
 
 - Running uses stored execution evidence. Background tasks are tracked beyond the parent's interim response. Both user-record and queued-attachment task notifications settle pending work; a subsequent parent report establishes delivery. Cold replay and incremental reads use the same classifier.

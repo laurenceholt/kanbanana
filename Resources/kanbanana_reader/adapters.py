@@ -214,7 +214,10 @@ def codex_cards(cutoff, tracked_ids=()):
     # release handles explicitly instead of waiting for cyclic garbage collection.
     with closing(readonly(codex_root() / "state_5.sqlite")) as con:
         require_columns(con, "threads", ["id", "name", "title", "cwd", "updated_at", "history_mode", "rollout_path", "source", "thread_source"])
-        rows = con.execute("SELECT id,name,title,cwd,updated_at,history_mode,rollout_path FROM threads WHERE source IN ('vscode','appServer','cli') AND (thread_source IS NULL OR thread_source='user')").fetchall()
+        # Agent-created chats and scheduled runs are top-level sidebar tasks,
+        # even without a saved project. Exclude internal subagents/reviews, not
+        # whole user-facing conversations based on who started them.
+        rows = con.execute("SELECT id,name,title,cwd,updated_at,history_mode,rollout_path FROM threads WHERE source IN ('vscode','appServer','cli') AND (thread_source IS NULL OR thread_source IN ('user','agent_created_thread','automation'))").fetchall()
         # Filter inexpensive metadata first; read histories only for recent or
         # already tracked conversations, including older parked cards.
         rows = [row for row in rows if row["updated_at"] >= cutoff or "codex:" + row["id"] in tracked_ids]

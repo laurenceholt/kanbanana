@@ -163,6 +163,28 @@ class ReaderTests(unittest.TestCase):
             self.assertEqual({c["nativeID"] for c in cards}, {"recent", "old"})
             self.assertTrue(all(c["state"] == "ready" for c in cards))
 
+    def test_codex_projectless_top_level_chats_are_discovered_but_internal_agents_are_not(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(r, "HOME", Path(d)):
+            root = Path(d) / ".codex"; root.mkdir()
+            rollout = root / "done.jsonl"
+            rollout.write_text(json.dumps({"type": "event_msg", "payload": {"type": "task_complete", "last_agent_message": "Done"}}) + "\n")
+            with sqlite3.connect(root / "state_5.sqlite") as con:
+                con.execute("CREATE TABLE threads (id TEXT,name TEXT,title TEXT,cwd TEXT,updated_at INTEGER,history_mode TEXT,rollout_path TEXT,source TEXT,thread_source TEXT,project_id TEXT)")
+                rows = [
+                    ("manual", "vscode", "user", None),
+                    ("created", "appServer", "agent_created_thread", None),
+                    ("scheduled", "vscode", "automation", None),
+                    ("legacy", "cli", None, None),
+                    ("project", "vscode", "user", "saved-project"),
+                    ("child", "vscode", "subagent", None),
+                    ("review", "appServer", "guardian_review", None),
+                    ("internal", "exec", None, None),
+                ]
+                con.executemany("INSERT INTO threads VALUES (?,?,?,?,?,?,?,?,?,?)", [(sid, sid, sid, "/work/" + sid, 100, "rollout", str(rollout), source, kind, project) for sid, source, kind, project in rows])
+            cards = r.codex_cards(50)
+            self.assertEqual({c["nativeID"] for c in cards}, {"manual", "created", "scheduled", "legacy", "project"})
+            self.assertTrue(all(c["state"] == "ready" for c in cards))
+
     def user(self, key, text, **extra):
         return dict(type="user", uuid=key, timestamp="2026-09-08T12:00:00Z", message={"content": text}, **extra)
 
