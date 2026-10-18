@@ -2,7 +2,7 @@
 
 [Watch/download the MP4](media/kanbanana-demo.mp4) · [Subtitles](media/kanbanana-demo.vtt) · [Poster](media/demo-poster.png)
 
-The video is **56 seconds, portrait 1080×1920, 30 fps, H.264/AAC**. It stays in Night mode, starts in Focus and ends in the full Projects view. The app fills the frame, with conversational subtitles below it and quiet instrumental electronica. The final Projects view holds for four seconds while a centered GitHub URL fades in over it. Music continues through the URL, fading only in the final 1.2 seconds. There are no slides, scene cuts, voiceover or theme changes.
+The video is **56 seconds, portrait 1080×1920, 30 fps, H.264/AAC**. It stays in Night mode, starts in Focus and ends in the full Projects view. The app fills the frame, with conversational subtitles below it and quiet instrumental electronica with a pronounced drum beat and synth bass. The final Projects view holds for four seconds while a centered GitHub URL fades in over it. Music continues through the URL, fading only in the final 1.2 seconds. There are no slides, scene cuts, voiceover or theme changes.
 
 ## Feature order and interaction script
 
@@ -48,7 +48,7 @@ Requirements: Apple Silicon Mac, Swift 6, a logged-in graphical macOS session, a
 zsh scripts/demo.zsh
 ```
 
-`scripts/render-demo.swift` records the persistent app view to `.build/walkthrough/walkthrough-silent.mp4`, writes subtitles to `captions.json`, and saves inspection frames. `scripts/encode-demo.py` adds the bundled soundtrack, normalizes it to a quiet −28 LUFS target, crossfades in an earlier musical phrase to extend the track, adds the centered URL overlay and opening/closing audio fades, and verifies the complete encoded file. Outputs in `docs/media/` are overwritten:
+`scripts/render-demo.swift` records the persistent app view to `.build/walkthrough/walkthrough-silent.mp4`, writes subtitles to `captions.json`, and saves inspection frames. `scripts/encode-demo.py` adds the bundled soundtrack, normalizes it to a quiet −28 LUFS target, checks that the soundtrack covers the full film, adds the centered URL overlay and opening/closing audio fades, and verifies the complete encoded file. Outputs in `docs/media/` are overwritten:
 
 - `kanbanana-demo.mp4`: phone-oriented video with web fast-start.
 - `kanbanana-demo.vtt`: subtitles with matching timing.

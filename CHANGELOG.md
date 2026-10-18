@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Replace the demo soundtrack with beat-led electro/IDM, keeping the mix quiet and the full URL ending covered.
+
 - Finish the demo with a centered repository URL over Projects; extend the music through the final frame.
 
 - Replaced the slide-style demo with a continuous portrait Night-mode walkthrough, real control clicks, conversational subtitles and quiet electronica. Clarified the desktop and command-line integration boundary.

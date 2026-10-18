@@ -13,17 +13,13 @@ walkthrough_duration = captions[-1]['end']
 ending_duration = 4
 duration = walkthrough_duration + ending_duration
 music = output / 'electronica.m4a'
-# Reuse an earlier musical phrase so the generated track's original ending cannot fade too soon.
-# A two-second equal-power crossfade joins the phrase; the only final fade is at the video's end.
-music_mix = frames / 'extended-music.wav'
-subprocess.run([
-    'ffmpeg', '-hide_banner', '-loglevel', 'warning', '-y', '-i', str(music),
-    '-filter_complex',
-    f'[0:a]asplit=2[a][b];[a]atrim=end={walkthrough_duration-8},asetpts=PTS-STARTPTS[body];'
-    '[b]atrim=start=20:end=34,asetpts=PTS-STARTPTS[tail];'
-    '[body][tail]acrossfade=d=2:c1=qsin:c2=qsin[music]',
-    '-map', '[music]', '-c:a', 'pcm_s16le', str(music_mix)
-], check=True)
+# The beat-led replacement is longer than the film, so it needs no loop or musical splice.
+# Reject short tracks rather than silently leaving the URL ending without music.
+music_duration = float(subprocess.check_output([
+    'ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', str(music)
+]))
+assert music_duration >= duration, 'Soundtrack must cover the complete video, including the URL ending.'
+music_mix = music
 subprocess.run(['swift', str(root / 'scripts/render-demo-ending.swift'), str(frames / 'ending-overlay.png')], check=True)
 # Two-pass normalization gives the background a deliberately quiet, repeatable level.
 measurement = subprocess.run([
@@ -45,7 +41,7 @@ subprocess.run([
     '[app][url]overlay=0:0:format=auto[video]',
     '-map', '[video]', '-map', '1:a:0', '-t', str(duration),
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p',
-    '-af', normalize + f',afade=t=in:d=1.2,afade=t=out:st={duration-1.2}:d=1.2',
+    '-af', normalize + f',afade=t=in:d=0.15,afade=t=out:st={duration-1.2}:d=1.2',
     '-c:a', 'aac', '-b:a', '128k', '-ar', '48000', '-movflags', '+faststart',
     str(output / 'kanbanana-demo.mp4')
 ], check=True)
