@@ -22,11 +22,11 @@ This repo is already public. Source builds are available; the signed macOS downl
 - [ ] Verify onboarding, source access, cold-start navigation, question/permission/resume/delivery states, Keychain persistence, sleep/wake and upgrade preservation.
 - [ ] Settle the intended supported scope. Cloud-backed Codex conversations are currently excluded even when their code runs locally.
 - [ ] Publish the new GitHub prerelease with download, SHA256SUMS, requirements, installation steps, known limitations and recovery instructions.
-- [ ] Update README and demo end-card only after that download exists.
+- [ ] Update README download links only after that download exists.
 
 ## Launch on X
 
-The video in `docs/media/` is captioned and silent, 1920×1080 H.264. It is rendered from real application views using fictional data. Read [DEMO.md](DEMO.md) before regenerating or editing it.
+The video in `docs/media/` is a continuous 52-second Night-mode walkthrough, with conversational subtitles and quiet electronica. It is portrait 1080×1920 H.264/AAC and uses real application controls with fictional data. Read [DEMO.md](DEMO.md) before regenerating or editing it.
 
 1. Download and watch the final video all the way through. Ensure its source/download wording matches the release.
 2. Open the GitHub link while signed out. Check the README, video, download and issue templates.

@@ -24,6 +24,10 @@ Claude reads Desktop metadata under `~/Library/Application Support/Claude/claude
 
 Native schemas and deep links are private implementation details and can change. Known Codex tables and columns are checked before querying. Unsupported formats and denied access are reported explicitly. Neither app's data or configuration is edited.
 
+### Command-line sessions
+
+Claude discovery starts from Desktop Code metadata and then reads its linked CLI transcript. A standalone Claude Code terminal session without that metadata is not discovered. Codex discovery explicitly includes `source = 'cli'` records in the supported local database, alongside `vscode` and `appServer`; synthetic reader tests cover inclusion. Navigation always uses a Codex Desktop deep link, not a terminal resume command. Terminal-only discovery, status transitions and resumption have not been validated end to end and are outside the promised desktop launch workflow.
+
 ### Codex tasks outside projects (17 October 2026)
 
 Local top-level chats are discovered whether or not they have a saved Codex project. This includes user-started chats, agent-created top-level chats and scheduled runs; internal subagents and guardian reviews are excluded. Kanbanana initially groups a chat by its working folder, so its project label can differ from Codex's sidebar placement.

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Replaced the slide-style demo with a continuous portrait Night-mode walkthrough, real control clicks, conversational subtitles and quiet electronica. Clarified the desktop and command-line integration boundary.
+
 - Refresh the public README, launch checklist and contributor entry points. Replace demo content with coherent fictional projects; add reproducible captioned demo video production.
 - Derive notarized archive filenames from the built app version and reject non-Developer-ID signing identities before building.
 

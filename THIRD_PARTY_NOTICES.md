@@ -22,4 +22,6 @@ Claude and Codex icons are read from the user's installed applications at runtim
 
 ## Demo media
 
-`docs/media/kanbanana-demo.mp4` includes cropped, overlaid details of Todd Williamson’s *Searching the Void* (2016), CC BY-SA 4.0. The edited demo video is distributed under CC BY-SA 4.0; its credit, source and license links are in [docs/media/README.md](docs/media/README.md). This does not change the MIT license of the source code. Demo conversations are fictional.
+The current `docs/media/kanbanana-demo.mp4` is a Night-mode walkthrough with no third-party background art. Its quiet electronica was generated with Sonilo Music through Higgsfield. Provenance, output-rights links and reuse notes are in [docs/media/README.md](docs/media/README.md). Provider marks remain their owners’ property. Demo conversations are fictional.
+
+The earlier landscape demo in older commits contains Todd Williamson’s *Searching the Void* (2016), CC BY-SA 4.0. Copies of that earlier film retain its attribution and ShareAlike terms.
