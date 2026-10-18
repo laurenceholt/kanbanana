@@ -1,6 +1,12 @@
 # Compatibility and limitations
 
-Status for the 0.3.0 source beta, 16 September 2026. Compatibility is based on observed stores and tests, not an official integration contract.
+Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
+
+## Latest automated checks — 18 October 2026
+
+All 103 Swift tests (71 XCTest and 32 Swift Testing) passed with warnings treated as errors; all 50 Python tests passed. The bundled-runtime release build and isolated Focus/Projects screenshot rendering also passed. The fictional demo video was encoded, fully decoded without errors and inspected at sampled scenes. These checks do not establish Developer ID signing, notarization or compatibility on a second physical Mac.
+
+## Native-use and CI evidence — September 2026
 
 | Component | Evidence / support |
 | --- | --- |

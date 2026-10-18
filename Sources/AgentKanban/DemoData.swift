@@ -15,29 +15,29 @@ enum DemoData {
     static func state(mode: String = "focus", now: Double = Date().timeIntervalSince1970, priority: Bool = true) -> SavedState {
         var state = SavedState()
         state.onboardingComplete = true
-        let math = Project(name: "Math interactives", note: "Build a set of fraction models.", colorIndex: 0, symbolIndex: 0)
-        let boats = Project(name: "Weekend atlas", colorIndex: 1, symbolIndex: 6)
-        let writing = Project(name: "Writing", colorIndex: 0, symbolIndex: 1)
-        state.projects = [math, boats, writing]
+        let weather = Project(id: "demo-weather", name: "Pocket weather", note: "Ship a calm, accessible forecast for the weekend.", colorIndex: 0, symbolIndex: 8)
+        let trails = Project(id: "demo-trails", name: "Trail guide", note: "Find three walks reachable by train.", colorIndex: 1, symbolIndex: 10)
+        let writing = Project(id: "demo-notes", name: "Launch notes", note: "Explain the first release in plain English.", colorIndex: 3, symbolIndex: 1)
+        state.projects = [weather, trails, writing]
         var samples: [(String, String, String, Column, String)] = [
-            ("Build fraction model", "claude", "Apply the new framework to the fractions interactive.", .running, math.id),
-            ("Plan a weekend route", "codex", "Collect marina and appointment details for the shortlist.", .running, boats.id),
-            ("Fix dragging", "codex", "Fix the drag target labels and check touch behavior.", .needsMe, math.id),
-            ("Compare shortlisted boats", "claude", "Collect ferry routes and walking trail details.", .ready, boats.id),
-            ("Update evaluations", "claude", "Apply the revised rubric to the latest interactive.", .dealtWith, math.id),
-            ("Polish article", "codex", "Revise the opening and simplify the final paragraph.", .ready, writing.id),
-            ("Confirm marina map", "codex", "Check the stand numbers for our appointments.", .dealtWith, boats.id),
-            ("Package the demo", "codex", "Build the installer for the interactive builder.", .todo, math.id),
-            ("Plan boat visits", "claude", "Prepare a shortlist of boats to visit.", .todo, boats.id)
+            ("Build the forecast card", "claude", "Build a five-day forecast card with an accessible color palette.", .running, weather.id),
+            ("Map the trailheads", "codex", "Map the trailheads and nearby train stations.", .running, trails.id),
+            ("Fix drag targets", "codex", "Fix the draggable forecast tiles and test keyboard controls.", .needsMe, weather.id),
+            ("Compare walking routes", "claude", "Compare three walks for distance, train access and steep sections.", .ready, trails.id),
+            ("Check forecast tests", "claude", "Check the forecast tests for missing-data cases.", .dealtWith, weather.id),
+            ("Polish release notes", "codex", "Make the release notes shorter and clearer.", .ready, writing.id),
+            ("Check station access", "codex", "Check step-free access at each station.", .dealtWith, trails.id),
+            ("Package the preview", "codex", "Package the forecast preview for a friend to try.", .todo, weather.id),
+            ("Plan a Sunday walk", "claude", "Prepare a short route with a good lunch stop.", .todo, trails.id)
         ]
         if ["stacks", "focus"].contains(mode) {
             samples += [
-                ("Test fractions on touch screens", "codex", "Check pointer and touch interactions.", .running, math.id),
-                ("Review the builder installer", "codex", "Try the installer on a clean Mac.", .ready, math.id),
-                ("Apply accessibility updates", "claude", "Apply the latest keyboard navigation rules.", .ready, math.id),
-                ("Review the new rubric", "codex", "Review the evaluations and suggest missing cases.", .ready, math.id),
-                ("Check Weekend atlas appointments", "codex", "Verify the appointment times with the shortlist.", .ready, boats.id),
-                ("Finish fraction examples", "codex", "Check the final example values.", .dealtWith, math.id)
+                ("Test compact layouts", "codex", "Test the forecast at small window sizes.", .running, weather.id),
+                ("Review the preview build", "codex", "Try the preview build on a clean Mac.", .ready, weather.id),
+                ("Improve keyboard access", "claude", "Check keyboard navigation and focus indicators.", .ready, weather.id),
+                ("Review weather edge cases", "codex", "Review the weather fixtures for missing edge cases.", .ready, weather.id),
+                ("Check train times", "codex", "Check the return trains for all three routes.", .ready, trails.id),
+                ("Finish sample forecasts", "codex", "Check all sample forecast values.", .dealtWith, weather.id)
             ]
         }
         if mode == "parking" {
@@ -49,15 +49,20 @@ enum DemoData {
         for (index, s) in samples.enumerated() {
             let now = now - Double(index * 400)
             let r = RequestItem(id: "request-\(index)", text: s.2, time: now)
-            let reports = ["Compare shortlisted boats": "Compared the shortlist: two fit the marina limits; one needs a berth check.",
-                           "Polish article": "Revised the opening and shortened the conclusion. Ready for your review.",
-                           "Review the builder installer": "Installer works on a clean Mac. The first-launch instructions need a final read.",
-                           "Apply accessibility updates": "Added keyboard navigation and focus indicators. Screen-reader testing is still pending.",
-                           "Review the new rubric": "Found two missing edge cases in the rubric; proposed examples for each.",
-                           "Check Weekend atlas appointments": "Verified appointment times. One overlaps with the ferry departure.",
-                           "Fix dragging": "Needs your permission to run the touch simulator before testing the drag fix."]
+            let requests = index == 5 ? [
+                RequestItem(id: "draft-notes", text: "Draft release notes for Pocket weather. Keep the tone calm and practical.", time: now - 7200),
+                RequestItem(id: "trim-notes", text: "Lead with what changed. Remove the feature-by-feature tour.", time: now - 3600),
+                r
+            ] : [r]
+            let reports = ["Compare walking routes": "Compared three walks. River Loop has the easiest train access; Ridge Path has one steep climb.",
+                           "Polish release notes": "Shortened the introduction and explained the first release in three clear bullets.",
+                           "Review the preview build": "Preview opens on a clean Mac. The first-launch instructions need a final read.",
+                           "Improve keyboard access": "Added keyboard navigation and focus indicators. Screen-reader testing is still pending.",
+                           "Review weather edge cases": "Found two missing cases: overnight frost and an unavailable forecast. Added fixtures for both.",
+                           "Check train times": "Checked the return trains. River Loop has departures every 30 minutes.",
+                           "Fix drag targets": "Needs your permission to run the keyboard interaction tests."]
             let report = reports[s.0] ?? ""
-            let card = Conversation(id: "demo-\(index)", provider: s.1, nativeID: "demo", title: s.0, folder: "", updated: now, requests: [r], state: s.3 == .dealtWith || s.3 == .todo ? .ready : s.3, reason: s.3 == .needsMe ? "Permission needed" : "", response: report, eventID: "event", eventTime: now, url: "")
+            let card = Conversation(id: "demo-\(index)", provider: s.1, nativeID: "demo", title: s.0, folder: "", updated: now, requests: requests, state: s.3 == .dealtWith || s.3 == .todo ? .ready : s.3, reason: s.3 == .needsMe ? "Permission needed" : "", response: report, eventID: "event", eventTime: now, url: "")
             state.cards.append(card)
             var d = Disposition(); d.projectID = s.4
             if mode == "parking" { d.parked = true }
@@ -65,10 +70,12 @@ enum DemoData {
             if s.3 == .dealtWith { d.acknowledgedRevision = card.revision }
             if s.3 == .todo {
                 d.manualColumn = .todo; d.manualRevision = card.revision; d.todoRequestID = r.id
-                if s.4 == math.id { d.todoNote = "Try the installer on a writer’s Mac." }
+                if s.4 == weather.id { d.todoNote = "Ask a friend to try the preview without instructions." }
             }
             state.dispositions[card.id] = d
-            state.summaries[card.id + ":" + r.id] = Summary(text: r.text, inputHash: BoardStore.hash(r.text))
+            for request in requests {
+                state.summaries[card.id + ":" + request.id] = Summary(text: request.text, inputHash: BoardStore.hash(request.text))
+            }
             if !report.isEmpty {
                 state.summaries[card.reportSummaryKey] = Summary(text: report, inputHash: BoardStore.hash(report), styleVersion: SummaryStyle.version)
             }

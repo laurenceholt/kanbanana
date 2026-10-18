@@ -19,3 +19,7 @@ The collection credits Todd Williamson, José de Martín Simón, Fons Heijnsbroe
 Downloaded JPEG/PNG renditions are bundled unchanged. The app displays cropped, zoomed versions with a contrast overlay; CC BY-SA images and their adapted display versions retain the indicated CC BY-SA license. The art picker exposes artist credits and source/license links. No artist or Wikimedia endorsement is implied.
 
 Claude and Codex icons are read from the user's installed applications at runtime; their artwork is not bundled. Product names and marks belong to their respective owners. kanbanana is not affiliated with Anthropic or OpenAI.
+
+## Demo media
+
+`docs/media/kanbanana-demo.mp4` includes cropped, overlaid details of Todd Williamson’s *Searching the Void* (2016), CC BY-SA 4.0. The edited demo video is distributed under CC BY-SA 4.0; its credit, source and license links are in [docs/media/README.md](docs/media/README.md). This does not change the MIT license of the source code. Demo conversations are fictional.

@@ -23,7 +23,7 @@ import SwiftUI
         let boats = state.projects[1]
         if CommandLine.arguments.count > 2 { store.search = CommandLine.arguments[2] }
         if let artID = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_ART"], let index = ArtBackdrop.artworks.firstIndex(where: { $0.id == artID }) {
-            preferences.set(ArtBackdrop.offset(selecting: index, at: .now, context: "Math interactives Weekend atlas Writing"), forKey: "photoOffset")
+            preferences.set(ArtBackdrop.offset(selecting: index, at: .now, context: state.projects.map(\.name).joined(separator: " ")), forKey: "photoOffset")
         }
         let content: AnyView
         switch mode {

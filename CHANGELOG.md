@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refresh the public README, launch checklist and contributor entry points. Replace demo content with coherent fictional projects; add reproducible captioned demo video production.
+- Derive notarized archive filenames from the built app version and reject non-Developer-ID signing identities before building.
+
 - Discover local agent-created top-level Codex chats and scheduled runs, including tasks without a saved project. Continue excluding internal subagents and reviews. Document the separate limitation for cloud-backed histories that execute on a local Mac.
 
 - Replace Photos with Art details: 19 contemporary works from six artists, with documented artist releases, curated close-ups in original color, hourly rotation and a credited art picker. Existing appearance preferences carry over.

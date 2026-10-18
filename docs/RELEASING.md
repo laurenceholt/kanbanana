@@ -6,11 +6,13 @@
 2. Review the entire public tree and history for personal material; secret scanning does not review screenshots or ordinary private text.
 3. Regenerate synthetic screenshots with `zsh scripts/previews.zsh` and inspect them.
 4. Update version, changelog and dated compatibility evidence. Verify fresh-run onboarding, privacy controls, ordinary navigation, persistence and recovery.
-5. Publish a GitHub prerelease tagged `v0.3.0-beta.1`. Source-only releases must clearly say they have no signed download.
+5. Choose a new version, update `CFBundleShortVersionString` and increase `CFBundleVersion` in `scripts/build.zsh`, then tag that tested commit. Never reuse or move a published release tag. Source-only releases must clearly say they have no signed download.
 
 CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No production API key, signing identity or user data is needed.
 
 ## Signed app download
+
+**Not yet released.** Apple enrollment/signing, the first successful notarization and independent-Mac verification remain release gates. The script currently packages a ZIP; a drag-to-Applications DMG is planned, not implemented. Track the full launch in [LAUNCH.md](LAUNCH.md).
 
 An Apple Developer membership, Developer ID Application certificate/private key, and a notarytool credential profile are required. Install/import those through Apple's tools; never commit them or paste credentials into an issue or script.
 
@@ -20,7 +22,7 @@ KANBAN_NOTARY_PROFILE='kanbanana-notary' \
 zsh scripts/notarize.zsh
 ```
 
-The build signs embedded Mach-O files inside-out, enables hardened runtime when a Developer ID is supplied, and verifies the staged bundle. Notarization submits a ZIP, waits for acceptance, staples and validates the ticket, runs Gatekeeper assessment, and creates the final archive plus SHA256SUMS.
+The build signs embedded Mach-O files inside-out, enables hardened runtime when a Developer ID is supplied, and verifies the staged bundle. Notarization submits a ZIP, waits for acceptance, staples and validates the ticket, runs Gatekeeper assessment, and creates the final archive plus SHA256SUMS. The archive version is read from the built app’s Info.plist so it cannot drift from the app version. Verify hashes from inside `dist` with `shasum -a 256 -c SHA256SUMS`.
 
 The default `build.zsh` uses ad-hoc signing for local development. That is not Developer ID signing and not notarization. Do not upload that output as the signed release. The notarization path must be tested with a real identity before advertising downloadable support.
 

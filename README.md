@@ -1,93 +1,126 @@
-<p align="center"><img src="Resources/Branding/banana.png" width="64" alt="kanbanana banana"></p>
+<p align="left"><img src="Resources/Branding/banana.png" width="48" alt=""></p>
 
 # kanbanana
 
-**A little Mac window for keeping up with your AI agents.**
+**Keep up with your agents in one little Mac window.**
 
-See what's running in Claude Code and Codex, remember what you asked, and jump into the right conversation. One card per conversation. Projects, priorities and notes help you pick up where you left off.
+Several conversations running in Claude Code and Codex. A few have finished. One needs an answer. You’ve forgotten what you asked the others to do.
 
-<img src="docs/focus-beta.png" width="300" alt="Focus view with fictional projects">
+kanbanana puts those conversations on one board. See what needs you, read a short reminder, and jump back into the right app. It lives in your menu bar, with a narrow **Focus** window that fits beside your work.
 
-**0.3.0 beta · Apple Silicon · source release.** Built for Claude Desktop's **Code** section and Codex Desktop local sessions. Independently developed; not affiliated with Anthropic or OpenAI.
+[Watch the 33-second demo](docs/media/kanbanana-demo.mp4) · [Build it locally](#get-started) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](PRIVACY.md)
+
+<img src="docs/focus-beta.png" width="300" alt="Focus mode showing fictional Pocket weather, Trail guide and Launch notes conversations with short agent reports">
+
+*Screenshots and demo use fictional conversations.*
+
+**macOS · Apple Silicon · early beta.** Source builds are available now. A signed, notarized download is being prepared; there is **no public app download yet**. [Releases](https://github.com/laurenceholt/kanbanana/releases)
+
+## A small place to pick up the thread
+
+- **See what came back.** Ready to check shows the agent’s latest report; Needs me highlights a detected question or interruption. Other states remind you of your latest request.
+- **Keep your next move.** Star a priority, mark a round Dealt with, or move it to To do with an optional reminder.
+- **Think in projects.** Group conversations across both apps and multiple folders. Add a project goal. Your manual assignments stay put.
+- **Remember the conversation.** Expand the request history to retrace what you asked, one request at a time.
+- **Use the space you have.** Focus is a thin strip; Projects adds horizontal lanes; Columns puts everything on one board.
+
+kanbanana monitors and organizes existing conversations. Start work, reply and review the actual output in Claude or Codex. Clicking a card opens its native conversation.
 
 ## Get started
 
-This beta is distributed as source. **No paid Apple Developer membership or signing certificate is needed to build and run it locally.** The build uses ad-hoc signing. A future signed, notarized download would be a separate convenience; this release has no binary download.
+You need an **Apple Silicon Mac**, **macOS 14+**, and **Swift 6+** (Xcode 16 or newer, or its command line tools). At least one supported provider is needed for live monitoring. No paid Apple Developer membership or API key is needed for a local build.
 
-Requirements: Apple Silicon Mac, macOS 14 or later, Xcode command line tools with Swift 6.0 or newer (Xcode 16+), and at least one supported desktop app. See [tested compatibility and limitations](docs/COMPATIBILITY.md). The minimum OS is a build target, not a claim that every older version has been tested.
+```zsh
+# If Apple's command line tools are not installed:
+xcode-select --install
+```
+
+After the tools finish installing:
 
 ```zsh
 git clone https://github.com/laurenceholt/kanbanana.git
 cd kanbanana
+swift --version
 zsh scripts/build.zsh
 open dist/kanbanana.app
 ```
 
-The build downloads a pinned, checksum-verified Python runtime and bundles it in the app. Python does not need to be installed separately to run the resulting bundle. Keep the whole `.app` together; you can move it to Applications.
+The build downloads a pinned, checksum-verified Python runtime and bundles it inside the app. You don’t need a separate Python installation to run it. Drag the resulting `dist/kanbanana.app` into Applications if you want to keep it there. Quit an existing copy before replacing it.
 
-You can also give your coding agent this instruction:
+**Prefer to ask your coding agent?**
 
-> Clone https://github.com/laurenceholt/kanbanana, read README.md, check the macOS/Swift requirements, run the tests and `zsh scripts/build.zsh`, then open `dist/kanbanana.app`. Do not change provider permissions or read my API key.
+> Clone https://github.com/laurenceholt/kanbanana. Read AGENTS.md and README.md, verify the macOS and Swift requirements, run the Swift and Python tests, then build with `zsh scripts/build.zsh` and open `dist/kanbanana.app`. Preserve any existing kanbanana data. Do not change provider permissions or read my API key.
 
-On first launch, choose which providers to monitor. Local conversations active in the last two weeks are discovered automatically. Cloud summaries are **off by default**; the board works with request/report excerpts and no API key.
+### First launch
 
-Click the banana and counts in the menu bar to reopen the window. Closing the window leaves monitoring running. Settings → Quit ends it. Double-click the app to restart.
+1. Choose which providers to monitor. kanbanana imports locally available conversations active in the last two weeks.
+2. Open **Focus** to work through Ready to check, or **Projects** to work project by project.
+3. Optionally enable cloud summaries in Settings. Until then, cards show local excerpts.
+
+The banana and counts in the menu bar reopen the window. Closing the window keeps monitoring running; **Settings → Quit** stops the app. Double-click the app to restart.
+
+## Supported conversations
+
+| Provider | Supported now |
+| --- | --- |
+| Claude Desktop | The **Code** section, using locally available session records. Chat and Cowork are outside this beta’s scope. |
+| Codex Desktop | Locally stored top-level conversations, including local tasks outside saved projects and scheduled runs. |
+
+**A task running on your Mac can still have cloud-backed history.** Those newer Codex conversations are not currently captured by the local-file reader. Remote/SSH/cloud-only work also has no completeness guarantee. Intel builds are not provided.
+
+These integrations read private local file formats, which can change when the source apps update. The macOS 14 minimum is a build target; physical testing is more limited than CI coverage. [Exact evidence, versions and limitations →](docs/COMPATIBILITY.md)
 
 ## Three views, one board
 
-- **Focus:** a narrow strip beside your other windows. Ready to check is the default list. Click a status icon to switch lists.
-- **Projects:** horizontal lanes, grouped by project. Priority projects come first, then recent activity.
-- **Columns:** a compact board mixing projects within each status. Optionally fold projects into stacks.
+**Focus** shows one status as a flat list. **Projects** groups cards into horizontal lanes. **Columns** mixes projects within each status, with optional temporary project stacks. Focus’s expand arrows open Projects.
 
-![Project lanes with fictional projects](docs/projects-beta.png)
+![Projects view with fictional conversations](docs/projects-beta.png)
 
-| State | Meaning |
+| State | What it means |
 | --- | --- |
-| To do | You reviewed the previous round and want to return later. Manual only; an optional card note records what comes next. |
-| Running | Recent execution evidence, including tracked background tasks. |
-| Needs me | A detected question, required approval, error or interruption. Some native permission waits are not observable. |
-| Ready to check | The agent appears to have delivered. This does not certify the work. |
-| Dealt with | Your manual acknowledgement. A new request reactivates the card. |
+| To do | You want another round later. Only you put cards here; each can have a reminder note. |
+| Running | The source has recent execution evidence, including tracked background tasks. |
+| Needs me | A detected question, required approval, error or interruption. Some native permission waits are not visible to the reader. |
+| Ready to check | The agent appears to have delivered. It does not certify correctness, tests or a Git push. |
+| Dealt with | Your acknowledgement of this round. A new request reactivates the card. |
+| Status unavailable | The app cannot establish the current state. Retry rereads the source; your notes and assignments are preserved. |
 
-Click a title to open its native conversation; expand history to see earlier requests. Star any card to keep it near the top. Project assignments and notes belong to kanbanana and never change the source app.
+Quiet cards move to the parking lot after seven days; To do reminders stay. The full board’s archive-box button lets you find and restore parked cards. A temporary read failure never triggers automatic parking.
 
-Quiet cards are parked after seven days; To do reminders stay. Conversations confirmed missing from the source follow the same rule, preserving their saved history and notes. Temporary read failures never trigger automatic parking. Use the archive-box button in the full board to find and restore parked cards. Focus's expand arrows open Projects.
+## Local by default
 
-## Optional summaries
+There is no kanbanana account, telemetry service or developer-operated backend. Native source records are read-only. Project goals, To do notes and assignments belong to kanbanana and never modify Claude or Codex.
 
-Settings → save an OpenAI API key → explicitly enable summaries. Saving a key alone does not enable them. Selected requests and latest agent reports are sent directly to OpenAI and billed to your API account. A ChatGPT subscription is separate.
+**Optional OpenAI summaries:** save your own API key in Settings, then explicitly enable summaries. Saving a key alone does not enable them. Selected requests and latest agent reports go directly to OpenAI, billed to your API account. A ChatGPT subscription does not include API credit. Keys stay in macOS Keychain; project and To do notes are not sent.
 
-Choose the model, exclude sensitive projects, and set a daily limit (100 summary attempts by default). Each attempt can make up to two calls; this is **not a dollar budget**. Ready to check and Needs me cards summarize what the agent reported; other states summarize your latest ask. Request history stays focused on your asks. Both types are summarized automatically. Summarizing older history requires a button; cached summaries may be refreshed when the wording format changes.
+You can choose the model, exclude projects and set a daily attempt limit. The default is 100 attempts; each can retry once. This is an attempt cap, not a dollar budget. [Full privacy, retention and cost controls →](PRIVACY.md)
 
-Keys stay in macOS Keychain. Delete saved key stops summaries and removes the stored credential. [Privacy and retention details](PRIVACY.md).
+Your board lives in `~/Library/Application Support/Agent Kanban/` (the historical name preserves existing installations). Settings includes **Export board**, **Restore**, **Open data folder** and **Diagnostics**. Seven rotating backups are kept locally. Board exports contain private text; use sanitized Diagnostics when reporting a problem. [Recovery and troubleshooting →](docs/TROUBLESHOOTING.md)
 
-## Your data
+## Make it yours
 
-The board is local, in `~/Library/Application Support/Agent Kanban/`. `board.json` holds your notes, projects, settings and manual choices; `observations.json` is a rebuildable history cache; `summary-usage.json` records daily attempts. The historical folder name preserves existing installations. Seven rotating backups are stored alongside them. Existing boards migrate automatically after a backup.
+Choose Classic, Night, Brutalist or Art details. Project symbols and saturated color strips help you distinguish cards. Art details rotates through 19 licensed contemporary works, with a small artist credit and source link. All images are bundled locally. [Artwork and credits →](Resources/Art/README.md)
 
-Settings provides **Export board**, **Restore**, **Open data folder**, and **Diagnostics**. Board exports include private request text; diagnostic reports include only versions, health categories and aggregate counts. [Backup, recovery and troubleshooting](docs/TROUBLESHOOTING.md).
+## Build, test and contribute
 
-## Appearance
-
-Classic colors, Night, Brutalist and Art details. Art details includes 19 less familiar contemporary works by six artists: luminous abstraction, gestural painting, portraits, surreal scenes and mixed-media constructions. Pick a detail or let the collection rotate hourly in its original colors. A small caption at the bottom names the work, artist and date, and opens its source page. Everything is bundled locally; the art picker includes artist credits and license links. [Art collection and credits](Resources/Art/README.md) · [Asset and runtime notices](THIRD_PARTY_NOTICES.md).
-
-## Development
+The app has three Swift targets: pure board rules in **Core**, persistence and integrations in **Services**, and the **macOS interface**. The Python reader has separate adapters, parsers and worker supervision. [Architecture →](docs/ARCHITECTURE.md)
 
 ```zsh
-swift test
+swift test -Xswiftc -warnings-as-errors
 zsh scripts/fetch-runtime.zsh
 .build/runtime/python/bin/python3 -I -B -m unittest discover -s tests -v
 zsh scripts/build.zsh
+zsh scripts/audit.zsh
 ```
 
-Try the interface without connecting to any personal data:
+To explore without connecting to your conversations:
 
 ```zsh
 swift run AgentKanban --demo
 ```
 
-Demo mode uses fictional conversations, temporary storage/preferences, and disabled provider/Keychain/network services. Changes are discarded when you quit. See [Architecture](docs/ARCHITECTURE.md) for module boundaries and the synthetic reader benchmark.
+Demo mode uses fictional data, temporary storage/preferences and disabled monitoring, Keychain and summary services. Changes are discarded when you quit. Generate screenshots with `zsh scripts/previews.zsh`, or the video with `zsh scripts/demo.zsh` (requires FFmpeg). [Demo production notes →](docs/DEMO.md)
 
-[Contributing](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Release process](docs/RELEASING.md) · [Changelog](CHANGELOG.md) · [Report a security issue](SECURITY.md).
+[Contributing](CONTRIBUTING.md) · [Release checklist](docs/RELEASING.md) · [Launch checklist](docs/LAUNCH.md) · [Changelog](CHANGELOG.md) · [Security reports](SECURITY.md)
 
-The code and generated banana mark are MIT licensed. Museum artwork images and bundled runtime components retain their separate notices.
+Independently developed; not affiliated with Anthropic or OpenAI. Source code and the generated banana mark are MIT licensed. Artwork and bundled runtime components retain their [separate licenses](THIRD_PARTY_NOTICES.md).
