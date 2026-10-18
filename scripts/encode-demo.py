@@ -36,7 +36,7 @@ subprocess.run([
     '-loop', '1', '-framerate', '30', '-i', str(frames / 'ending-overlay.png'),
     '-filter_complex',
     f'[0:v]tpad=stop_mode=clone:stop_duration={ending_duration},'
-    f'drawbox=x=0:y=1690:w=iw:h=230:color=black:t=fill:enable=gte(t\\,{walkthrough_duration})[app];'
+    f'drawbox=x=0:y=1884:w=iw:h=36:color=black:t=fill:enable=gte(t\\,{walkthrough_duration})[app];'
     f'[2:v]scale=1080:1920:flags=lanczos,format=rgba,fade=t=in:st={walkthrough_duration}:d=0.6:alpha=1[url];'
     '[app][url]overlay=0:0:format=auto[video]',
     '-map', '[video]', '-map', '1:a:0', '-t', str(duration),
@@ -45,7 +45,7 @@ subprocess.run([
     '-c:a', 'aac', '-b:a', '128k', '-ar', '48000', '-movflags', '+faststart',
     str(output / 'kanbanana-demo.mp4')
 ], check=True)
-shutil.copy2(frames / 'check-0.png', output / 'demo-poster.png')
+shutil.copy2(frames / 'check-1.png', output / 'demo-poster.png')
 def stamp(seconds):
     millis = round(seconds * 1000)
     return f'{millis//3600000:02}:{millis//60000%60:02}:{millis//1000%60:02}.{millis%1000:03}'

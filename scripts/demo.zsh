@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Synthetic-only: render real SwiftUI views and encode a continuous Night-mode walkthrough with subtitles and quiet music.
+# Synthetic-only: render real SwiftUI views and encode a continuous Night-mode walkthrough with pointer-adjacent callouts and quiet music.
 set -euo pipefail
 cd "${0:A:h:h}"
 command -v ffmpeg >/dev/null || { print -u2 'FFmpeg is required. See docs/DEMO.md.'; exit 1; }

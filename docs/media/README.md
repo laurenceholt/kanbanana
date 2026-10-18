@@ -1,12 +1,12 @@
 # kanbanana demo media
 
 - [Continuous walkthrough](kanbanana-demo.mp4) — 56 seconds, portrait 1080×1920, H.264/AAC, 30 fps.
-- [Subtitles](kanbanana-demo.vtt) — also burned into the video.
+- [Accessible transcript](kanbanana-demo.vtt) — the same short notes shown in callout boxes beside the pointer.
 - [Poster](demo-poster.png).
 - [Soundtrack](electronica.m4a) — the original generated track before mixing.
 - [Interaction order and reproduction](../DEMO.md).
 
-The film uses one persistent app view with fictional conversations. It stays in Night mode, scrolls, stars a card, marks it Dealt with, then expands to Projects and holds it under a centered GitHub URL overlay. No private board or provider history is included. There are no background artworks in this version.
+Short overlay notes follow each action near the pointer, with no bottom subtitle strip. The film uses one persistent app view with fictional conversations. It stays in Night mode, scrolls, stars a card, marks it Dealt with, then expands to Projects and holds it under a centered GitHub URL overlay. No private board or provider history is included. There are no background artworks in this version.
 
 ## Music provenance
 
@@ -18,6 +18,6 @@ The supplied generation is 60 seconds. The video uses its first 56 seconds witho
 
 ## Reuse
 
-Original renderer code, subtitles, app imagery and the generated banana mark are offered under the repository's MIT license. The maintainer permits reuse of the generated soundtrack and assembled walkthrough under MIT to the extent of rights held. Claude and Codex marks remain their owners' property and imply no affiliation or endorsement.
+Original renderer code, callout text, app imagery and the generated banana mark are offered under the repository's MIT license. The maintainer permits reuse of the generated soundtrack and assembled walkthrough under MIT to the extent of rights held. Claude and Codex marks remain their owners' property and imply no affiliation or endorsement.
 
 The previous landscape demo in older commits contained *Searching the Void* by Todd Williamson under CC BY-SA 4.0. Its attribution and ShareAlike terms still apply to copies of that earlier film; it is not the current `kanbanana-demo.mp4`.

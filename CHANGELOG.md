@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Move demo explanations into short overlay boxes beside the pointer, removing the bottom subtitle strip.
+
 - Replace the demo soundtrack with beat-led electro/IDM, keeping the mix quiet and the full URL ending covered.
 
 - Finish the demo with a centered repository URL over Projects; extend the music through the final frame.

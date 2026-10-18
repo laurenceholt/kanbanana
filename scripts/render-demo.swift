@@ -26,7 +26,7 @@ import KanbananaServices
         let style = BoardAppearance(background: .butter, cards: .cream, theme: .night)
         let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: preferences)
             .environment(\.boardAppearance, style).environment(\.colorScheme, .dark))
-        let window = DemoWindow(contentRect: NSRect(x: 0, y: 0, width: 390, height: 610),
+        let window = DemoWindow(contentRect: NSRect(x: 0, y: 0, width: 390, height: 680),
             styleMask: [.borderless], backing: .buffered, defer: false)
         window.contentView = host
         window.setFrameOrigin(NSPoint(x: -20000, y: -20000))
@@ -49,18 +49,18 @@ import KanbananaServices
             }
         }
         let captions: [(Double, Double, String)] = [
-            (0, 4, "This is kanbanana. I keep it beside\nwhatever I’m working on."),
-            (4, 8, "It brings my Claude Code and Codex\ndesktop work into one little window."),
-            (8, 12, "Up here: what’s running, what needs me,\nand what’s ready to check."),
-            (12, 16, "I can scroll through the replies\nwithout losing track of things."),
-            (16, 20, "Each card gives me a short version\nof what the agent reported."),
-            (20, 24, "Click a conversation to open it\nin Claude or Codex."),
-            (24, 28, "If something matters most, I star it.\nIt stays at the top."),
-            (28, 32, "Once I’ve looked at it, I click here\nto mark it Dealt with."),
-            (32, 36, "It leaves this list. A new request\nwill bring it back."),
-            (36, 40, "And when I want the bigger picture,\nI expand to Projects."),
-            (40, 46, "The conversations stay separate,\nbut now they’re grouped by project."),
-            (46, 52, "These little notes remind me\nwhat I’m trying to get done.")
+            (0, 4, "Keep your agents\nin one small window."),
+            (4, 8, "Claude Code + Codex,\nin one place."),
+            (8, 12, "Running, needs you,\nor ready to check."),
+            (12, 16, "Scroll through\nwhat came back."),
+            (16, 20, "A short report\non each card."),
+            (20, 24, "Click to open\nthe conversation."),
+            (24, 28, "Star it to keep\nit at the top."),
+            (28, 32, "Checked it?\nMark it Dealt with."),
+            (32, 36, "Off your list—until\nyour next request."),
+            (36, 40, "Expand to see\nall your projects."),
+            (40, 46, "Separate conversations,\ngrouped by project."),
+            (46, 52, "Keep the goal\nin a project note.")
         ]
         let manifest = captions.map { ["start": $0.0, "end": $0.1, "caption": $0.2] as [String: Any] }
         try JSONSerialization.data(withJSONObject: manifest, options: [.prettyPrinted, .sortedKeys])
@@ -87,9 +87,10 @@ import KanbananaServices
         let start = ContinuousClock.now
         var cachedView: CGImage?
         var priorityChecked = false, dealtChecked = false, projectsChecked = false
-        var cursor = CGPoint(x: 360, y: 560)
+        var cursor = CGPoint(x: 150, y: 37)
         let keyframes: [(Double, CGPoint)] = [
-            (0, CGPoint(x: 360, y: 560)), (7.8, CGPoint(x: 360, y: 560)),
+            (0, CGPoint(x: 150, y: 37)), (3.7, CGPoint(x: 150, y: 37)),
+            (4.5, CGPoint(x: 30, y: 241)), (7.7, CGPoint(x: 30, y: 241)),
             (8.5, CGPoint(x: 120, y: 66)), (9.4, CGPoint(x: 195, y: 66)),
             (10.4, CGPoint(x: 270, y: 66)), (11.5, CGPoint(x: 350, y: 390)),
             (19, CGPoint(x: 350, y: 390)), (21, CGPoint(x: 160, y: 168)),
@@ -111,11 +112,12 @@ import KanbananaServices
             if t >= 38 {
                 let progress = smooth((t - 38) / 1.2)
                 let width = 390 + 450 * progress
-                window.setContentSize(CGSize(width: width, height: width * 610 / 390))
+                window.setContentSize(CGSize(width: width, height: width * 680 / 390))
             } else if t >= 12 && t < 24 {
                 let down = smooth((t - 12) / 3)
                 let up = smooth((t - 18) / 3)
-                focusScroll.contentView.scroll(to: CGPoint(x: 0, y: 390 * (down - up)))
+                let travel = min(390, max(0, (focusScroll.documentView?.bounds.height ?? 0) - focusScroll.contentView.bounds.height))
+                focusScroll.contentView.scroll(to: CGPoint(x: 0, y: travel * (down - up)))
                 focusScroll.reflectScrolledClipView(focusScroll.contentView)
             }
             // Advance the real run loop so SwiftUI input, scrolling and animations settle naturally.
@@ -181,14 +183,40 @@ import KanbananaServices
             }
             NSGraphicsContext.saveGraphicsState()
             NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
-            let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center; paragraph.lineSpacing = 10
-            let caption = captions.first { t >= $0.0 && t < $0.1 }!.2
-            (caption as NSString).draw(in: NSRect(x: 38, y: 71, width: 1004, height: 132), withAttributes: [
-                .font: NSFont.systemFont(ofSize: 42, weight: .medium), .foregroundColor: NSColor.white, .paragraphStyle: paragraph])
-            ("Fictional sessions · desktop workflow" as NSString).draw(in: NSRect(x: 30, y: 24, width: 1020, height: 30), withAttributes: [
-                .font: NSFont.systemFont(ofSize: 22), .foregroundColor: NSColor(white: 0.55, alpha: 1), .paragraphStyle: paragraph])
+            let cue = captions.first { t >= $0.0 && t < $0.1 }!
+            // Notes sit beside the pointer rather than in a separate subtitle strip.
+            // Keep a gap around the pointed control; clamp the bubble inside phone-safe margins.
+            let textStyle = NSMutableParagraphStyle(); textStyle.alignment = .left; textStyle.lineSpacing = 7
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: NSFont.systemFont(ofSize: 40, weight: .medium),
+                .foregroundColor: NSColor.white, .paragraphStyle: textStyle]
+            let boxWidth: CGFloat = 570
+            let textHeight = (cue.2 as NSString).boundingRect(with: NSSize(width: boxWidth - 48, height: 300),
+                options: .usesLineFragmentOrigin, attributes: attributes).height
+            let boxHeight = ceil(textHeight) + 44
+            let pointer = CGPoint(x: cursor.x * scale, y: cursor.y * scale)
+            let centered = (8..<12).contains(t) || (20..<24).contains(t) || (40..<46).contains(t)
+            let right = t < 8 || t >= 46
+            let desiredX = centered ? pointer.x - boxWidth / 2 : right ? pointer.x + 44 : pointer.x - boxWidth - 44
+            let boxX = min(1080 - boxWidth - 24, max(24, desiredX))
+            let boxTop = min(1840 - boxHeight, pointer.y + 48)
+            let box = NSRect(x: boxX, y: 1920 - boxTop - boxHeight, width: boxWidth, height: boxHeight)
+            let opacity = min(smooth((t - cue.0) / 0.18), smooth((cue.1 - 0.12 - t) / 0.25))
+            context.saveGState(); context.setAlpha(opacity)
+            let shadow = NSShadow(); shadow.shadowColor = NSColor.black.withAlphaComponent(0.6)
+            shadow.shadowBlurRadius = 18; shadow.shadowOffset = NSSize(width: 0, height: -5); shadow.set()
+            let bubble = NSBezierPath(roundedRect: box, xRadius: 18, yRadius: 18)
+            NSColor(calibratedWhite: 0.12, alpha: 0.97).setFill(); bubble.fill()
+            NSShadow().set()
+            NSColor(calibratedRed: 0.95, green: 0.81, blue: 0.30, alpha: 0.85).setStroke()
+            bubble.lineWidth = 2; bubble.stroke()
+            (cue.2 as NSString).draw(in: box.insetBy(dx: 24, dy: 22), withAttributes: attributes)
+            context.restoreGState()
+            let footer = NSMutableParagraphStyle(); footer.alignment = .center
+            ("Fictional sessions · desktop workflow" as NSString).draw(in: NSRect(x: 30, y: 5, width: 1020, height: 28), withAttributes: [
+                .font: NSFont.systemFont(ofSize: 20), .foregroundColor: NSColor(white: 0.55, alpha: 1), .paragraphStyle: footer])
             NSGraphicsContext.restoreGraphicsState()
-            if [0, 15*fps, 26*fps, 31*fps, 40*fps, 49*fps].contains(frame) {
+            if [1*fps, 5*fps, 10*fps, 15*fps, 22*fps, 25*fps, 27*fps, 30*fps, 34*fps, 37*fps, 40*fps, 49*fps].contains(frame) {
                 let image = NSBitmapImageRep(cgImage: context.makeImage()!)
                 try image.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("check-\(Int(t)).png"))
                 print("Captured \(Int(t))s")
