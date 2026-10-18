@@ -2,7 +2,7 @@
 
 [Watch/download the MP4](media/kanbanana-demo.mp4) · [Subtitles](media/kanbanana-demo.vtt) · [Poster](media/demo-poster.png)
 
-The video is **52 seconds, portrait 1080×1920, 30 fps, H.264/AAC**. It stays in Night mode, starts in Focus and ends in the full Projects view. The app fills the frame, with conversational subtitles below it and quiet instrumental electronica. There are no slides, scene cuts, voiceover or theme changes.
+The video is **56 seconds, portrait 1080×1920, 30 fps, H.264/AAC**. It stays in Night mode, starts in Focus and ends in the full Projects view. The app fills the frame, with conversational subtitles below it and quiet instrumental electronica. The final Projects view holds for four seconds while a centered GitHub URL fades in over it. Music continues through the URL, fading only in the final 1.2 seconds. There are no slides, scene cuts, voiceover or theme changes.
 
 ## Feature order and interaction script
 
@@ -19,15 +19,16 @@ The video is **52 seconds, portrait 1080×1920, 30 fps, H.264/AAC**. It stays in
 | 32–36 s | Show its removal and the changed counts | It leaves this list. A new request will bring it back. |
 | 36–40 s | Click the expand arrows and widen the same window | And when I want the bigger picture, I expand to Projects. |
 | 40–46 s | Hold on project lanes, retaining the changed card state | The conversations stay separate, but now they’re grouped by project. |
-| 46–52 s | Point at a project’s goal note; end on Projects | These little notes remind me what I’m trying to get done. |
+| 46–52 s | Point at a project’s goal note | These little notes remind me what I’m trying to get done. |
+| 52–56 s | Hold Projects, dim it gently and overlay the URL at screen center | github.com/laurenceholt/kanbanana |
 
 Native conversation navigation is explained but not executed: the fictional cards have no real destination. The film does not fabricate a Claude or Codex conversation. Likewise, new-request reactivation is described but not demonstrated.
 
 ## What “continuous” means here
 
-One persistent `BoardView`, `BoardStore` and native window run for the entire sequence. The recorder dispatches mouse down/up events to the real star, Dealt with and Projects controls. It scrolls the actual native scroll view, then smoothly resizes the same window. Checks fail if the UI clicks do not change priority order, reduce Ready to check from six cards to five, or select Projects.
+One persistent `BoardView`, `BoardStore` and native window run for the 52-second interaction. The encoder holds its final frame for the four-second URL ending. The recorder dispatches mouse down/up events to the real star, Dealt with and Projects controls. It scrolls the actual native scroll view, then smoothly resizes the same window. Checks fail if the UI clicks do not change priority order, reduce Ready to check from six cards to five, or select Projects.
 
-Every frame comes from that view. The pointer/click rings and subtitles are composited onto those frames. The window is hosted offscreen, so the recorder cannot pick up the desktop, other windows or the live board. This is a continuous scripted interaction with the app, not a recording of live provider execution or a performance benchmark. Rendering may take longer than the 52-second output on a busy machine.
+Every frame comes from that view. The pointer/click rings and subtitles are composited onto those frames. The window is hosted offscreen, so the recorder cannot pick up the desktop, other windows or the live board. This is a continuous scripted interaction with the app, not a recording of live provider execution or a performance benchmark. Rendering may take longer than the output on a busy machine.
 
 ## Fictional data and privacy
 
@@ -47,13 +48,13 @@ Requirements: Apple Silicon Mac, Swift 6, a logged-in graphical macOS session, a
 zsh scripts/demo.zsh
 ```
 
-`scripts/render-demo.swift` records the persistent app view to `.build/walkthrough/walkthrough-silent.mp4`, writes subtitles to `captions.json`, and saves inspection frames. `scripts/encode-demo.py` adds the bundled soundtrack, normalizes it to a quiet −28 LUFS target, adds opening/closing audio fades, and verifies the complete encoded file. Outputs in `docs/media/` are overwritten:
+`scripts/render-demo.swift` records the persistent app view to `.build/walkthrough/walkthrough-silent.mp4`, writes subtitles to `captions.json`, and saves inspection frames. `scripts/encode-demo.py` adds the bundled soundtrack, normalizes it to a quiet −28 LUFS target, crossfades in an earlier musical phrase to extend the track, adds the centered URL overlay and opening/closing audio fades, and verifies the complete encoded file. Outputs in `docs/media/` are overwritten:
 
 - `kanbanana-demo.mp4`: phone-oriented video with web fast-start.
 - `kanbanana-demo.vtt`: subtitles with matching timing.
 - `demo-poster.png`: opening frame.
 
-Edit the timeline, pointer coordinates and subtitles in the Swift renderer. Coordinates deliberately match the current real UI; recheck them after UI changes. Do not replace failed clicks with direct state mutations. The renderer checks that the actions worked. The app sources are unchanged by this recording setup.
+Edit the timeline, pointer coordinates and subtitles in the Swift renderer. The centered URL is drawn by `scripts/render-demo-ending.swift`; the encoder controls the four-second hold and overlay fade. Coordinates deliberately match the current real UI; recheck them after UI changes. Do not replace failed clicks with direct state mutations. The renderer checks that the actions worked. The app sources are unchanged by this recording setup.
 
 Before posting, play the final file with sound and check the pacing and phone legibility. No download claim should precede a tested public artifact. Posting to X remains a separate, maintainer-approved action.
 

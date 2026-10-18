@@ -8,7 +8,7 @@ Several conversations running in Claude Code and Codex. A few have finished. One
 
 kanbanana puts those conversations on one board. See what needs you, read a short reminder, and jump back into the right app. It lives in your menu bar, with a narrow **Focus** window that fits beside your work.
 
-[Watch the 52-second walkthrough](docs/media/kanbanana-demo.mp4) · [Build it locally](#get-started) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](PRIVACY.md)
+[Watch the 56-second walkthrough](docs/media/kanbanana-demo.mp4) · [Build it locally](#get-started) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](PRIVACY.md)
 
 <img src="docs/focus-beta.png" width="300" alt="Focus mode showing fictional Pocket weather, Trail guide and Launch notes conversations with short agent reports">
 

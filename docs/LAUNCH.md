@@ -26,7 +26,7 @@ This repo is already public. Source builds are available; the signed macOS downl
 
 ## Launch on X
 
-The video in `docs/media/` is a continuous 52-second Night-mode walkthrough, with conversational subtitles and quiet electronica. It is portrait 1080×1920 H.264/AAC and uses real application controls with fictional data. Read [DEMO.md](DEMO.md) before regenerating or editing it.
+The video in `docs/media/` is a 56-second Night-mode walkthrough with a centered GitHub URL ending, with conversational subtitles and quiet electronica. It is portrait 1080×1920 H.264/AAC and uses real application controls with fictional data. Read [DEMO.md](DEMO.md) before regenerating or editing it.
 
 1. Download and watch the final video all the way through. Ensure its source/download wording matches the release.
 2. Open the GitHub link while signed out. Check the README, video, download and issue templates.
