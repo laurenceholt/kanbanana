@@ -12,18 +12,10 @@ Gitleaks is an MIT-licensed development/release-audit tool, not bundled with the
 
 `Resources/Branding/banana.png` is AI-generated pop-art-inspired artwork, offered with this project's MIT license. Its generation prompt is recorded beside the asset. It is not an official mark or endorsement of another artist, album or company.
 
-The 42 art backgrounds are images obtained from Wikimedia Commons, with individual file records identifying public-domain, CC0, CC BY or CC BY-SA terms. They cover works from prehistory to 1998. **They are not all CC0 and are not covered by the source-code MIT license.**
+The 19 contemporary art backgrounds are obtained from Wikimedia Commons under per-image CC0, CC BY 2.0, CC BY-SA 3.0 or CC BY-SA 4.0 terms. **These images are not covered by the source-code MIT license.**
 
-Downloaded JPEG/PNG files are bundled unchanged. The app displays cropped, zoomed versions with a contrast overlay. CC BY-SA images and their adapted display versions retain the indicated CC BY-SA license. Photographer attributions, image-license links, artwork/museum links, download URLs, SHA-256 hashes, crop parameters and source rights metadata are retained in `Resources/Art/catalog.json` and the per-file table in `Resources/Art/README.md`. These files ship inside the app. The art picker exposes photographer credits and a link to each image's licensing page.
+The collection credits Todd Williamson, José de Martín Simón, Fons Heijnsbroek, Ben Vollers, Peter Klashorst and Marike Bok. Sources document artist uploads, an artist Flickr release reviewed by Commons, or Wikimedia permission tickets. Full source revisions, permission evidence, per-image attribution and license URLs are preserved in [Resources/Art/catalog.json](Resources/Art/catalog.json), with a readable per-file table in [Resources/Art/README.md](Resources/Art/README.md). These records ship inside the app.
 
-The attribution-required photographs are:
-
-- `willendorf.jpg`: MatthiasKabel, **CC BY 2.5**.
-- `nefertiti.jpg`: Philip Pikart, **CC BY-SA 3.0**.
-- `single-form.jpg`: QuentinUK, **CC BY-SA 3.0** (Barbara Hepworth's permanent public sculpture in Battersea Park, London).
-- `guggenheim.jpg`: Naotake Murayama, **CC BY 2.0** (Frank Gehry's Guggenheim Museum Bilbao, Spain).
-- `angel.jpg`: saw2th, **CC BY-SA 2.0** (Antony Gormley's permanent public sculpture in Gateshead, England).
-
-Lascaux's reproduction additionally credits Commons contributor EU, and the historical photograph of Duchamp's *Fountain* credits Alfred Stieglitz. Image licenses do not transfer copyright in depicted modern artworks. The UK sculpture photographs depict permanent works in public places (see [Copyright, Designs and Patents Act, section 62](https://www.legislation.gov.uk/ukpga/1988/48/section/62)). No artist, museum or Wikimedia endorsement is implied.
+Downloaded JPEG/PNG renditions are bundled unchanged. The app displays cropped, zoomed versions with a contrast overlay; CC BY-SA images and their adapted display versions retain the indicated CC BY-SA license. The art picker exposes artist credits and source/license links. No artist or Wikimedia endorsement is implied.
 
 Claude and Codex icons are read from the user's installed applications at runtime; their artwork is not bundled. Product names and marks belong to their respective owners. kanbanana is not affiliated with Anthropic or OpenAI.

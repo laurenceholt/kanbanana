@@ -4,7 +4,7 @@
 
 - Discover local agent-created top-level Codex chats and scheduled runs, including tasks without a saved project. Continue excluding internal subagents and reviews. Document the separate limitation for cloud-backed histories that execute on a local Mac.
 
-- Replace Photos with Art details: 42 recognizable works across art history, curated close-ups in original color, hourly rotation and a credited art picker. Existing appearance preferences carry over.
+- Replace Photos with Art details: 19 contemporary works from six artists, with documented artist releases, curated close-ups in original color, hourly rotation and a credited art picker. Existing appearance preferences carry over.
 - Identify the current background with a small, linked artwork/artist/date caption at the bottom of Focus and full-board views.
 
 - Recognize Claude background-task completions delivered as queued attachments, preventing finished conversations from remaining Running or Status unavailable after history replay.

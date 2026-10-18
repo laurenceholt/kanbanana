@@ -69,7 +69,7 @@ Settings provides **Export board**, **Restore**, **Open data folder**, and **Dia
 
 ## Appearance
 
-Classic colors, Night, Brutalist and Art details. Art details includes 42 recognizable works spanning prehistory, the Renaissance and modern art, from Lascaux and Nefertiti to Vermeer, Hokusai, Kandinsky and Hepworth. Pick a detail or let the collection rotate hourly in its original colors. A small caption at the bottom names the work, artist and date, and opens Wikipedia or a museum page. Everything is bundled locally; the art picker also includes image credits and license links. [Art collection and credits](Resources/Art/README.md) · [Asset and runtime notices](THIRD_PARTY_NOTICES.md).
+Classic colors, Night, Brutalist and Art details. Art details includes 19 less familiar contemporary works by six artists: luminous abstraction, gestural painting, portraits, surreal scenes and mixed-media constructions. Pick a detail or let the collection rotate hourly in its original colors. A small caption at the bottom names the work, artist and date, and opens its source page. Everything is bundled locally; the art picker includes artist credits and license links. [Art collection and credits](Resources/Art/README.md) · [Asset and runtime notices](THIRD_PARTY_NOTICES.md).
 
 ## Development
 
