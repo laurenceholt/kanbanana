@@ -12,8 +12,8 @@ This repo is already public. Source builds are available; the signed macOS downl
 
 ## Before the first downloadable beta
 
-- [ ] Apple Developer enrollment is active (purchase receipt alone is insufficient).
-- [ ] Developer ID Application certificate and private key are available in Keychain.
+- [x] Apple Developer enrollment is active (verified October 19, 2026).
+- [x] Developer ID Application certificate and private key are available in Keychain (October 19, 2026); signed staging build passes deep/strict verification and bundled Python smoke check.
 - [ ] A notarytool Keychain profile is configured; credentials stay out of the repo and CI logs.
 - [ ] Choose a new release version and increase CFBundleVersion in `scripts/build.zsh`.
 - [ ] Complete the signed ZIP path in [RELEASING.md](RELEASING.md), including Apple's acceptance, stapling and Gatekeeper assessment.

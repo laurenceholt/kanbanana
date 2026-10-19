@@ -12,7 +12,7 @@ CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No prod
 
 ## Signed app download
 
-**Not yet released.** Apple enrollment/signing, the first successful notarization and independent-Mac verification remain release gates. The script currently packages a ZIP; a drag-to-Applications DMG is planned, not implemented. Track the full launch in [LAUNCH.md](LAUNCH.md).
+**Not yet released.** Apple enrollment and Developer ID signing were verified on October 19, 2026. Notarization credentials, the first successful notarization and independent-Mac verification remain release gates. The script currently packages a ZIP; a drag-to-Applications DMG is planned, not implemented. Track the full launch in [LAUNCH.md](LAUNCH.md).
 
 An Apple Developer membership, Developer ID Application certificate/private key, and a notarytool credential profile are required. Install/import those through Apple's tools; never commit them or paste credentials into an issue or script.
 
