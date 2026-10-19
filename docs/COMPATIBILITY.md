@@ -2,7 +2,11 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
-## Latest automated checks — 18 October 2026
+## Release candidate checks — 19 October 2026
+
+For app version `0.4.0` (build `4`, Apple Silicon), all 103 Swift tests passed with warnings treated as errors, all 50 Python tests passed, and the full Git history secret scan found no leaks. The Developer ID signed staging bundle passes deep/strict signature verification; its bundled Python reader passes an isolated empty-source smoke check without changing the signature. Apple notarization is in progress. A separate physical Mac has not yet validated the downloadable candidate.
+
+## Earlier automated checks — 18 October 2026
 
 All 103 Swift tests (71 XCTest and 32 Swift Testing) passed with warnings treated as errors; all 50 Python tests passed. The bundled-runtime release build and isolated Focus/Projects screenshot rendering also passed. The fictional demo video was encoded, fully decoded without errors and inspected at sampled scenes. These checks do not establish Developer ID signing, notarization or compatibility on a second physical Mac.
 

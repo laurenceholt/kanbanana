@@ -14,11 +14,11 @@ This repo is already public. Source builds are available; the signed macOS downl
 
 - [x] Apple Developer enrollment is active (verified October 19, 2026).
 - [x] Developer ID Application certificate and private key are available in Keychain (October 19, 2026); signed staging build passes deep/strict verification and bundled Python smoke check.
-- [ ] A notarytool Keychain profile is configured; credentials stay out of the repo and CI logs.
-- [ ] Choose a new release version and increase CFBundleVersion in `scripts/build.zsh`.
+- [x] A notarytool Keychain profile is configured and authenticated (October 19, 2026); credentials stay out of the repo and CI logs.
+- [x] Prepare `v0.4.0-beta.1`: app version `0.4.0`, build `4` in `scripts/build.zsh`.
 - [ ] Complete the signed ZIP path in [RELEASING.md](RELEASING.md), including Apple's acceptance, stapling and Gatekeeper assessment.
-- [ ] Add and validate the planned DMG with an Applications shortcut. The current script produces ZIP only.
-- [ ] Run the exact downloaded artifact on independent Macs: Claude-only, Codex-only and both. Record provider/OS versions and results.
+- [ ] Add and validate the planned DMG with an Applications shortcut. The release script now creates both formats; validation is required.
+- [ ] Run the exact downloaded artifact on independent Macs: Claude-only, Codex-only and both. Record provider/OS versions and results using [DOWNLOAD-TEST.md](DOWNLOAD-TEST.md).
 - [ ] Verify onboarding, source access, cold-start navigation, question/permission/resume/delivery states, Keychain persistence, sleep/wake and upgrade preservation.
 - [ ] Settle the intended supported scope. Cloud-backed Codex conversations are currently excluded even when their code runs locally.
 - [ ] Publish the new GitHub prerelease with download, SHA256SUMS, requirements, installation steps, known limitations and recovery instructions.
