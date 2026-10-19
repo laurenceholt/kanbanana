@@ -4,7 +4,7 @@ Compatibility is based on dated observations and tests, not an official integrat
 
 ## Release candidate checks — 19 October 2026
 
-For app version `0.4.0` (build `4`, Apple Silicon), all 103 Swift tests passed with warnings treated as errors, all 50 Python tests passed, and the full Git history secret scan found no leaks. The Developer ID signed staging bundle passes deep/strict signature verification; its bundled Python reader passes an isolated empty-source smoke check without changing the signature. Apple notarization is in progress. A separate physical Mac has not yet validated the downloadable candidate.
+For app version `0.4.0` (build `4`, Apple Silicon), all 103 Swift tests passed with warnings treated as errors, all 50 Python tests passed, and the full Git history secret scan found no leaks. The Developer ID signed staging bundle passes deep/strict signature verification; its bundled Python reader passes an isolated empty-source smoke check without changing the signature. The same source commit passed the full macOS 14 and 15 CI matrix, including app packaging, secret audit and bundled-reader smoke checks ([run](https://github.com/laurenceholt/kanbanana/actions/runs/39271962103)). Apple notarization is in progress. A separate physical Mac has not yet validated the downloadable candidate.
 
 ## Earlier automated checks — 18 October 2026
 
