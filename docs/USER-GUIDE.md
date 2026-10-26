@@ -112,6 +112,8 @@ Keep the default model unless you have a reason to change it. If you enter anoth
 
 ## Closing, updating and getting help
 
+Drag the **banana or kanbanana title** to move the window. Drag a window edge or corner to resize it; Focus and the full board remember their sizes separately.
+
 Closing the window keeps monitoring running. Click the banana/counts in the macOS menu bar to reopen it. **Settings → Quit** stops the app; open kanbanana again to restart.
 
 Updates come from [GitHub Releases](https://github.com/laurenceholt/kanbanana/releases); there is no automatic updater. Quit kanbanana before replacing the app. Keep `~/Library/Application Support/Agent Kanban/` so your board, project notes and preferences survive.

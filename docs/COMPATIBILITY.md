@@ -2,6 +2,12 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Direct window move handle — 26 October 2026
+
+Version `0.4.4`, build `8`, adds a direct drag handle over the banana and app title in Focus and full-board layouts. It moves the window from content-view mouse events, bypassing the native titlebar drag initiation that remained unreliable in 0.4.3. Repeated drags of the installed Focus window changed its saved position by the expected amount and returned it to its original position. The underlying native titlebar failure is not yet explained; this verifies the alternative move handle, not a fix to macOS titlebar tracking.
+
+All 110 Swift tests pass, including successive window movement and stopping on mouse release. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40341968246)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app uses the existing application data directory, with private backups retained before the upgrade.
+
 ## Native window frame — 26 October 2026
 
 Version `0.4.3`, build `7`, reserves a standard AppKit titlebar outside the SwiftUI board and removes the former simulated titlebar spacing. All 109 Swift tests pass, including native frame/content separation and repeated content resizing. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40329907452)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app's width and height were resized through native edges; titlebar drag tool calls completed, but a repeated controlled drag did not change the saved position, so movement is not yet verified. The board was left fully onscreen, and existing projects and acknowledgments survived the update. Sustained user confirmation after app switching remains outstanding.
