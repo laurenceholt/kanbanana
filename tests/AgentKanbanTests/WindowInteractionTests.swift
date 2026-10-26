@@ -72,4 +72,27 @@ final class WindowInteractionTests: XCTestCase {
             XCTAssertLessThan(window.contentView!.frame.maxY, window.frame.height)
         }
     }
+
+    @MainActor func testTitleHandleMovesWindowAcrossSuccessiveDragsAndStopsOnRelease() {
+        let window = BoardWindow(contentSize: NSSize(width: 300, height: 400))
+        defer { window.close() }
+        window.setFrameOrigin(NSPoint(x: 300, y: 300))
+        let handle = WindowMoveView(frame: NSRect(x: 0, y: 350, width: 200, height: 30))
+        window.contentView!.addSubview(handle)
+        func event(_ type: NSEvent.EventType, _ x: CGFloat, _ y: CGFloat) -> NSEvent {
+            NSEvent.mouseEvent(with: type, location: NSPoint(x: x, y: y), modifierFlags: [],
+                               timestamp: 0, windowNumber: window.windowNumber, context: nil,
+                               eventNumber: 0, clickCount: 1, pressure: 1)!
+        }
+        handle.mouseDown(with: event(.leftMouseDown, 50, 360))
+        let start = window.frame.origin
+        handle.mouseDragged(with: event(.leftMouseDragged, 90, 330))
+        XCTAssertEqual(window.frame.origin, NSPoint(x: start.x + 40, y: start.y - 30))
+        handle.mouseDragged(with: event(.leftMouseDragged, 80, 340))
+        XCTAssertEqual(window.frame.origin, NSPoint(x: start.x + 70, y: start.y - 50))
+        handle.mouseUp(with: event(.leftMouseUp, 50, 360))
+        let stopped = window.frame
+        handle.mouseDragged(with: event(.leftMouseDragged, 100, 300))
+        XCTAssertEqual(window.frame, stopped)
+    }
 }

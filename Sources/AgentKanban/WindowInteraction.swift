@@ -1,5 +1,6 @@
 import KanbananaCore
 import AppKit
+import SwiftUI
 
 /// Window rectangles use Core Graphics screen coordinates throughout; this also
 /// works on displays to the left of or above the main display. No screen pixels,
@@ -50,6 +51,41 @@ final class ActivationClickShield: NSView {
     override func mouseUp(with event: NSEvent) { isArmed = false }
 }
 
+/// A content-area move handle also works when native titlebar tracking fails.
+/// Track in screen coordinates so each move stays anchored under the pointer,
+/// including across displays. No global event tap or modal tracking loop.
+struct WindowMoveHandle: NSViewRepresentable {
+    func makeNSView(context: Context) -> WindowMoveView { WindowMoveView() }
+    func updateNSView(_ view: WindowMoveView, context: Context) { }
+}
+
+final class WindowMoveView: NSView {
+    private var grabOffset: NSPoint?
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        toolTip = "Drag the banana or title to move kanbanana"
+        setAccessibilityElement(true)
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("Move kanbanana window")
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func resetCursorRects() { addCursorRect(bounds, cursor: .openHand) }
+    override func mouseDown(with event: NSEvent) {
+        guard let window else { return }
+        grabOffset = event.locationInWindow
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+    }
+    override func mouseDragged(with event: NSEvent) {
+        guard let window, let grabOffset else { return }
+        let pointer = window.convertPoint(toScreen: event.locationInWindow)
+        window.setFrameOrigin(NSPoint(x: pointer.x - grabOffset.x, y: pointer.y - grabOffset.y))
+    }
+    override func mouseUp(with event: NSEvent) { grabOffset = nil }
+}
+
 final class BoardWindow: NSWindow {
     private let activationShield = ActivationClickShield()
 
@@ -89,7 +125,10 @@ final class BoardWindow: NSWindow {
 
     override func sendEvent(_ event: NSEvent) {
         if event.type == .leftMouseDown {
-            activationShield.isArmed = !isKeyWindow && attachedSheet == nil
+            activationShield.isArmed = false
+            let point = contentView?.superview?.convert(event.locationInWindow, from: nil) ?? event.locationInWindow
+            let isMoveHandle = contentView?.hitTest(point) is WindowMoveView
+            activationShield.isArmed = !isMoveHandle && !isKeyWindow && attachedSheet == nil
                 && Self.isContentClick(event.locationInWindow, layoutRect: contentLayoutRect)
                 && WindowCoverage.isCovered(self)
         }

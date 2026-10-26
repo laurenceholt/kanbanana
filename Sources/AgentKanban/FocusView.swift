@@ -32,9 +32,11 @@ struct FocusBoard<CardContent: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 5) {
-                BananaMark().frame(width: 16, height: 16)
-                Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
-                Spacer()
+                HStack(spacing: 5) {
+                    BananaMark().frame(width: 16, height: 16)
+                    Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
+                    Spacer(minLength: 0)
+                }.frame(maxHeight: .infinity).overlay(WindowMoveHandle())
                 BoardHelpMenu(openSettings: openSettings)
             }
             .foregroundStyle(appearance.ink)
