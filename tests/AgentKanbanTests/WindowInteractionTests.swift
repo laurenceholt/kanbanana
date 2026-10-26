@@ -55,4 +55,21 @@ final class WindowInteractionTests: XCTestCase {
         shield.mouseUp(with: up)
         XCTAssertNil(shield.hitTest(point))
     }
+
+    @MainActor func testNativeChromeStaysOutsideBoardAndContentFollowsResize() {
+        let window = BoardWindow(contentSize: NSSize(width: 300, height: 700))
+        defer { window.close() }
+        XCTAssertTrue(window.isMovable)
+        XCTAssertTrue(window.styleMask.contains(.resizable))
+        XCTAssertFalse(window.styleMask.contains(.fullSizeContentView))
+        XCTAssertLessThan(window.contentLayoutRect.maxY, window.frame.height)
+        let board = NSView(frame: window.contentView!.bounds)
+        window.contentView = board
+        window.installActivationShield()
+        for size in [NSSize(width: 360, height: 600), NSSize(width: 280, height: 800)] {
+            window.setContentSize(size)
+            XCTAssertEqual(board.frame.size, size)
+            XCTAssertLessThan(window.contentView!.frame.maxY, window.frame.height)
+        }
+    }
 }

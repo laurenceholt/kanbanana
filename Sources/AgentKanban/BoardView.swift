@@ -53,7 +53,6 @@ struct BoardView: View {
             .frame(minWidth: layout.minimumSize.width, maxWidth: .infinity, minHeight: layout.minimumSize.height, maxHeight: .infinity)
             .background { BoardBackdrop(appearance: appearance, artwork: artwork) }
         }
-        .ignoresSafeArea(.container, edges: .top)
         .foregroundStyle(appearance.ink)
         .tint(appearance.ink)
         .environment(\.colorScheme, appearance.scheme)
@@ -174,7 +173,7 @@ struct BoardView: View {
             BoardHelpMenu(openSettings: { settings = true })
             AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext)
             Button { settings = true } label: { Image(systemName: "gearshape").font(.system(size: 13)) }.buttonStyle(QuietIconButton()).help("Settings").accessibilityLabel("Settings")
-        }.padding(.horizontal, 18).padding(.vertical, 7).padding(.top, 23)
+        }.padding(.horizontal, 18).padding(.vertical, 7)
             .background(appearance.canvas)
     }
     private var projectStrip: some View {

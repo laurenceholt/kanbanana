@@ -39,7 +39,7 @@ struct FocusBoard<CardContent: View>: View {
             }
             .foregroundStyle(appearance.ink)
             .frame(maxWidth: .infinity, alignment: .leading).frame(height: 28)
-            .padding(.horizontal, 18).padding(.top, 23)
+            .padding(.horizontal, 18).padding(.top, 3)
 
             HStack(spacing: 2) {
                 ForEach(columns, id: \.self) { column in columnHeader(column) }

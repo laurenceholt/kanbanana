@@ -29,10 +29,9 @@ import SwiftUI
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(toggle)
-        boardWindow = BoardWindow(contentRect: NSRect(origin: .zero, size: layout.defaultSize), styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
+        boardWindow = BoardWindow(contentSize: layout.defaultSize)
         boardWindow.title = demoRoot == nil ? "kanbanana" : "kanbanana · demo"
         boardWindow.titleVisibility = demoRoot == nil ? .hidden : .visible
-        boardWindow.titlebarAppearsTransparent = true
         boardWindow.backgroundColor = NSColor(BoardAppearance.saved(in: preferences).canvas)
         boardWindow.appearance = NSAppearance(named: BoardAppearance.saved(in: preferences).isDark ? .darkAqua : .aqua)
         boardWindow.isReleasedWhenClosed = false

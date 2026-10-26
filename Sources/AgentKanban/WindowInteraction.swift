@@ -53,6 +53,18 @@ final class ActivationClickShield: NSView {
 final class BoardWindow: NSWindow {
     private let activationShield = ActivationClickShield()
 
+    convenience init(contentSize: NSSize) {
+        // Reserve a real AppKit titlebar. Extending the hosting view underneath
+        // it makes window gestures compete with SwiftUI content hit testing.
+        self.init(contentRect: NSRect(origin: .zero, size: contentSize),
+                  styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                  backing: .buffered, defer: false)
+        isMovable = true
+        isMovableByWindowBackground = false
+        titlebarAppearsTransparent = false
+        isReleasedWhenClosed = false
+    }
+
     /// Called once after the hosting view is installed. The shield is normally
     /// transparent to hit testing; card controls and card drags remain unchanged.
     func installActivationShield() {

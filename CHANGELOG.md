@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Give Focus and full views a native macOS titlebar outside the SwiftUI content; remove the simulated titlebar spacing. Explicitly keep native movement and resizing enabled. Version `0.4.3`, build `7`.
+
 - Keep window move/resize events in AppKit: protect covered-window activation clicks with a content-only shield instead of swallowing mouse sequences in the window dispatcher. Use native content bounds to exclude the titlebar and resize edges. App version `0.4.2`, build `6`.
 
 - Explain local-only discovery during onboarding and on an empty board, including work on another Mac. Distinguish scanning, disabled monitoring, unreadable sources, filtered results, empty statuses and parked work.
