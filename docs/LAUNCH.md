@@ -16,8 +16,8 @@ This repo is already public. Source builds are available; the signed macOS downl
 - [x] Developer ID Application certificate and private key are available in Keychain (October 19, 2026); signed staging build passes deep/strict verification and bundled Python smoke check.
 - [x] A notarytool Keychain profile is configured and authenticated (October 19, 2026); credentials stay out of the repo and CI logs.
 - [x] Prepare `v0.4.0-beta.1`: app version `0.4.0`, build `4` in `scripts/build.zsh`.
-- [ ] Complete the signed ZIP path in [RELEASING.md](RELEASING.md), including Apple's acceptance, stapling and Gatekeeper assessment.
-- [ ] Add and validate the planned DMG with an Applications shortcut. The release script now creates both formats; validation is required.
+- [x] Version 0.4.0 ZIP passed Apple acceptance, stapling and Gatekeeper assessment on October 19. Recheck these for each later binary.
+- [x] Version 0.4.0 DMG with an Applications shortcut passed notarization, stapling and Gatekeeper checks. MacBook Air install/run reported October 25; source-discovery workflow remains to test there.
 - [ ] Run the exact downloaded artifact on independent Macs: Claude-only, Codex-only and both. Record provider/OS versions and results using [DOWNLOAD-TEST.md](DOWNLOAD-TEST.md).
 - [ ] Verify onboarding, source access, cold-start navigation, question/permission/resume/delivery states, Keychain persistence, sleep/wake and upgrade preservation.
 - [ ] Settle the intended supported scope. Cloud-backed Codex conversations are currently excluded even when their code runs locally.

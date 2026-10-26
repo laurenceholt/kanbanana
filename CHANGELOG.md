@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Explain local-only discovery during onboarding and on an empty board, including work on another Mac. Distinguish scanning, disabled monitoring, unreadable sources, filtered results, empty statuses and parked work.
+- Add Help in Focus and full views, an illustrated user guide, and optional summary setup with a fictional example, API/billing links and explicit opt-in. Prepare app version `0.4.1`, build `5`.
+
 ## 0.4.0-beta.1 (release candidate)
 
 - Prepare Developer ID signing and notarized ZIP/DMG packaging, with an Applications shortcut, Gatekeeper checks and SHA-256 checksums. App version is `0.4.0`, build `4`. Public binary release remains gated on Apple acceptance and independent-Mac testing.

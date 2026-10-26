@@ -16,17 +16,26 @@ import SwiftUI
         if let cards = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_CARDS"] { preferences.set(cards, forKey: CardPaper.preferenceKey) }
         if let theme = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_THEME"] { preferences.set(theme, forKey: BoardTheme.preferenceKey) }
         let mode = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_MODE"] ?? "board"
-        let state = DemoData.state(mode: mode, priority: ProcessInfo.processInfo.environment["KANBAN_PREVIEW_PRIORITY"] == "1")
+        var state = DemoData.state(mode: mode, priority: ProcessInfo.processInfo.environment["KANBAN_PREVIEW_PRIORITY"] == "1")
+        if mode.hasPrefix("empty") { state.cards = []; state.projects = []; state.dispositions = [:] }
         let store = await BoardStore.loaded(root: root, start: false, initialState: state, credentials: DemoCredentials())
         DemoData.showHealth(in: store)
+        await store.refreshKeyStatus()
+        if mode.hasPrefix("empty") {
+            for provider in ProviderID.allCases {
+                store.apply(ProviderSnapshot(provider: provider, cards: [], health: ProviderHealth(.noSessions), inventoryComplete: true, knownIDs: [], scannedAt: Date().timeIntervalSince1970, completeHistory: false))
+            }
+        }
         store.parking = mode == "parking"
-        let boats = state.projects[1]
+        let boats = state.projects.dropFirst().first ?? Project(name: "Example")
         if CommandLine.arguments.count > 2 { store.search = CommandLine.arguments[2] }
         if let artID = ProcessInfo.processInfo.environment["KANBAN_PREVIEW_ART"], let index = ArtBackdrop.artworks.firstIndex(where: { $0.id == artID }) {
             preferences.set(ArtBackdrop.offset(selecting: index, at: .now, context: state.projects.map(\.name).joined(separator: " ")), forKey: "photoOffset")
         }
         let content: AnyView
         switch mode {
+        case "welcome": content = AnyView(WelcomeView(store: store))
+        case "settings": content = AnyView(SettingsView(store: store))
         case "artlibrary": content = AnyView(ArtLibraryView(artOffset: .constant(0), context: ""))
         case "artcrops":
             content = AnyView(VStack(alignment: .leading, spacing: 12) {
@@ -43,7 +52,7 @@ import SwiftUI
         case "icons": content = AnyView(ProjectIconLibrary(store: store, project: boats, done: {}).padding(24).background(BoardStyle.canvas))
         case "projects": content = AnyView(ProjectsView(store: store))
         case "stacks": content = AnyView(BoardView(store: store, initiallyStacked: true, layoutPreferences: preferences))
-        case "focus":
+        case "focus", "emptyfocus":
             preferences.set(BoardLayout.focus.rawValue, forKey: "boardLayout")
             content = AnyView(BoardView(store: store, layoutPreferences: preferences))
         case "lanes", "outage":
@@ -53,9 +62,9 @@ import SwiftUI
         }
         let view = content.environment(\.artResourceRoot, resources).environment(\.colorScheme, BoardAppearance.saved(in: preferences).scheme).environment(\.boardAppearance, BoardAppearance.saved(in: preferences))
         let host = NSHostingView(rootView: view)
-        let boardMode = ["board", "stacks", "lanes", "outage", "parking"].contains(mode)
-        let width = Double(ProcessInfo.processInfo.environment["KANBAN_PREVIEW_WIDTH"] ?? (mode == "focus" ? "300" : boardMode ? "840" : "500")) ?? 840
-        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "artcrops" ? Double((ArtBackdrop.artworks.count + 5) / 6 * 325 + 80) : mode == "artlibrary" ? 570 : mode == "focus" ? 740 : boardMode ? 574 : 450)
+        let boardMode = ["board", "stacks", "lanes", "outage", "parking", "emptyboard"].contains(mode)
+        let width = Double(ProcessInfo.processInfo.environment["KANBAN_PREVIEW_WIDTH"] ?? (["focus", "emptyfocus"].contains(mode) ? "300" : boardMode ? "840" : "500")) ?? 840
+        host.frame = NSRect(x: 0, y: 0, width: width, height: mode == "artcrops" ? Double((ArtBackdrop.artworks.count + 5) / 6 * 325 + 80) : mode == "artlibrary" ? 570 : ["focus", "emptyfocus"].contains(mode) ? 740 : mode == "settings" ? 620 : mode == "welcome" ? 540 : boardMode ? 574 : 450)
         host.layoutSubtreeIfNeeded()
         guard let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
         host.cacheDisplay(in: host.bounds, to: rep)

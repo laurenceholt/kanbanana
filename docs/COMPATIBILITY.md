@@ -2,9 +2,13 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Onboarding update — 25 October 2026
+
+Version `0.4.1`, build `5`, adds local-discovery onboarding, distinct empty states, Help links and guided summary setup. All 106 Swift tests (74 XCTest + 32 Swift Testing) pass with warnings treated as errors, along with all 50 Python tests. Synthetic renders were checked at Focus width and in the welcome/settings layouts. The guide uses synthetic data; no live API requests were made for this change. Signing and notarization are checked separately for the new binary.
+
 ## Release candidate checks — 19 October 2026
 
-For app version `0.4.0` (build `4`, Apple Silicon), all 103 Swift tests passed with warnings treated as errors, all 50 Python tests passed, and the full Git history secret scan found no leaks. The Developer ID signed staging bundle passes deep/strict signature verification; its bundled Python reader passes an isolated empty-source smoke check without changing the signature. The same source commit passed the full macOS 14 and 15 CI matrix, including app packaging, secret audit and bundled-reader smoke checks ([run](https://github.com/laurenceholt/kanbanana/actions/runs/39271962103)). Apple notarization is in progress. A separate physical Mac has not yet validated the downloadable candidate.
+For app version `0.4.0` (build `4`, Apple Silicon), all 103 Swift tests passed with warnings treated as errors, all 50 Python tests passed, and the full Git history secret scan found no leaks. The Developer ID signed staging bundle passes deep/strict signature verification; its bundled Python reader passes an isolated empty-source smoke check without changing the signature. The same source commit passed the full macOS 14 and 15 CI matrix, including app packaging, secret audit and bundled-reader smoke checks ([run](https://github.com/laurenceholt/kanbanana/actions/runs/39271962103)). Apple accepted both the app ZIP and DMG on October 19; stapling and Gatekeeper checks passed. On October 25, the maintainer reported that this download installed and ran on a MacBook Air. Its board was empty, with the work believed to reside on a separate Mac Studio. This confirms a second-Mac installation, not provider discovery or the complete workflow; exact OS/provider versions were not supplied.
 
 ## Earlier automated checks — 18 October 2026
 

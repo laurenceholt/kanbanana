@@ -34,19 +34,24 @@ struct WelcomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack { BananaMark().frame(width: 36, height: 36); Text("Welcome to kanbanana").font(.title2.bold()) }
-            Text("See what your agents are doing, remember what you asked, and jump back into the right conversation.")
-            Text("Local monitoring").font(.headline)
+            Text("A small window for the Claude Code and Codex conversations stored on this Mac.")
+            ScrollView { VStack(alignment: .leading, spacing: 16) {
+            Text("Which apps do you use here?").font(.headline)
             ForEach(["claude", "codex"], id: \.self) { provider in
                 Toggle(isOn: Binding(get: { !store.privacy.disabledProviders.contains(provider) }, set: { store.setProvider(provider, enabled: $0) })) {
                     Text("\(provider == "claude" ? "Claude Desktop Code" : "Codex Desktop") · \(IntegrationInfo.versions[provider] ?? "Not installed")")
                 }
             }
-            Text("Reads local session history without changing either app. The first import covers the last two weeks. Requests and your notes are saved on this Mac. Parked cards remain recoverable.").font(.callout)
-            Text("Optional cloud summaries").font(.headline)
-            Text("You can add an OpenAI API key in Settings later. Summaries stay off until you enable them. Enabling sends request text and the latest agent report directly to OpenAI and incurs charges on your API account; a ChatGPT subscription does not supply API credit. Project notes are never sent.").font(.callout)
+            Text("We look for local conversations active in the last two weeks, including finished ones. If this Mac has no supported history yet, your board will start empty.").font(.callout).fixedSize(horizontal: false, vertical: true)
+            Text("Do your agents work on another Mac?").font(.headline)
+            Text("Run kanbanana on that Mac. Boards do not sync between Macs, and cloud-only conversations cannot be read here.").font(.callout).fixedSize(horizontal: false, vertical: true)
+            Text("No API key needed to get started").font(.headline)
+            Text("Cards show local excerpts by default. Later, you can enable optional paid OpenAI summaries in Settings. A key is not needed to discover conversations.").font(.callout).fixedSize(horizontal: false, vertical: true)
             Link("Read the privacy details", destination: URL(string: "https://github.com/laurenceholt/kanbanana/blob/main/PRIVACY.md")!)
-            Button("Open my board") { store.completeOnboarding() }.buttonStyle(.borderedProminent)
-        }.padding(24).frame(width: 470).background(appearance.canvas).foregroundStyle(appearance.ink)
+            Link("Getting started on this Mac", destination: HelpLinks.topic("your-first-conversation"))
+            } }
+            Button("Look for conversations") { store.completeOnboarding() }.buttonStyle(.borderedProminent)
+        }.padding(24).frame(width: 470, height: 540).background(appearance.canvas).foregroundStyle(appearance.ink)
     }
 }
 

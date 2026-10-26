@@ -12,7 +12,7 @@ CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No prod
 
 ## Signed app download
 
-**Not yet released.** Apple enrollment and Developer ID signing were verified on October 19, 2026. Notarization credentials are configured. Apple acceptance and independent-Mac verification remain release gates. The release script packages a ZIP and a signed disk image with an Applications shortcut. Track the full launch in [LAUNCH.md](LAUNCH.md).
+**Not yet released.** Apple enrollment and Developer ID signing were verified on October 19, 2026. Notarization credentials are configured. Version 0.4.0 passed Apple notarization, stapling and Gatekeeper checks on October 19; its installation on a MacBook Air was reported October 25. Provider workflows still need wider independent-Mac verification, and each new binary needs its own notarization. The release script packages a ZIP and a signed disk image with an Applications shortcut. Track the full launch in [LAUNCH.md](LAUNCH.md).
 
 An Apple Developer membership, Developer ID Application certificate/private key, and a notarytool credential profile are required. Install/import those through Apple's tools; never commit them or paste credentials into an issue or script.
 
@@ -30,7 +30,7 @@ Follow [the download acceptance checklist](DOWNLOAD-TEST.md) on a separate clean
 
 ## Release hygiene
 
-Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. Use a numeric three-part CFBundleShortVersionString (currently `0.4.0`, build `4`); the GitHub release tag carries beta status (`v0.4.0-beta.1`). GitHub Releases is the update channel; this beta has no automatic updater.
+Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. Use a numeric three-part CFBundleShortVersionString (currently `0.4.1`, build `5`); the GitHub release tag carries beta status (`v0.4.1-beta.1`). GitHub Releases is the update channel; this beta has no automatic updater.
 
 ## Pilot checklist
 

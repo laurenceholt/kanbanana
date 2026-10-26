@@ -8,7 +8,7 @@ Several conversations running in Claude Code and Codex. A few have finished. One
 
 kanbanana puts those conversations on one board. See what needs you, read a short reminder, and jump back into the right app. It lives in your menu bar, with a narrow **Focus** window that fits beside your work.
 
-[Watch the 56-second walkthrough](docs/media/kanbanana-demo.mp4) · [Build it locally](#get-started) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](PRIVACY.md)
+[Watch the 56-second walkthrough](docs/media/kanbanana-demo.mp4) · [User guide](docs/USER-GUIDE.md) · [Build it locally](#build-from-source) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](PRIVACY.md)
 
 <img src="docs/focus-beta.png" width="300" alt="Focus mode showing fictional Pocket weather, Trail guide and Launch notes conversations with short agent reports">
 
@@ -27,6 +27,12 @@ kanbanana puts those conversations on one board. See what needs you, read a shor
 kanbanana monitors and organizes existing conversations. Start work, reply and review the actual output in Claude or Codex. Clicking a card opens its native conversation.
 
 ## Get started
+
+Use kanbanana on the Mac where your Claude Code or Codex conversations are stored. It does not sync work from another Mac or read cloud-only histories. An empty first board is possible: the [getting-started guide](docs/USER-GUIDE.md#your-first-conversation) explains how to find your first conversation. No API key is needed for discovery or local excerpts.
+
+The **?** Help menu in Focus and the full board links to [background and appearance controls](docs/USER-GUIDE.md#appearance), [optional summary setup](docs/USER-GUIDE.md#optional-ai-summaries), and [missing conversations](docs/USER-GUIDE.md#missing-conversations).
+
+### Build from source
 
 You need an **Apple Silicon Mac**, **macOS 14+**, and **Swift 6+** (Xcode 16 or newer, or its command line tools). At least one supported provider is needed for live monitoring. No paid Apple Developer membership or API key is needed for a local build.
 
@@ -53,7 +59,7 @@ The build downloads a pinned, checksum-verified Python runtime and bundles it in
 
 ### First launch
 
-1. Choose which providers to monitor. kanbanana imports locally available conversations active in the last two weeks.
+1. Choose which providers to monitor **on this Mac**. kanbanana looks for locally available conversations active in the last two weeks, including completed ones. If none exist here, the board explains how to get started.
 2. Open **Focus** to work through Ready to check, or **Projects** to work project by project.
 3. Optionally enable cloud summaries in Settings. Until then, cards show local excerpts.
 

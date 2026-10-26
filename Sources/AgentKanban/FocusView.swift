@@ -17,6 +17,7 @@ struct FocusBoard<CardContent: View>: View {
     @Binding var theme: BoardTheme
     @Binding var artOffset: Int
     let artContext: String
+    let openSettings: () -> Void
     let changeLayout: (BoardLayout) -> Void
     let cardContent: (Conversation) -> CardContent
     @State private var expanded: Column = .ready
@@ -33,11 +34,12 @@ struct FocusBoard<CardContent: View>: View {
             HStack(spacing: 5) {
                 BananaMark().frame(width: 16, height: 16)
                 Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
+                Spacer()
+                BoardHelpMenu(openSettings: openSettings)
             }
             .foregroundStyle(appearance.ink)
             .frame(maxWidth: .infinity, alignment: .leading).frame(height: 28)
             .padding(.horizontal, 18).padding(.top, 23)
-            .accessibilityElement(children: .combine)
 
             HStack(spacing: 2) {
                 ForEach(columns, id: \.self) { column in columnHeader(column) }
@@ -69,11 +71,11 @@ struct FocusBoard<CardContent: View>: View {
                 VStack(spacing: appearance.theme == .art ? 12 : 8) {
                     ForEach(store.focusCards(in: expanded)) { card in cardContent(card) }
                     if store.focusCards(in: expanded).isEmpty {
-                        VStack(spacing: 8) {
-                            Image(systemName: expanded.symbol).font(.system(size: 24, weight: .ultraLight))
-                            Text(store.scanning && store.cards.isEmpty ? "Finding conversations…" : "\(expanded.title) is clear.")
-                                .font(appearance.font(12, weight: .medium))
-                        }.foregroundStyle(appearance.muted).frame(maxWidth: .infinity).padding(.vertical, 32)
+                        EmptyBoardView(store: store, focusColumn: expanded, openSettings: openSettings, openParking: {
+                            changeLayout(.projects)
+                            store.selectProject(nil)
+                            store.parking = true
+                        })
                     }
                 }.padding(.horizontal, 10).padding(.top, 4).padding(.bottom, 10)
             }.frame(maxHeight: .infinity).id(expanded)

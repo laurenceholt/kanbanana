@@ -43,7 +43,7 @@ struct BoardView: View {
             VStack(spacing: 0) {
                 Group {
                     if layout == .focus {
-                        FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext, changeLayout: { store.parking = false; layout = $0 }) { card in
+                        FocusBoard(store: store, background: $background, cardPaper: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext, openSettings: { settings = true }, changeLayout: { store.parking = false; layout = $0 }) { card in
                             cardView(card, opensProjectBoard: true)
                         }
                     } else { fullBoard }
@@ -97,14 +97,11 @@ struct BoardView: View {
                     StatusRetryButton(store: store)
                 }.foregroundStyle(appearance.muted).padding(.horizontal, 18).padding(.bottom, 8)
             }
-            if store.scanning && store.cards.isEmpty {
-                Spacer(); ProgressView("Finding your conversations…"); Spacer()
-            } else if store.visible.isEmpty {
-                Spacer()
-                Image(systemName: store.parking ? "archivebox" : "rectangle.3.group").font(.system(size: 30, weight: .ultraLight)).foregroundStyle(appearance.muted)
-                Text(store.parking ? "Room to breathe." : "A clear view.").font(appearance.font(20, weight: .semibold)).padding(.top, 8)
-                Text("No conversations here. Try another project or search.").font(appearance.font(11)).foregroundStyle(appearance.muted)
-                Spacer()
+            if store.visible.isEmpty {
+                ScrollView {
+                    EmptyBoardView(store: store, openSettings: { settings = true }, openParking: { store.parking = true })
+                        .padding(.vertical, 20)
+                }.frame(maxHeight: .infinity)
             } else {
                 if layout == .columns && store.visible.contains(where: { store.column($0) == .unknown }) && !store.parking {
                     DisclosureGroup(isExpanded: $unavailableExpanded) {
@@ -174,6 +171,7 @@ struct BoardView: View {
                     guard let card = store.cards.first(where: { $0.id == id }) else { return false }
                     store.park(card, true); return true
                 }
+            BoardHelpMenu(openSettings: { settings = true })
             AppearanceMenu(background: $background, cards: $cardPaper, theme: $theme, artOffset: $artOffset, artContext: artContext)
             Button { settings = true } label: { Image(systemName: "gearshape").font(.system(size: 13)) }.buttonStyle(QuietIconButton()).help("Settings").accessibilityLabel("Settings")
         }.padding(.horizontal, 18).padding(.vertical, 7).padding(.top, 23)
