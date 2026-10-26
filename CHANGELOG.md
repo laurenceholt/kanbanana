@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep window move/resize events in AppKit: protect covered-window activation clicks with a content-only shield instead of swallowing mouse sequences in the window dispatcher. Use native content bounds to exclude the titlebar and resize edges. App version `0.4.2`, build `6`.
+
 - Explain local-only discovery during onboarding and on an empty board, including work on another Mac. Distinguish scanning, disabled monitoring, unreadable sources, filtered results, empty statuses and parked work.
 - Add Help in Focus and full views, an illustrated user guide, and optional summary setup with a fictional example, API/billing links and explicit opt-in. Prepare app version `0.4.1`, build `5`.
 

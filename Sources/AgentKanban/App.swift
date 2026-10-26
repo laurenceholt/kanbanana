@@ -43,6 +43,7 @@ import SwiftUI
         let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: preferences, layoutChanged: { [weak self] in self?.changeLayout($0) }, appearanceChanged: { [weak self] in self?.boardWindow.backgroundColor = NSColor($0.canvas); self?.boardWindow.appearance = NSAppearance(named: $0.isDark ? .darkAqua : .aqua) }).environment(\.artResourceRoot, resourceRoot))
         host.sizingOptions = []
         boardWindow.contentView = host
+        boardWindow.installActivationShield()
         if demoRoot != nil || !boardWindow.setFrameUsingName(frameName) { boardWindow.center() }
         fitOnScreen()
         if demoRoot == nil { boardWindow.setFrameAutosaveName(frameName) }

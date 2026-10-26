@@ -33,27 +33,64 @@ enum WindowCoverage {
     }
 }
 
+/// Catch an activation click in the content view, not in NSWindow.sendEvent.
+/// AppKit must see every event in a window move/resize sequence, even when the
+/// board underneath should not respond to the click that brought it forward.
+final class ActivationClickShield: NSView {
+    var isArmed = false
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        isArmed && bounds.contains(convert(point, from: superview)) ? self : nil
+    }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func mouseDown(with event: NSEvent) {
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+    }
+    override func mouseDragged(with event: NSEvent) { }
+    override func mouseUp(with event: NSEvent) { isArmed = false }
+}
+
 final class BoardWindow: NSWindow {
-    private var consumingRaiseClick = false
+    private let activationShield = ActivationClickShield()
+
+    /// Called once after the hosting view is installed. The shield is normally
+    /// transparent to hit testing; card controls and card drags remain unchanged.
+    func installActivationShield() {
+        guard let contentView else { return }
+        // Keep the shield outside SwiftUI's managed subview hierarchy so view
+        // updates cannot remove or reorder it. Native sizing owns the wrapper.
+        let container = NSView(frame: contentView.frame)
+        self.contentView = container
+        contentView.frame = container.bounds
+        contentView.autoresizingMask = [.width, .height]
+        container.addSubview(contentView)
+        activationShield.frame = container.bounds
+        activationShield.autoresizingMask = [.width, .height]
+        container.addSubview(activationShield)
+    }
+
+    static func isContentClick(_ point: NSPoint, layoutRect: NSRect) -> Bool {
+        // Use AppKit's actual content layout, not a guessed title-bar height.
+        // Leave a generous native resize zone at every edge.
+        layoutRect.insetBy(dx: 12, dy: 12).contains(point)
+    }
+
     override func sendEvent(_ event: NSEvent) {
         if event.type == .leftMouseDown {
-            consumingRaiseClick = false
-            // Preserve native titlebar buttons and resize gestures. Only the
-            // content activation click is consumed, including its drag/up.
-            let content = CGRect(x: 6, y: 6, width: max(0, frame.width - 12), height: max(0, frame.height - 30))
-            if !isKeyWindow, attachedSheet == nil, content.contains(event.locationInWindow), WindowCoverage.isCovered(self) {
-                consumingRaiseClick = true
-                NSApp.activate(ignoringOtherApps: true)
-                makeKeyAndOrderFront(nil)
-                return
-            }
-        } else if consumingRaiseClick && (event.type == .leftMouseDragged || event.type == .leftMouseUp) {
-            if event.type == .leftMouseUp { consumingRaiseClick = false }
-            return
+            activationShield.isArmed = !isKeyWindow && attachedSheet == nil
+                && Self.isContentClick(event.locationInWindow, layoutRect: contentLayoutRect)
+                && WindowCoverage.isCovered(self)
         }
+        // Never drop an event here: doing so can interrupt native window tracking.
         super.sendEvent(event)
+        if event.type == .leftMouseUp { activationShield.isArmed = false }
+    }
+    override func resignKey() {
+        activationShield.isArmed = false
+        super.resignKey()
     }
     override func cancelOperation(_ sender: Any?) {
+        activationShield.isArmed = false
         if CardDragSession.activeID != nil { CardDragSession.cancel() }
         else { performClose(sender) }
     }
