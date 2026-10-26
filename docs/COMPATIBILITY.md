@@ -4,7 +4,7 @@ Compatibility is based on dated observations and tests, not an official integrat
 
 ## Native window frame — 26 October 2026
 
-Version `0.4.3`, build `7`, reserves a standard AppKit titlebar outside the SwiftUI board and removes the former simulated titlebar spacing. All 109 Swift tests pass, including native frame/content separation and repeated content resizing. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40329907452)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app's width and height were resized through native edges; titlebar drag actions completed, with persisted frame changes observed. The board was left fully onscreen, and existing projects and acknowledgments survived the update. Sustained user confirmation after app switching remains outstanding.
+Version `0.4.3`, build `7`, reserves a standard AppKit titlebar outside the SwiftUI board and removes the former simulated titlebar spacing. All 109 Swift tests pass, including native frame/content separation and repeated content resizing. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40329907452)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app's width and height were resized through native edges; titlebar drag tool calls completed, but a repeated controlled drag did not change the saved position, so movement is not yet verified. The board was left fully onscreen, and existing projects and acknowledgments survived the update. Sustained user confirmation after app switching remains outstanding.
 
 ## Window interaction update — 25 October 2026
 
