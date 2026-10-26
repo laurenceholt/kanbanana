@@ -2,6 +2,12 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Window interaction update — 25 October 2026
+
+Version `0.4.2`, build `6`, routes covered-window activation protection through a content-only view; every native mouse event still reaches AppKit. Tests cover titlebar/resize-edge exclusion and the shield returning to transparent hit testing after mouse-up. All 108 Swift tests pass with warnings treated as errors. Apple accepted both ZIP and DMG submissions; stapling and Gatekeeper checks passed. The installed Focus layout was visually checked, and all existing project records and acknowledgments survived relaunch. Repeated physical move/resize after switching apps still needs user confirmation.
+
+During investigation, an old `0.3.0-beta.1` backup app was found running alongside the installed app against the same data directory. It was stopped after a private backup. This is a possible contributor to the earlier save conflicts and acknowledgment resets; the evidence does not establish an independent lifecycle defect.
+
 ## Onboarding update — 25 October 2026
 
 Version `0.4.1`, build `5`, adds local-discovery onboarding, distinct empty states, Help links and guided summary setup. All 106 Swift tests (74 XCTest + 32 Swift Testing) pass with warnings treated as errors, along with all 50 Python tests. Synthetic renders were checked at Focus width and in the welcome/settings layouts. The guide uses synthetic data; no live API requests were made for this change. Apple accepted the 0.4.1 app ZIP and DMG on October 25; stapling, strict signature verification, checksums and Gatekeeper checks passed. The same source passed the macOS 14/15 CI matrix ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40253300373)). The installed Mac Studio copy launches and its Focus Help menu was verified. A separate restart issue resurfaced nine previously acknowledged cards despite unchanged final conversation events; the nine marks were restored through the UI and verified against the pre-upgrade export. That export remains private for investigating the underlying issue.
