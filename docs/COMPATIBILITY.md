@@ -2,9 +2,13 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Native window frame — 26 October 2026
+
+Version `0.4.3`, build `7`, reserves a standard AppKit titlebar outside the SwiftUI board and removes the former simulated titlebar spacing. All 109 Swift tests pass, including native frame/content separation and repeated content resizing. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40329907452)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app's width and height were resized through native edges; titlebar drag actions completed, with persisted frame changes observed. The board was left fully onscreen, and existing projects and acknowledgments survived the update. Sustained user confirmation after app switching remains outstanding.
+
 ## Window interaction update — 25 October 2026
 
-Version `0.4.2`, build `6`, routes covered-window activation protection through a content-only view; every native mouse event still reaches AppKit. Tests cover titlebar/resize-edge exclusion and the shield returning to transparent hit testing after mouse-up. All 108 Swift tests pass with warnings treated as errors. Apple accepted both ZIP and DMG submissions; stapling and Gatekeeper checks passed. The installed Focus layout was visually checked, and all existing project records and acknowledgments survived relaunch. Repeated physical move/resize after switching apps still needs user confirmation.
+Version `0.4.2`, build `6`, routes covered-window activation protection through a content-only view; every native mouse event still reaches AppKit. Tests cover titlebar/resize-edge exclusion and the shield returning to transparent hit testing after mouse-up. All 108 Swift tests pass with warnings treated as errors. Apple accepted both ZIP and DMG submissions; stapling and Gatekeeper checks passed. The installed Focus layout was visually checked, and all existing project records and acknowledgments survived relaunch. On October 26, the maintainer reported that the window still could not move, including after a clean restart. This change did not resolve the reported symptom.
 
 During investigation, an old `0.3.0-beta.1` backup app was found running alongside the installed app against the same data directory. It was stopped after a private backup. This is a possible contributor to the earlier save conflicts and acknowledgment resets; the evidence does not establish an independent lifecycle defect.
 
