@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restore the visible native window title and standard Mac app activation (Dock and Command-Tab), retaining the menu-bar controls. Remove the custom content drag handle. Version `0.4.5`, build `9`; physical-click movement verification is pending.
+
 - Make the banana/title a direct window move handle in Focus and full views, independent of native titlebar drag initiation. Keep first-click activation protection off that handle. Version `0.4.4`, build `8`.
 
 - Give Focus and full views a native macOS titlebar outside the SwiftUI content; remove the simulated titlebar spacing. Explicitly keep native movement and resizing enabled. Version `0.4.3`, build `7`.

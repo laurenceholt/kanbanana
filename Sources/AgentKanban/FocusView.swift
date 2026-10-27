@@ -36,7 +36,7 @@ struct FocusBoard<CardContent: View>: View {
                     BananaMark().frame(width: 16, height: 16)
                     Text("kanbanana").font(appearance.font(13, weight: .semibold)).tracking(-0.3)
                     Spacer(minLength: 0)
-                }.frame(maxHeight: .infinity).overlay(WindowMoveHandle())
+                }.frame(maxHeight: .infinity)
                 BoardHelpMenu(openSettings: openSettings)
             }
             .foregroundStyle(appearance.ink)

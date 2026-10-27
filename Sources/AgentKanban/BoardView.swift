@@ -139,7 +139,7 @@ struct BoardView: View {
             HStack(spacing: 9) {
                 BananaMark().frame(width: 24, height: 25)
                 Text("kanbanana").font(appearance.font(15, weight: .semibold)).tracking(-0.25).foregroundStyle(appearance.ink)
-            }.overlay(WindowMoveHandle())
+            }
             Picker("Board view", selection: $layout) {
                 ForEach(BoardLayout.allCases.filter { $0 != .focus }, id: \.self) { Text($0.title).tag($0) }
             }.pickerStyle(.segmented).labelsHidden().controlSize(.small).frame(width: 165).accessibilityLabel("Board view")

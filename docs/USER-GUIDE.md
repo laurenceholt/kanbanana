@@ -112,7 +112,9 @@ Keep the default model unless you have a reason to change it. If you enter anoth
 
 ## Closing, updating and getting help
 
-Drag the **banana or kanbanana title** to move the window. Drag a window edge or corner to resize it; Focus and the full board remember their sizes separately.
+Drag the native **title bar** to move the window. Drag a window edge or corner to resize it; Focus and the full board remember their sizes separately.
+
+kanbanana appears in the Dock and in Command-Tab, as well as the menu bar.
 
 Closing the window keeps monitoring running. Click the banana/counts in the macOS menu bar to reopen it. **Settings → Quit** stops the app; open kanbanana again to restart.
 

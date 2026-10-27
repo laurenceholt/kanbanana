@@ -16,7 +16,9 @@ import SwiftUI
     private var demoRoot: URL?
     private var preferences = UserDefaults.standard
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApplication.shared.setActivationPolicy(.accessory)
+        // The board is an ordinary Mac window, including Dock/Cmd-Tab activation.
+        // Keep this consistent with LSUIElement=false in the packaged app.
+        NSApplication.shared.setActivationPolicy(.regular)
         if CommandLine.arguments.contains("--demo") {
             let root = FileManager.default.temporaryDirectory.appendingPathComponent("kanbanana-demo-" + UUID().uuidString)
             demoRoot = root
@@ -31,7 +33,7 @@ import SwiftUI
         statusItem.button?.action = #selector(toggle)
         boardWindow = BoardWindow(contentSize: layout.defaultSize)
         boardWindow.title = demoRoot == nil ? "kanbanana" : "kanbanana · demo"
-        boardWindow.titleVisibility = demoRoot == nil ? .hidden : .visible
+        boardWindow.titleVisibility = .visible
         boardWindow.backgroundColor = NSColor(BoardAppearance.saved(in: preferences).canvas)
         boardWindow.appearance = NSAppearance(named: BoardAppearance.saved(in: preferences).isDark ? .darkAqua : .aqua)
         boardWindow.isReleasedWhenClosed = false

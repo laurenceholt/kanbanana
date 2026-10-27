@@ -2,11 +2,15 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Standard application activation candidate — 26 October 2026
+
+Version `0.4.5`, build `9`, restores the visible native title, removes the custom content drag handle and uses regular application activation with a Dock icon and Command-Tab presence. The menu-bar controls remain. All 110 Swift tests pass with warnings treated as errors, including native key/main eligibility and window controls. Apple accepted and stapled both ZIP and DMG. On October 27, this candidate replaced the installed app after a private backup, and the temporary demo was closed. The existing board and project records were retained. Physical-click testing remains pending. Background automation delivered mouse events while the test app remained inactive, so those events do not establish that native titlebar dragging works. Do not treat this candidate as a confirmed resolution until physical-click activation, movement and resizing have been checked.
+
 ## Direct window move handle — 26 October 2026
 
 Version `0.4.4`, build `8`, adds a direct drag handle over the banana and app title in Focus and full-board layouts. It moves the window from content-view mouse events, bypassing the native titlebar drag initiation that remained unreliable in 0.4.3. Repeated drags of the installed Focus window changed its saved position by the expected amount and returned it to its original position. The underlying native titlebar failure is not yet explained; this verifies the alternative move handle, not a fix to macOS titlebar tracking.
 
-All 110 Swift tests pass, including successive window movement and stopping on mouse release. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40341968246)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app uses the existing application data directory, with private backups retained before the upgrade.
+All 110 Swift tests pass, including successive window movement and stopping on mouse release. The macOS 14/15 CI matrix passed ([run](https://github.com/laurenceholt/kanbanana/actions/runs/40341968246)). Apple accepted the ZIP and DMG; signature, stapling, Gatekeeper and checksum checks passed. The installed app uses the existing application data directory, with private backups retained before the upgrade. The maintainer subsequently reported that physical dragging and resizing still failed and that the window controls remained gray after clicking. The custom handle did not resolve the reported problem.
 
 ## Native window frame — 26 October 2026
 
