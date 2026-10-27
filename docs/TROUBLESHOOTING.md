@@ -37,6 +37,10 @@ If the current board is corrupt or has an unsupported version, saving is disable
 
 Closing the window does not quit. Click its menu-bar item to reopen. Quit from Settings, or force-quit kanbanana if unresponsive, then double-click the same app bundle. The saved board reloads. A force quit may lose a very recent edit that had not yet autosaved.
 
+## Focus window will not drag
+
+Drag the native title bar at the top of the window. If cards still scroll and the sides/bottom resize, check whether screen mirroring is active. In one macOS setup, JetKVM mirroring (shown by the purple indicator) prevented Focus titlebar dragging while the full board still moved normally. Turning off that mirroring restored dragging immediately. This is an observed interaction, not a requirement to disable all screen sharing.
+
 ## Safe bug reports
 
 Settings → Diagnostics exports app/OS/provider versions, aggregate counts and fixed health categories. Review the file before attaching. Never attach `board.json`, backups, raw reader output, transcripts, keys or screenshots with private cards. The reader's stdout is a private application data pipe and contains request text and the bounded latest agent report.

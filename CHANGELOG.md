@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Restore the visible native window title and standard Mac app activation (Dock and Command-Tab), retaining the menu-bar controls. Remove the custom content drag handle. Version `0.4.5`, build `9`; physical-click movement verification is pending.
+- Restore the visible native window title and standard Mac app activation (Dock and Command-Tab), retaining the menu-bar controls. Remove the custom content drag handle. Version `0.4.5`, build `9`. Focus dragging was confirmed after disabling interfering JetKVM screen mirroring; see troubleshooting.
 
 - Make the banana/title a direct window move handle in Focus and full views, independent of native titlebar drag initiation. Keep first-click activation protection off that handle. Version `0.4.4`, build `8`.
 

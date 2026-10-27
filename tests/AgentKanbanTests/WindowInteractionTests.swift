@@ -2,6 +2,7 @@ import KanbananaCore
 import KanbananaServices
 import AppKit
 import XCTest
+import SwiftUI
 @testable import AgentKanban
 
 final class WindowInteractionTests: XCTestCase {
@@ -85,4 +86,35 @@ final class WindowInteractionTests: XCTestCase {
             XCTAssertTrue(window.standardWindowButton(button)?.isEnabled == true)
         }
     }
+    @MainActor func testRealFocusContentDoesNotCoverNativeTitlebar() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let prefs = UserDefaults(suiteName: root.lastPathComponent)!
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            prefs.removePersistentDomain(forName: root.lastPathComponent)
+        }
+        let store = await BoardStore.loaded(root: root, start: false)
+        try await store.installFixture { $0 = DemoData.state() }
+        for layout in [BoardLayout.focus, .projects] {
+            prefs.set(layout.rawValue, forKey: "boardLayout")
+            let size = layout == .focus ? NSSize(width: 308, height: 1330) : NSSize(width: 1183, height: 1125)
+            let window = BoardWindow(contentSize: size)
+            let host = NSHostingView(rootView: BoardView(store: store, layoutPreferences: prefs))
+            host.sizingOptions = []
+            window.contentView = host
+            window.installActivationShield()
+            window.orderBack(nil)
+            window.contentView?.layoutSubtreeIfNeeded()
+            let frame = try XCTUnwrap(window.contentView?.superview)
+            let content = try XCTUnwrap(window.contentView)
+            for x in [CGFloat(150), size.width / 2, size.width - 30] {
+                let point = NSPoint(x: x, y: window.contentLayoutRect.maxY + 16)
+                let hit = frame.hitTest(point)
+                XCTAssertNotNil(hit)
+                XCTAssertFalse(hit?.isDescendant(of: content) == true, "Native titlebar must not hit board content")
+            }
+            window.close()
+        }
+    }
+
 }
