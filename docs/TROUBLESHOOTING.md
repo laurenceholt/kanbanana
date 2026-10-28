@@ -17,6 +17,10 @@ If you use a custom `CODEX_HOME` or `CLAUDE_CONFIG_DIR`, enter it under Settings
 - **No recent execution signal:** the store can be read but it does not establish whether that quiet task is still running. Open the source conversation to check.
 - **No longer in Claude / Codex:** a complete inventory no longer contains that conversation. After seven days without activity it moves to the parking lot, retaining saved request history, notes and project assignment. To do reminders stay on the board; restoring a parked card gives it another seven days. These records do not count as retryable read failures. If new activity appears for the same source conversation, its card returns automatically. A renamed or replacement conversation with a different ID remains a separate card.
 
+## Model capacity and agent failures
+
+When Codex records a failed turn, its card belongs in **Needs me**. Model-capacity failures show **Model at capacity** and the provider’s explanation. Open the conversation to change models or retry. A subsequent running or completed turn replaces that warning. The board shows the current state, not an error history; transient warnings that the provider does not save cannot be detected.
+
 ## Summaries
 
 Saving a key does not enable summaries. Enable the toggle explicitly after reading the privacy information. If the daily attempt limit is reached, wait until the next local calendar day or change the limit. Excluded projects remain excerpts unless already cached.

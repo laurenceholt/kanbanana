@@ -90,6 +90,39 @@ class ReaderProtocolTests(unittest.TestCase):
             con.execute("INSERT INTO thread_items VALUES('x','new','question',4,?,'dynamicToolCall',2)", (json.dumps(tool),))
             self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Question", "Which file?"))
 
+    def test_paginated_failure_shows_capacity_message_until_next_turn(self):
+        with sqlite3.connect(":memory:") as con:
+            con.row_factory = sqlite3.Row
+            con.execute("CREATE TABLE thread_turns(thread_id,turn_id,status,started_at,completed_at,rollout_ordinal,error_json)")
+            con.execute("CREATE TABLE thread_items(thread_id,turn_id,item_id,created_at_ms,item_json,item_type,rollout_ordinal)")
+            error = {"message": "Selected model is at capacity. Please try a different model.",
+                     "codexErrorInfo": "serverOverloaded"}
+            con.execute("INSERT INTO thread_turns VALUES('x','failed','failed',1,2,1,?)", (json.dumps(error),))
+            # Even a final-looking message earlier in the failed turn must not
+            # take precedence over its terminal error.
+            con.execute("INSERT INTO thread_items VALUES('x','failed','partial',1,?,'agentMessage',1)",
+                        (json.dumps({"type": "agentMessage", "phase": "final_answer", "text": "Partial progress"}),))
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4],
+                             ("needsMe", "Model at capacity", error["message"]))
+            con.execute("INSERT INTO thread_turns VALUES('x','retry','inProgress',3,NULL,2,NULL)")
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("running", "", ""))
+            con.execute("UPDATE thread_turns SET status='completed',completed_at=4 WHERE turn_id='retry'")
+            con.execute("INSERT INTO thread_items VALUES('x','retry','final',4,?,'agentMessage',2)",
+                        (json.dumps({"type": "agentMessage", "phase": "final_answer", "text": "Finished"}),))
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("ready", "Response ready", "Finished"))
+
+    def test_paginated_optional_error_is_defensive_and_bounded(self):
+        with sqlite3.connect(":memory:") as con:
+            con.row_factory = sqlite3.Row
+            con.execute("CREATE TABLE thread_turns(thread_id,turn_id,status,started_at,completed_at,rollout_ordinal,error_json)")
+            con.execute("CREATE TABLE thread_items(thread_id,turn_id,item_id,created_at_ms,item_json,item_type,rollout_ordinal)")
+            con.execute("INSERT INTO thread_turns VALUES('x','failed','failed',1,2,1,NULL)")
+            for value in [None, '{', 'null', '[]', '42', '{"message":42}']:
+                con.execute("UPDATE thread_turns SET error_json=?", (value,))
+                self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Agent error", ""))
+            con.execute("UPDATE thread_turns SET error_json=?", (json.dumps({"message": "x" * 25000}),))
+            self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Agent error", "x" * 20000))
+
     def test_append_decodes_only_new_records_and_unchanged_decodes_none(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / "history.jsonl"

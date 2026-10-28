@@ -172,6 +172,22 @@ def codex_paginated(con, tid, generation=None):
         return requests, "unknown", "Status unavailable", response, 0, ""
     state = {"completed": "ready", "failed": "needsMe", "interrupted": "needsMe", "inProgress": "running"}.get(turn["status"], "unknown")
     reason = {"completed": "Response ready", "failed": "Agent error", "interrupted": "Interrupted"}.get(turn["status"], "")
+    if turn["status"] == "failed":
+        # Failed turns carry their explanation separately from agent messages.
+        # Older history schemas omit this field. A bad optional error must not
+        # hide the known failure or make the whole conversation unreadable.
+        response = ""
+        error = turn["error_json"] if "error_json" in turn.keys() else None
+        try:
+            error = json.loads(error) if isinstance(error, str) else None
+        except ValueError:
+            error = None
+        if isinstance(error, dict):
+            message = error.get("message")
+            if isinstance(message, str):
+                response = message.strip()[:20000]
+            if error.get("codexErrorInfo") == "serverOverloaded":
+                reason = "Model at capacity"
     if state == "ready":
         state, reason = delivered_state(response)
     when = stamp(turn["completed_at"] or turn["started_at"])
