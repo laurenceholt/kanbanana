@@ -123,6 +123,57 @@ class ReaderProtocolTests(unittest.TestCase):
             con.execute("UPDATE thread_turns SET error_json=?", (json.dumps({"message": "x" * 25000}),))
             self.assertEqual(adapters.codex_paginated(con, "x")[1:4], ("needsMe", "Agent error", "x" * 20000))
 
+    def test_continued_codex_history_keeps_card_identity_and_reads_active_segment(self):
+        tid, segment = "11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"
+        with tempfile.TemporaryDirectory() as directory, patch.object(adapters, "CODEX_HOME", Path(directory)):
+            root = Path(directory)
+            path = root / f"rollout-2026-10-29T10-00-00-{tid}_{segment}.jsonl"
+            path.write_text(json.dumps({"type": "session_meta", "payload": {"id": tid,
+                "history_base": {"thread_id": tid, "end_ordinal_exclusive": 10}}}) + "\n")
+            with sqlite3.connect(root / "state_5.sqlite") as state:
+                state.execute("CREATE TABLE threads(id,name,title,cwd,updated_at,history_mode,rollout_path,source,thread_source)")
+                state.execute("INSERT INTO threads VALUES(?,?,?,?,?,?,?,?,?)", (tid,"Example","Example","/example",100,"paginated",str(path),"vscode","user"))
+            with sqlite3.connect(root / "thread_history_1.sqlite") as con:
+                con.row_factory = sqlite3.Row
+                con.execute("CREATE TABLE thread_turns(thread_id,turn_id,status,started_at,completed_at,rollout_ordinal)")
+                con.execute("CREATE TABLE thread_items(thread_id,turn_id,item_id,created_at_ms,item_json,item_type,rollout_ordinal)")
+                con.execute("INSERT INTO thread_turns VALUES(?,'old','interrupted',1,2,10)", (tid,))
+                for thread, key, ordinal in [(tid, "inherited", 1), (tid, "discarded", 10), (segment, "current", 11)]:
+                    con.execute("INSERT INTO thread_items VALUES(?,'turn',?,1000,?,'userMessage',?)", (thread,key,json.dumps({"type":"userMessage","content":key}),ordinal))
+                # Do not present the old interruption as current while the new
+                # segment's projection is temporarily missing.
+                self.assertEqual(adapters.codex_paginated(con, tid, rollout_path=path)[1:3], ("unknown", "History temporarily unavailable"))
+                con.execute("INSERT INTO thread_turns VALUES(?,'new','inProgress',3,NULL,11)", (segment,))
+                con.commit()
+                with patch.object(adapters.time, "time", return_value=4):
+                    card = adapters.codex_cards(0)[0]
+                self.assertEqual(card["id"], "codex:" + tid)
+                self.assertEqual(card["url"], "codex://threads/" + tid)
+                self.assertEqual(card["state"], "running")
+                self.assertEqual([r["id"] for r in card["requests"]], ["inherited", "current"])
+                question = {"tool":"request_user_input","status":"inProgress","arguments":{"questions":[{"question":"Which file?"}]}}
+                con.execute("INSERT INTO thread_items VALUES(?,'new','q',4000,?,'dynamicToolCall',12)", (segment,json.dumps(question)))
+                self.assertEqual(adapters.codex_paginated(con,tid,rollout_path=path)[1:4], ("needsMe","Question","Which file?"))
+                con.execute("UPDATE thread_turns SET status='completed',completed_at=5 WHERE thread_id=?", (segment,))
+                con.execute("INSERT INTO thread_items VALUES(?,'new','final',5000,?,'agentMessage',13)", (segment,json.dumps({"type":"agentMessage","phase":"final_answer","text":"Finished the example."})))
+                con.commit()
+                card = adapters.codex_cards(0)[0]
+                self.assertEqual((card["state"],card["response"],card["eventID"]), ("ready","Finished the example.","new:completed"))
+
+    def test_continuation_metadata_must_match_the_conversation(self):
+        tid, segment = "11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / f"rollout-2026-10-29T10-00-00-{tid}_{segment}.jsonl"
+            invalid = [[], {"type":"session_meta","payload":None},
+                       {"type":"session_meta","payload":{"id":tid,"history_base":None}},
+                       {"type":"session_meta","payload":{"id":segment,"history_base":{"thread_id":tid,"end_ordinal_exclusive":10}}},
+                       {"type":"session_meta","payload":{"id":tid,"history_base":{"thread_id":segment,"end_ordinal_exclusive":10}}}]
+            for record in invalid:
+                path.write_text(json.dumps(record) + "\n")
+                with self.assertRaises(adapters.UnsupportedFormat):
+                    adapters.codex_history_segment(tid, path)
+            self.assertEqual(adapters.codex_history_segment(tid, None), (tid,None))
+
     def test_append_decodes_only_new_records_and_unchanged_decodes_none(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / "history.jsonl"

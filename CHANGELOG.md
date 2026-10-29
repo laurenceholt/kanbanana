@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Follow continued Codex history segments while preserving the original card identity and inherited requests. Previously these chats could remain on an old interruption after new work completed. Validate continuation metadata and exclude abandoned history beyond the recorded branch boundary. Version `0.4.7`, build `11`.
+
 - Show Codex failed-turn explanations on Needs me cards, including “Model at capacity,” rather than discarding the error and showing only “Agent error.” Clear the failure when a later turn resumes or completes. Version `0.4.6`, build `10`.
 
 - Restore the visible native window title and standard Mac app activation (Dock and Command-Tab), retaining the menu-bar controls. Remove the custom content drag handle. Version `0.4.5`, build `9`. Focus dragging was confirmed after disabling interfering JetKVM screen mirroring; see troubleshooting.

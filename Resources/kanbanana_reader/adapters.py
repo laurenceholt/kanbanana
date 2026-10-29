@@ -149,15 +149,51 @@ def claude_cards(cutoff, tracked_ids=()):
 
 
 
-def codex_paginated(con, tid, generation=None):
-    cache_key = (generation, tid)
+def codex_history_segment(tid, rollout_path):
+    """Resolve a continued rollout without changing the public conversation ID.
+
+    Codex names these files <conversation UUID>_<segment UUID>.jsonl and
+    records the inherited prefix in session_meta.history_base. Validate both
+    before reading another history key; never infer relationships from titles.
+    """
+    if not rollout_path:
+        return tid, None
+    uuid = r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}"
+    match = re.search(r"-" + re.escape(tid) + r"_(" + uuid + r")$", Path(rollout_path).stem)
+    if not match:
+        return tid, None
+    with Path(rollout_path).open("rb") as stream:
+        line = stream.readline(1024 * 1024 + 1)
+    if len(line) > 1024 * 1024 or not line.endswith(b"\n"):
+        raise UnsupportedFormat()
+    record = json.loads(line)
+    if not isinstance(record, dict) or not isinstance(record.get("payload"), dict):
+        raise UnsupportedFormat()
+    meta = record["payload"]
+    base = meta.get("history_base")
+    if not isinstance(base, dict):
+        raise UnsupportedFormat()
+    end = base.get("end_ordinal_exclusive")
+    if (record.get("type") != "session_meta" or meta.get("id") != tid
+            or base.get("thread_id") != tid or type(end) is not int or end < 0
+            or match[1] == tid):
+        raise UnsupportedFormat()
+    return match[1], end
+
+
+def codex_paginated(con, tid, generation=None, rollout_path=None):
+    active_tid, base_end = codex_history_segment(tid, rollout_path)
+    cache_key = (generation, tid, active_tid, base_end)
     if generation is not None and cache_key in PAGINATED_CACHE:
         PAGINATED_CACHE.move_to_end(cache_key)
         return PAGINATED_CACHE[cache_key]
     require_columns(con, "thread_items", ["item_id", "created_at_ms", "item_json", "thread_id", "turn_id", "item_type", "rollout_ordinal"])
     require_columns(con, "thread_turns", ["thread_id", "turn_id", "status", "completed_at", "started_at", "rollout_ordinal"])
-    turn = con.execute("SELECT * FROM thread_turns WHERE thread_id=? ORDER BY rollout_ordinal DESC LIMIT 1", (tid,)).fetchone()
-    rows = con.execute("SELECT item_id,created_at_ms,item_json,turn_id FROM thread_items WHERE thread_id=? AND item_type IN ('userMessage','agentMessage') ORDER BY rollout_ordinal", (tid,))
+    turn = con.execute("SELECT * FROM thread_turns WHERE thread_id=? ORDER BY rollout_ordinal DESC LIMIT 1", (active_tid,)).fetchone()
+    scope, args = "thread_id=?", (active_tid,)
+    if base_end is not None:
+        scope, args = "(thread_id=? OR (thread_id=? AND rollout_ordinal<?))", (active_tid, tid, base_end)
+    rows = con.execute("SELECT thread_id,item_id,created_at_ms,item_json,turn_id FROM thread_items WHERE " + scope + " AND item_type IN ('userMessage','agentMessage') ORDER BY rollout_ordinal", args)
     requests, seen, response = [], set(), ""
     for row in rows:
         d = json.loads(row["item_json"])
@@ -166,10 +202,10 @@ def codex_paginated(con, tid, generation=None):
             if text and row["item_id"] not in seen:
                 requests.append(request(row["item_id"], text, stamp(row["created_at_ms"])))
                 seen.add(row["item_id"])
-        elif d.get("phase") == "final_answer" and turn and row["turn_id"] == turn["turn_id"]:
+        elif d.get("phase") == "final_answer" and turn and row["thread_id"] == active_tid and row["turn_id"] == turn["turn_id"]:
             response = d.get("text", "")
     if not turn:
-        return requests, "unknown", "Status unavailable", response, 0, ""
+        return requests, "unknown", "History temporarily unavailable" if base_end is not None else "Status unavailable", response, 0, ""
     state = {"completed": "ready", "failed": "needsMe", "interrupted": "needsMe", "inProgress": "running"}.get(turn["status"], "unknown")
     reason = {"completed": "Response ready", "failed": "Agent error", "interrupted": "Interrupted"}.get(turn["status"], "")
     if turn["status"] == "failed":
@@ -192,9 +228,9 @@ def codex_paginated(con, tid, generation=None):
         state, reason = delivered_state(response)
     when = stamp(turn["completed_at"] or turn["started_at"])
     if state == "running":
-        latest = con.execute("SELECT MAX(created_at_ms) FROM thread_items WHERE thread_id=? AND turn_id=?", (tid, turn["turn_id"])).fetchone()[0]
+        latest = con.execute("SELECT MAX(created_at_ms) FROM thread_items WHERE thread_id=? AND turn_id=?", (active_tid, turn["turn_id"])).fetchone()[0]
         when = max(when, stamp(latest))
-        for row in con.execute("SELECT item_json FROM thread_items WHERE thread_id=? AND turn_id=? AND item_type IN ('mcpToolCall','dynamicToolCall')", (tid, turn["turn_id"])):
+        for row in con.execute("SELECT item_json FROM thread_items WHERE thread_id=? AND turn_id=? AND item_type IN ('mcpToolCall','dynamicToolCall')", (active_tid, turn["turn_id"])):
             item = json.loads(row[0])
             if item.get("status") == "inProgress" and item.get("tool", "").split(".")[-1] == "request_user_input":
                 state, reason = "needsMe", "Question"
@@ -257,7 +293,7 @@ def codex_cards(cutoff, tracked_ids=()):
                         parsed = ([], "unknown", "History temporarily unavailable", "", 0, "")
                         issue = history_issue
                     else:
-                        parsed = codex_paginated(history, row["id"], history_generation)
+                        parsed = codex_paginated(history, row["id"], history_generation, row["rollout_path"])
                 else:
                     parsed = read_jsonl(row["rollout_path"], parse_codex_legacy)
             except (OSError, sqlite3.Error, ValueError, KeyError, TypeError, UnsupportedFormat) as error:

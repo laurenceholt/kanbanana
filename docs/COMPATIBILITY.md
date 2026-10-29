@@ -2,6 +2,10 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## Continued Codex histories — 29 October 2026
+
+Version `0.4.7`, build `11`, follows a continued paginated rollout whose filename carries a segment UUID and whose `session_meta.history_base` identifies the original conversation and inherited ordinal boundary. The reader retains the public card ID and navigation link, includes inherited requests only before that boundary, and reads current status/report from the active segment. Missing projections and unrecognized continuation metadata produce an unavailable observation instead of silently presenting the abandoned segment as current. All 54 Python tests pass, including synthetic continuation discovery, running/question/completion transitions, inherited history boundaries and malformed metadata. The Developer ID signed local build was installed and signature-verified. The affected live card advanced from an October 7 interruption to its current running turn; project records, assignments, priorities and to-do notes were preserved. This build is not yet notarized or published as a download.
+
 ## Codex capacity failures — 28 October 2026
 
 Version `0.4.6`, build `10`, reads optional `error_json` from failed paginated Codex turns. Capacity failures remain Needs me and now include the provider’s explanation with a Model at capacity label. Missing/malformed errors retain the generic failure state; subsequent turns supersede the warning. All 52 Python reader tests pass, including failure → retry → completion and optional-schema handling. An isolated in-memory replay of the observed failed turn verified the capacity message without altering the source database. The Developer ID signed local build was installed and signature-verified; fresh observations resumed and project records, assignments, priorities and to-do notes were preserved. This build has not yet been notarized or published as a download.
