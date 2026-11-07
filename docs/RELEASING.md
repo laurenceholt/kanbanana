@@ -30,6 +30,8 @@ Follow [the download acceptance checklist](DOWNLOAD-TEST.md) on a separate clean
 
 ## Release hygiene
 
+Store local upgrade app backups as `.app-backup` directories or archives, never runnable `.app` bundles. Unregister obsolete copies from Launch Services. After quitting all previous copies, launch the explicit installed path and verify the running executable is `~/Applications/kanbanana.app/Contents/MacOS/kanbanana`, with its readers beneath that same bundle. `open` returning success does not establish which copy is running.
+
 Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. Use a numeric three-part CFBundleShortVersionString (currently `0.4.1`, build `5`); the GitHub release tag carries beta status (`v0.4.1-beta.1`). GitHub Releases is the update channel; this beta has no automatic updater.
 
 ## Pilot checklist

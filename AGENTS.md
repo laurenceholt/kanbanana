@@ -8,3 +8,5 @@ This repository is the authoritative source for the refactored app and all futur
 - Use synthetic data for screenshots and tests. Never commit local boards, exports, keys, or native conversation content.
 - Build with `zsh scripts/build.zsh`. Use `swift run AgentKanban --demo` or `zsh scripts/previews.zsh` for isolated UI work.
 - The installed app is `~/Applications/kanbanana.app`. Quit an older running copy before launching an updated build. Preserve the existing bundle identifier and `~/Library/Application Support/Agent Kanban/` data directory.
+
+- Never retain upgrade backups as runnable `.app` bundles. Use `.app-backup` folders or archives and unregister old copies from Launch Services. After launch, verify the running process path is `~/Applications/kanbanana.app/Contents/MacOS/kanbanana`; a successful `open` command alone is not proof that the intended copy is running.
