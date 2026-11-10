@@ -15,9 +15,22 @@ final class EmptyBoardTests: XCTestCase {
         store.apply(ProviderSnapshot(provider: .codex, cards: [], health: ProviderHealth(.accessDenied), inventoryComplete: false, knownIDs: [], scannedAt: 100, completeHistory: false))
         XCTAssertEqual(store.emptyBoardState(), .connectionProblem)
         try await store.installFixture { state in
-            var privacy = PrivacyOptions(); privacy.disabledProviders = ["claude", "codex"]; state.privacy = privacy
+            var privacy = PrivacyOptions(); privacy.disabledProviders = Set(ProviderID.allCases.map(\.rawValue)); state.privacy = privacy
         }
         XCTAssertEqual(store.emptyBoardState(), .monitoringOff)
+        await store.stop()
+    }
+
+    @MainActor func testMissingChatGPTSignalIsExplainedAsACatalogLimitation() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = await BoardStore.loaded(root: root, start: false, credentials: DemoCredentials())
+        let card = Conversation(id: "chatgpt:example", provider: "chatgpt", nativeID: "example", title: "Example",
+            folder: "", updated: 100, requests: [], state: .unknown, reason: "No completion signal", eventID: "catalog:100", eventTime: 100, url: "")
+        store.apply(ProviderSnapshot(provider: .chatgpt, cards: [card], health: ProviderHealth(.connected),
+            inventoryComplete: false, knownIDs: [card.id], scannedAt: 101))
+        XCTAssertTrue(store.statusCheckMessage?.contains("ChatGPT has not exposed status") == true)
+        XCTAssertFalse(store.statusCheckMessage?.contains("retrying automatically") == true)
         await store.stop()
     }
 

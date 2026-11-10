@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add limited ChatGPT discovery from the desktop app’s local catalog, with explicit unread-result and fresh activity signals, independent monitoring controls, and browser navigation. Unknown status remains unknown; message summaries and Needs me detection are unavailable. Version `0.4.8`, build `12`.
+
 - Follow continued Codex history segments while preserving the original card identity and inherited requests. Previously these chats could remain on an old interruption after new work completed. Validate continuation metadata and exclude abandoned history beyond the recorded branch boundary. Version `0.4.7`, build `11`.
 
 - Show Codex failed-turn explanations on Needs me cards, including “Model at capacity,” rather than discarding the error and showing only “Agent error.” Clear the failure when a later turn resumes or completes. Version `0.4.6`, build `10`.

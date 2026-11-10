@@ -96,3 +96,7 @@ Keys live in macOS Keychain. Fresh installs default to excerpts and summaries of
 - `zsh scripts/build.zsh`: pinned runtime, packaged worker modules, ad-hoc local signing and bundle verification.
 
 CI runs these tests and the packaged-reader smoke check on macOS 14 and 15. Native store schemas remain private integration details; automated fixtures cannot guarantee compatibility with every provider release. See [Compatibility](COMPATIBILITY.md).
+
+### ChatGPT catalog adapter
+
+ChatGPT uses a third isolated provider worker (`kanbanana_reader/chatgpt.py`). It reads only the desktop catalog and optional active-turn table from the configured Codex home. It deliberately emits no requests or reports, no authoritative absence, and no inferred success for null status. This preserves the existing Core → Services → UI boundary and keeps partial ChatGPT support independent of the Codex transcript reader. Navigation validates the conversation UUID and constructs a canonical HTTPS URL.

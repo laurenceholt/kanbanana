@@ -162,7 +162,7 @@ private struct ProjectPile: View {
                     HStack(spacing: 4) {
                         Text("\(cards.count) conversations").font(appearance.font(9, weight: .semibold))
                         Spacer(minLength: 0)
-                        ForEach(["claude", "codex"].filter { provider in cards.contains { $0.provider == provider } }, id: \.self) { provider in
+                        ForEach(["claude", "codex", "chatgpt"].filter { provider in cards.contains { $0.provider == provider } }, id: \.self) { provider in
                             ProviderIcon(provider: provider, size: 13)
                         }
                     }.foregroundStyle(appearance.muted).padding(.top, 2)

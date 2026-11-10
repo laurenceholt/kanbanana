@@ -10,7 +10,7 @@ A small window for keeping up with your Claude Code and Codex conversations. Sta
 
 **Use kanbanana on the Mac where your conversations are stored.** If all your work runs on a Mac Studio, installing kanbanana on your MacBook Air won't bring that work across. There is no cross-Mac board sync or cloud-history connection. An API key is unrelated to discovery.
 
-1. Open kanbanana. On the welcome screen, choose **Claude Desktop Code**, **Codex Desktop**, or both, then click **Look for conversations**.
+1. Open kanbanana. On the welcome screen, choose the integrations you use: **Claude**, **Codex**, and optionally **ChatGPT**, then click **Look for conversations**.
 2. Give the local scan a moment. The initial import looks for supported conversations active in the last two weeks, including finished ones. A job doesn't have to be running now.
 3. If the board is empty, open Claude Desktop's **Code** section or Codex Desktop **on this Mac**. Start or continue a locally stored conversation, then return to kanbanana. It checks automatically; **Check again** requests another scan.
 4. If no card appears, read the source status on the empty board and follow [Missing conversations](#missing-conversations). Starting a task on this Mac does not guarantee that its history is local: newer cloud-backed Codex histories are not supported.
@@ -19,7 +19,18 @@ A small window for keeping up with your Claude Code and Codex conversations. Sta
 
 You can change the background or read Help while the board is empty. You do **not** need an API key to see cards, use projects, or track status.
 
-Once a card appears, clicking its conversation title opens the conversation in its original app. kanbanana doesn't start jobs or send replies for you.
+Once a card appears, clicking its conversation title opens the conversation in its original app (ChatGPT opens in your browser). kanbanana doesn't start jobs or send replies for you.
+
+## ChatGPT: limited support
+
+ChatGPT cards come from the local catalog maintained by the desktop app with bundle identity `com.openai.codex` (the app itself may be named ChatGPT). Keep that app open so its catalog can refresh. Installing kanbanana alone does not fetch your ChatGPT cloud history; an API key does not change that.
+
+- Recent cataloged conversations appear as separate cards, initially under Ungrouped. Assign projects, star cards, add To do notes, park them, and mark them Dealt with as usual.
+- A fresh active-turn signal shows Running. An explicit unread-result signal shows Ready to check. Missing or old activity signals show Status unavailable; absence of activity is not proof of completion.
+- ChatGPT does not provide local message history in this catalog, so kanbanana cannot show request/report summaries or detect questions and errors for Needs me. Open the card to read the conversation on chatgpt.com.
+- A catalog timestamp change can reactivate a dealt-with card. Since individual requests are unavailable, a To do card remains a manual reminder; move it out yourself when starting the next round.
+- Retry rereads the catalog; it cannot force ChatGPT to publish a missing status. You can turn ChatGPT monitoring off independently in Settings.
+- Catalog absence never deletes or retires an existing card. Source schema changes are reported as Unsupported format and leave your curation intact.
 
 ## Using the board
 

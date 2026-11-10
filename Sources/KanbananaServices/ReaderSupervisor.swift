@@ -52,7 +52,7 @@ package struct ServiceClock: Sendable {
         historyConnections.removeAll()
         tasks.removeAll()
         connections.removeAll()
-        replacement = Task {
+        replacement = Task { [self] in
             await preceding?.value
             for connection in oldConnections { await connection.stop() }
             for task in oldTasks { await task.value }

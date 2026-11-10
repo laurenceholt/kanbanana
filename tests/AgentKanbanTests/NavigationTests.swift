@@ -24,6 +24,13 @@ final class NavigationTests: XCTestCase {
         }
     }
 
+    func testChatGPTNavigationUsesValidatedIDAndCanonicalWebsite() {
+        let id = "550e8400-e29b-41d4-a716-446655440000"
+        XCTAssertEqual(card("chatgpt", id, url: "https://untrusted.invalid").navigationURL?.absoluteString, "https://chatgpt.com/c/" + id)
+        XCTAssertEqual(card("chatgpt", id, url: "").providerName, "ChatGPT")
+        XCTAssertNil(card("chatgpt", "../other?redirect=bad", url: "https://chatgpt.com").navigationURL)
+    }
+
     func testInvalidLocalIDsAndProviderMismatchDoNotNavigateElsewhere() {
         for id in ["local_", "local_abc?session=last", "local_abc/../new"] {
             XCTAssertNil(card("claude", id, url: "claude://code/\(id)").navigationURL)

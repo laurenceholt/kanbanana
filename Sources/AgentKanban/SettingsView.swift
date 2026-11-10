@@ -68,8 +68,9 @@ struct SettingsView: View {
             Link("Privacy and OpenAI data handling", destination: URL(string: "https://github.com/laurenceholt/kanbanana/blob/main/PRIVACY.md")!)
             Divider()
             Text("Integrations").font(.headline)
-            ForEach(["claude", "codex"], id: \.self) { p in HStack { Text(p == "claude" ? "Claude Code" : "Codex Desktop"); Spacer(); Text(store.health[p] ?? "Connecting").foregroundStyle(.secondary) }.font(.caption) }
+            ForEach(["claude", "codex", "chatgpt"], id: \.self) { p in HStack { Text(IntegrationInfo.title(p)); Spacer(); Text(store.health[p] ?? "Connecting").foregroundStyle(.secondary) }.font(.caption) }
             IntegrationOptions(store: store)
+            Text("ChatGPT support is limited: reads the desktop catalog, opens chats in your browser, and shows status only when explicitly available. Messages, summaries, and Needs me detection are not available. Keep the source desktop app open to refresh its catalog.").font(.caption).foregroundStyle(.secondary)
             Text("Beta: reads local history. Live approval signals and exact navigation are still being validated. Quiet, unfinished turns show status unavailable.").font(.caption).foregroundStyle(.secondary)
             DataControls(store: store)
             HStack {

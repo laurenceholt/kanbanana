@@ -231,6 +231,7 @@ extension BoardStore {
 @MainActor enum ProviderArtwork {
     static let claude = load("com.anthropic.claudefordesktop")
     static let codex = load("com.openai.codex")
+    static let chatgpt = load("com.openai.chat")
     private static func load(_ bundleID: String) -> NSImage? {
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return nil }
         return NSWorkspace.shared.icon(forFile: url.path)
@@ -241,15 +242,15 @@ struct ProviderIcon: View {
     var size: CGFloat = 19
     var body: some View {
         Group {
-            if let image = provider == "claude" ? ProviderArtwork.claude : ProviderArtwork.codex {
+            if let image = provider == "claude" ? ProviderArtwork.claude : provider == "chatgpt" ? ProviderArtwork.chatgpt : ProviderArtwork.codex {
                 Image(nsImage: image).resizable().interpolation(.high)
             } else {
-                Image(systemName: provider == "claude" ? "asterisk" : "circle.hexagongrid.fill").resizable().scaledToFit().padding(3)
+                Image(systemName: provider == "claude" ? "asterisk" : provider == "chatgpt" ? "bubble.left.and.bubble.right" : "circle.hexagongrid.fill").resizable().scaledToFit().padding(3)
             }
         }
         .frame(width: size, height: size)
-        .help(provider == "claude" ? "Claude" : "Codex")
-        .accessibilityLabel(provider == "claude" ? "Claude" : "Codex")
+        .help(ProviderID(rawValue: provider)?.title ?? provider)
+        .accessibilityLabel(ProviderID(rawValue: provider)?.title ?? provider)
     }
 }
 

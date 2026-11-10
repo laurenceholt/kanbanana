@@ -53,7 +53,7 @@ package struct Conversation: Codable, Sendable, Identifiable, Equatable {
     // Set only by a complete source inventory. Optional for older saved boards.
     // Unlike a read failure, confirmed absence can age into the parking lot.
     package var sourceMissing: Bool? = nil
-    package var providerName: String { provider == "claude" ? "Claude" : "Codex" }
+    package var providerName: String { ProviderID(rawValue: provider)?.title ?? provider }
     package var navigationURL: URL? {
         guard sourceMissing != true else { return nil }
         // Desktop's local IDs use the continue endpoint. /code/<id> accepts
@@ -66,6 +66,10 @@ package struct Conversation: Codable, Sendable, Identifiable, Equatable {
             link.path = "/continue"
             link.queryItems = [URLQueryItem(name: "session", value: nativeID)]
             return link.url
+        }
+        if provider == "chatgpt" {
+            guard UUID(uuidString: nativeID) != nil else { return nil }
+            return URL(string: "https://chatgpt.com/c/" + nativeID)
         }
         guard let link = URL(string: url), ["claude", "codex"].contains(provider), link.scheme == provider else { return nil }
         return link

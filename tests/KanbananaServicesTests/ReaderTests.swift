@@ -49,7 +49,7 @@ private struct ConnectionCounts: Sendable {
     let probe = OSAllocatedUnfairLock(initialState: ConnectionCounts())
     let source = String(decoding: try fixtureFrame(), as: UTF8.self)
     let supervisor = ReaderSupervisor(deadline: 5, factory: { _, args in
-        let provider = args.contains("claude") ? "claude" : "codex"
+        let provider = args[args.firstIndex(of: "--provider")! + 1]
         let id = UUID()
         probe.withLock {
             $0.active[provider, default: []].insert(id)
@@ -61,13 +61,13 @@ private struct ConnectionCounts: Sendable {
     })
     var received = 0
     supervisor.start(config()) { _ in received += 1 }
-    try await waitUntil { received >= 2 }
+    try await waitUntil { received >= 3 }
     for _ in 0..<25 { supervisor.start(config()) { _ in received += 1 } }
-    try await waitUntil { received >= 4 }
+    try await waitUntil { received >= 6 }
     await supervisor.stop()
     #expect(probe.withLock { $0.maximum } == 1)
     #expect(probe.withLock { $0.active.values.allSatisfy(\.isEmpty) })
-    #expect(probe.withLock { $0.launches } == 4)
+    #expect(probe.withLock { $0.launches } == 6)
 }
 
 private func config(disabled: Set<String> = []) -> ReaderConfiguration {
@@ -89,7 +89,7 @@ private func config(disabled: Set<String> = []) -> ReaderConfiguration {
     let connection = TestConnection(frame)
     let supervisor = ReaderSupervisor(deadline: 0.04, factory: { _, _ in connection })
     var observations: [ProviderSnapshot] = []
-    supervisor.start(config(disabled: ["codex"])) { observations.append($0) }
+    supervisor.start(config(disabled: ["codex", "chatgpt"])) { observations.append($0) }
     try await waitUntil { observations.contains { $0.health.status == .stale } }
     #expect(observations.contains { $0.provider == .claude && $0.health.status == .connected })
     #expect(observations.contains { $0.provider == .codex && $0.health.status == .disabled })
@@ -101,7 +101,7 @@ private func config(disabled: Set<String> = []) -> ReaderConfiguration {
     let second = TestConnection()
     let supervisor = ReaderSupervisor(deadline: 2, factory: { _, args in args.contains("claude") ? first : second })
     var observations: [ProviderSnapshot] = []
-    supervisor.start(config()) { observations.append($0) }
+    supervisor.start(config(disabled: ["chatgpt"])) { observations.append($0) }
     try await waitUntil { observations.contains { $0.provider == .claude && $0.health.status == .unavailable } }
     let heartbeat = #"{"protocolVersion":1,"provider":"codex","cards":[],"health":{"status":"connected"},"inventoryComplete":true,"knownIDs":[],"scannedAt":300}"#
     second.continuation.yield(Data((heartbeat + "\n").utf8))
@@ -167,4 +167,13 @@ private func config(disabled: Set<String> = []) -> ReaderConfiguration {
     var receivedAfterStop = 0
     for try await chunk in connection.output { receivedAfterStop += chunk.count }
     #expect(receivedAfterStop == 0)
+}
+
+@Test func chatGPTMetadataFrameDecodesWithoutInventingRequestHistory() throws {
+    let json = #"{"protocolVersion":1,"provider":"chatgpt","cards":[{"id":"chatgpt:example","nativeID":"example","title":"Example","folder":"","updated":100,"requests":[],"state":"unknown","reason":"No completion signal","response":"","eventID":"catalog:100","eventTime":100,"url":"https://chatgpt.com/c/example"}],"health":{"status":"connected"},"inventoryComplete":false,"knownIDs":["chatgpt:example"],"scannedAt":101}"#
+    let snapshot = try JSONDecoder().decode(ReaderFrame.self, from: Data(json.utf8)).snapshot(expected: .chatgpt)
+    #expect(snapshot.cards.count == 1)
+    #expect(snapshot.cards[0].state == .unknown)
+    #expect(snapshot.cards[0].requests.isEmpty && snapshot.cards[0].response.isEmpty)
+    #expect(!snapshot.inventoryComplete)
 }

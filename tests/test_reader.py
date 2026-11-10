@@ -15,6 +15,11 @@ READER_ENTRY = Path(__file__).parents[1] / "Resources/reader.py"
 
 
 class ReaderTests(unittest.TestCase):
+    def setUp(self):
+        patcher = patch("kanbanana_reader.chatgpt.cards", return_value=[])
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_required_input_is_distinct_from_optional_followups_and_quoted_questions(self):
         for text in [
             "Which repository should I use?",

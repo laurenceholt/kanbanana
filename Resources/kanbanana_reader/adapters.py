@@ -332,7 +332,8 @@ def scan_provider(provider, days=14, tracked_ids=()):
     if provider in DISABLED_PROVIDERS:
         return {"cards": [], "health": {"status": "disabled"}, "inventoryComplete": False,
                 "knownIDs": [], "scannedAt": time.time()}
-    reader = claude_cards if provider == "claude" else codex_cards
+    from .chatgpt import cards as chatgpt_cards
+    reader = {"claude": claude_cards, "codex": codex_cards, "chatgpt": chatgpt_cards}[provider]
     for attempt in range(3):
         found, complete, retryable = [], False, False
         try:
@@ -363,7 +364,7 @@ def scan_provider(provider, days=14, tracked_ids=()):
 def scan(days=14, tracked_ids=()):
     """Human-readable diagnostic snapshot; the app uses the typed worker protocol."""
     cards, health = [], {}
-    for provider in ("claude", "codex"):
+    for provider in ("claude", "codex", "chatgpt"):
         result = scan_provider(provider, days, tracked_ids)
         cards.extend(result["cards"])
         status = result["health"]["status"]
@@ -386,7 +387,7 @@ class HealthLog:
             self.events = []
 
     def record(self, snapshot):
-        event = {"health": dict(snapshot["health"]), "states": {provider: {state: sum(c["provider"] == provider and c["state"] == state for c in snapshot["cards"]) for state in ("running", "needsMe", "ready", "unknown")} for provider in ("claude", "codex")}}
+        event = {"health": dict(snapshot["health"]), "states": {provider: {state: sum(c["provider"] == provider and c["state"] == state for c in snapshot["cards"]) for state in ("running", "needsMe", "ready", "unknown")} for provider in ("claude", "codex", "chatgpt")}}
         if self.events and all(self.events[-1].get(k) == v for k, v in event.items()):
             return
         event["at"] = snapshot["scannedAt"]

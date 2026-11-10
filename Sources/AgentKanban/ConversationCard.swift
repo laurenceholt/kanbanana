@@ -16,6 +16,7 @@ struct ConversationCard: View, Equatable {
     var opensProjectBoard: Bool { presentation.opensProjectBoard }
     private var summaryInput: SummaryInput? { card.cardSummaryInput(in: displayedColumn) }
     private var missingSummaryText: String {
+        if card.provider == "chatgpt" { return "Open ChatGPT to read this conversation. Message previews aren’t available." }
         if displayedColumn == .needsMe { return card.reason.isEmpty ? "Open the conversation to see what is needed." : card.reason }
         return displayedColumn == .ready ? "Agent response unavailable. Open the conversation to check." : "Request history unavailable"
     }

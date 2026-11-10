@@ -4,7 +4,7 @@ kanbanana is a local macOS companion. It has no account system, analytics SDK, t
 
 ## What it reads and saves
 
-After onboarding, the selected integrations read local conversation metadata and histories from Claude Desktop Code and Codex. Source databases are opened read-only; native settings, permissions and conversations are not modified. Other products such as Claude Chat/Cowork are outside this beta's scope.
+After onboarding, the selected integrations read local conversation metadata and histories from Claude Desktop Code and Codex, plus limited ChatGPT metadata from the desktop app’s local catalog. Source databases are opened read-only; native settings, permissions and conversations are not modified. Other products such as Claude Chat/Cowork are outside this beta's scope.
 
 The local board stores conversation titles, identifiers, folder paths, user request text, summaries, project notes, assignments and manual states. The latest agent report, including human-facing questions from input tools, is also retained in the rebuildable observation cache (at most 20,000 characters per conversation). Full assistant-response history is not copied. Raw reports are omitted from portable exports and backups; their summaries can be included. Source histories may contain tool records needed to interpret execution; those records are not sent to the summary API.
 
@@ -39,3 +39,7 @@ Building from source downloads a pinned Python runtime from GitHub. Development 
 Board exports and backups contain private cached request text, summaries (including report summaries) and notes; they are not complete exports of native conversation history. Do not attach them to public issues. Settings → Diagnostics exports only app/OS/provider versions, counts and a fixed connection-health vocabulary; no titles, IDs, paths, requests, notes, key or arbitrary error strings.
 
 To remove the key, choose Settings → Delete saved key. To remove all local board data, quit kanbanana, remove `~/Library/Application Support/Agent Kanban/`, and remove the app if you no longer want it. Remove board exports wherever you saved them and account for your own system backups. Source conversations are unaffected. Relaunching an installed app can rediscover local sessions after onboarding.
+
+## Limited ChatGPT integration
+
+The ChatGPT reader opens `~/.codex/sqlite/codex.db` read-only (or the configured Codex home). It reads catalog titles, conversation IDs, timestamps, source identity and async status, plus locally recorded active-turn timestamps when available. It does not read browser cookies, authentication credentials or ChatGPT message bodies, and makes no network requests. Account/user identifiers are used only to match active signals to the correct catalog entry; they are not placed on cards or sent to OpenAI. ChatGPT titles and metadata are stored in the local board cache like other cards. Clicking a ChatGPT card opens its canonical `https://chatgpt.com/c/…` URL. Disable ChatGPT monitoring in Settings at any time.

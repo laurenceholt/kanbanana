@@ -257,9 +257,11 @@ import KanbananaServices
         if !scanning {
             let active = cards.filter { !disposition($0).parked }
             let missing = active.filter { $0.sourceMissing == true }.count
-            let unreadable = active.filter { $0.sourceMissing != true && ($0.observationIssue != nil || column($0) == .unknown) }.count
+            let catalogOnly = active.filter { $0.provider == "chatgpt" && $0.observationIssue == nil && column($0) == .unknown }.count
+            let unreadable = active.filter { $0.sourceMissing != true && ($0.observationIssue != nil || (column($0) == .unknown && $0.provider != "chatgpt")) }.count
             var details: [String] = []
             if missing > 0 { details.append("\(missing) conversation\(missing == 1 ? "" : "s") no longer in source") }
+            if catalogOnly > 0 { details.append("ChatGPT has not exposed status for \(catalogOnly) conversation\(catalogOnly == 1 ? "" : "s")") }
             if unreadable > 0 { details.append("\(unreadable) histories unavailable · retrying automatically") }
             let message = details.isEmpty ? "Status checked · all available" : details.joined(separator: " · ")
             if statusCheckMessage != message { statusCheckMessage = message }

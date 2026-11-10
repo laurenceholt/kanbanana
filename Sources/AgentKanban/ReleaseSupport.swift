@@ -16,9 +16,18 @@ struct BananaMark: View {
 }
 
 enum IntegrationInfo {
+    static func title(_ provider: String) -> String {
+        switch provider {
+        case "claude": "Claude Desktop Code"
+        case "codex": "Codex Desktop"
+        case "chatgpt": "ChatGPT · limited"
+        default: provider
+        }
+    }
+
     static var versions: [String: String] {
         var result = [String: String]()
-        for (name, id) in [("claude", "com.anthropic.claudefordesktop"), ("codex", "com.openai.codex")] {
+        for (name, id) in [("claude", "com.anthropic.claudefordesktop"), ("codex", "com.openai.codex"), ("chatgpt", "com.openai.codex")] {
             if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id), let bundle = Bundle(url: url) {
                 result[name] = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown version"
             } else { result[name] = "Not installed" }
@@ -34,19 +43,19 @@ struct WelcomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack { BananaMark().frame(width: 36, height: 36); Text("Welcome to kanbanana").font(.title2.bold()) }
-            Text("A small window for the Claude Code and Codex conversations stored on this Mac.")
+            Text("A small window for Claude Code, Codex, and locally cataloged ChatGPT conversations.")
             ScrollView { VStack(alignment: .leading, spacing: 16) {
             Text("Which apps do you use here?").font(.headline)
-            ForEach(["claude", "codex"], id: \.self) { provider in
+            ForEach(["claude", "codex", "chatgpt"], id: \.self) { provider in
                 Toggle(isOn: Binding(get: { !store.privacy.disabledProviders.contains(provider) }, set: { store.setProvider(provider, enabled: $0) })) {
-                    Text("\(provider == "claude" ? "Claude Desktop Code" : "Codex Desktop") · \(IntegrationInfo.versions[provider] ?? "Not installed")")
+                    Text("\(IntegrationInfo.title(provider)) · \(IntegrationInfo.versions[provider] ?? "Not installed")")
                 }
             }
             Text("We look for local conversations active in the last two weeks, including finished ones. If this Mac has no supported history yet, your board will start empty.").font(.callout).fixedSize(horizontal: false, vertical: true)
             Text("Do your agents work on another Mac?").font(.headline)
-            Text("Run kanbanana on that Mac. Boards do not sync between Macs, and cloud-only conversations cannot be read here.").font(.callout).fixedSize(horizontal: false, vertical: true)
+            Text("Run kanbanana on that Mac. Boards do not sync between Macs. ChatGPT discovery requires a catalog in the desktop app on this Mac.").font(.callout).fixedSize(horizontal: false, vertical: true)
             Text("No API key needed to get started").font(.headline)
-            Text("Cards show local excerpts by default. Later, you can enable optional paid OpenAI summaries in Settings. A key is not needed to discover conversations.").font(.callout).fixedSize(horizontal: false, vertical: true)
+            Text("Claude and Codex cards show local excerpts; ChatGPT cards currently show titles and limited status only. Later, you can enable optional paid OpenAI summaries in Settings. A key is not needed to discover conversations.").font(.callout).fixedSize(horizontal: false, vertical: true)
             Link("Read the privacy details", destination: URL(string: "https://github.com/laurenceholt/kanbanana/blob/main/PRIVACY.md")!)
             Link("Getting started on this Mac", destination: HelpLinks.topic("your-first-conversation"))
             } }
@@ -61,8 +70,8 @@ struct IntegrationOptions: View {
     @State private var claudeHome = ""
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(["claude", "codex"], id: \.self) { provider in
-                Toggle("Monitor \(provider == "claude" ? "Claude Code" : "Codex") (\(IntegrationInfo.versions[provider] ?? "Unknown"))", isOn: Binding(get: { !store.privacy.disabledProviders.contains(provider) }, set: { store.setProvider(provider, enabled: $0) }))
+            ForEach(["claude", "codex", "chatgpt"], id: \.self) { provider in
+                Toggle("Monitor \(IntegrationInfo.title(provider)) (\(IntegrationInfo.versions[provider] ?? "Unknown"))", isOn: Binding(get: { !store.privacy.disabledProviders.contains(provider) }, set: { store.setProvider(provider, enabled: $0) }))
             }
             DisclosureGroup("Custom session locations") {
                 HStack { TextField("Codex home (default ~/.codex)", text: $codexHome); Button("Apply") { store.setSourceHome("codex", path: codexHome) } }

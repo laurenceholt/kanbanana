@@ -1,8 +1,8 @@
 import Foundation
 
 package enum ProviderID: String, Codable, CaseIterable, Sendable {
-    case claude, codex
-    package var title: String { self == .claude ? "Claude" : "Codex" }
+    case claude, codex, chatgpt
+    package var title: String { switch self { case .claude: "Claude"; case .codex: "Codex"; case .chatgpt: "ChatGPT" } }
 }
 
 /// Connection health is independent of the last task state and its event time.

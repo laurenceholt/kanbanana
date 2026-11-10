@@ -75,3 +75,26 @@ private func card(_ provider: String = "claude") -> Conversation {
     saved.apply(.mark("claude:example", .running), now: 200)
     #expect(saved.dispositions["claude:example"]?.acknowledgedRevision == saved.cards[0].revision)
 }
+
+@Test func chatGPTCatalogGapPreservesCurationAndNewActivityReactivatesCard() {
+    var previous = card("chatgpt")
+    previous.requests = []; previous.state = .unknown
+    var saved = SavedState(); saved.cards = [previous]
+    saved.projects = [Project(id: "chosen", name: "Chosen")]
+    saved.dispositions[previous.id] = Disposition(projectID: "chosen", assignmentLocked: true,
+        acknowledgedRevision: previous.revision, todoNote: "Keep this", priority: true)
+    let absent = BoardReconciler.apply(ProviderSnapshot(provider: .chatgpt, cards: [], health: ProviderHealth(.connected),
+        inventoryComplete: false, knownIDs: [], scannedAt: 200), to: saved)
+    #expect(absent.cards[0].sourceMissing != true)
+    #expect(absent.dispositions == saved.dispositions)
+    #expect(Lifecycle.column(absent.cards[0], absent.dispositions[previous.id]!) == .dealtWith)
+    var changed = previous
+    changed.eventID = "catalog:300"; changed.eventTime = 300; changed.updated = 300
+    let resumed = BoardReconciler.apply(ProviderSnapshot(provider: .chatgpt, cards: [changed], health: ProviderHealth(.connected),
+        inventoryComplete: false, knownIDs: [previous.id], scannedAt: 301), to: absent)
+    let disposition = resumed.dispositions[previous.id]!
+    #expect(disposition.acknowledgedRevision == nil)
+    #expect(disposition.assignmentLocked && disposition.projectID == "chosen")
+    #expect(disposition.todoNote == "Keep this" && disposition.priority == true)
+    #expect(Lifecycle.column(resumed.cards[0], disposition) == .unknown)
+}

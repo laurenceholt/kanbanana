@@ -47,8 +47,8 @@ enum EmptyBoardState: Equatable {
     }
     var message: String {
         switch self {
-        case .scanning: "Checking locally stored Claude Code and Codex conversations. You don't need to start a new job if recent history is already here."
-        case .monitoringOff: "Choose Claude Desktop Code or Codex Desktop in Settings to start finding local conversations."
+        case .scanning: "Checking local Claude Code and Codex histories and the limited ChatGPT catalog. You don't need to start a new job if recent history is already here."
+        case .monitoringOff: "Choose Claude Desktop Code, Codex Desktop, or limited ChatGPT monitoring in Settings to start finding local conversations."
         case .connectionProblem: "Check the source status below. This doesn't mean your board is up to date. Retry, or open Settings to check your integrations."
         case .noLocalConversations: "Start or continue a conversation in Claude Desktop's Code section or Codex Desktop on this Mac. Recent locally stored conversations can appear even when they have finished."
         case .filtered: "Clear the search and project filter to see the rest of your board."
