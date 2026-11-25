@@ -14,7 +14,7 @@ kanbanana puts those conversations on one board. See what needs you, read a shor
 
 *Screenshots and demo use fictional conversations.*
 
-**macOS · Apple Silicon · early beta.** Source builds are available now. A signed, notarized download is being prepared; there is **no public app download yet**. [Releases](https://github.com/laurenceholt/kanbanana/releases)
+**macOS · Apple Silicon · early beta.** Source builds are available now. Release candidate **0.4.9** is undergoing private installation testing; there is **no public app download yet**. [Releases](https://github.com/laurenceholt/kanbanana/releases)
 
 ## A small place to pick up the thread
 
@@ -71,11 +71,11 @@ The banana and counts in the menu bar reopen the window. Closing the window keep
 | --- | --- |
 | Claude Desktop | The **Code** section, using locally available session records. Chat and Cowork are outside this beta’s scope. |
 | Codex Desktop | Locally stored top-level conversations, including local tasks outside saved projects and scheduled runs. |
-| ChatGPT (limited) | Conversations in the local desktop catalog. Titles, links, explicit unread results and fresh activity signals; no message previews, summaries or Needs me detection. Other chats show Status unavailable. |
+
 
 **What about terminal users?** Standalone Claude Code CLI sessions are not discovered: the Claude reader needs Desktop Code session metadata. The Codex reader includes local CLI records when they use the supported database/history format, but cards open Codex Desktop, not a terminal. A terminal-only workflow is not end-to-end validated or a supported launch promise.
 
-**ChatGPT support is metadata-only.** Keep the desktop app open so its local catalog can refresh. This does not connect kanbanana directly to your cloud account, import browser-only history, or grant access through an API key. Missing status is never treated as completion. [Details](docs/USER-GUIDE.md#chatgpt-limited-support).
+**Experimental ChatGPT monitoring is off by default and outside the supported beta.** You can opt in through Settings; it is metadata-only. Keep the desktop app open so its local catalog can refresh. This does not connect kanbanana directly to your cloud account, import browser-only history, or grant access through an API key. Missing status is never treated as completion. [Details](docs/USER-GUIDE.md#chatgpt-experimental-monitoring).
 
 **A task running on your Mac can still have cloud-backed history.** Those newer Codex conversations are not currently captured by the local-file reader. Remote/SSH/cloud-only work also has no completeness guarantee. Intel builds are not provided.
 

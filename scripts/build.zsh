@@ -3,6 +3,7 @@ set -euo pipefail
 cd "${0:A:h:h}"
 zsh scripts/fetch-runtime.zsh
 swift build -c release
+build_dir=$(swift build -c release --show-bin-path)
 install_app="$PWD/dist/kanbanana.app"
 # Sign outside Documents: its cloud provider can immediately reattach FinderInfo
 # to a bundle there, racing codesign even after xattr removes the metadata.
@@ -10,7 +11,7 @@ stage_dir=$(mktemp -d "${TMPDIR:-/tmp}/kanbanana-build.XXXXXX")
 trap 'rm -rf "$stage_dir"' EXIT
 app="$stage_dir/kanbanana.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-cp .build/release/AgentKanban "$app/Contents/MacOS/kanbanana"
+cp "$build_dir/AgentKanban" "$app/Contents/MacOS/kanbanana"
 cp Resources/reader.py "$app/Contents/Resources/reader.py"
 mkdir -p "$app/Contents/Resources/kanbanana_reader"
 cp Resources/kanbanana_reader/*.py "$app/Contents/Resources/kanbanana_reader/"
@@ -39,8 +40,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>kanbanana</string>
 <key>CFBundleDisplayName</key><string>kanbanana</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
-<key>CFBundleVersion</key><string>12</string>
-<key>CFBundleShortVersionString</key><string>0.4.8</string>
+<key>CFBundleVersion</key><string>13</string>
+<key>CFBundleShortVersionString</key><string>0.4.9</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>LSUIElement</key><false/>
 <key>LSMinimumSystemVersion</key><string>14.0</string>

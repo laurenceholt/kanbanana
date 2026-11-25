@@ -30,11 +30,27 @@ final class ReleaseTests: XCTestCase {
         XCTAssertTrue(store.needsOnboarding)
         XCTAssertTrue(store.health.isEmpty)
         XCTAssertFalse(store.saved.aiEnabled)
+        XCTAssertTrue(store.privacy.disabledProviders.contains("chatgpt"))
         await store.stop()
         let relaunched = await BoardStore.loaded(root: root)
         XCTAssertTrue(relaunched.needsOnboarding)
         XCTAssertTrue(relaunched.health.isEmpty)
     }
+    @MainActor func testExperimentalMonitoringToggleRecordsExplicitConsent() async throws {
+        let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = await BoardStore.loaded(root: root, start: false, credentials: ReleaseCredentials())
+        store.setProvider("chatgpt", enabled: true)
+        await store.persist()
+        await store.stop()
+        let restored = await BoardStore.loaded(root: root, start: false, credentials: ReleaseCredentials())
+        XCTAssertEqual(restored.privacy.chatGPTOptIn, true)
+        XCTAssertFalse(restored.privacy.disabledProviders.contains("chatgpt"))
+        restored.setProvider("chatgpt", enabled: false)
+        XCTAssertEqual(restored.privacy.chatGPTOptIn, false)
+        XCTAssertTrue(restored.privacy.disabledProviders.contains("chatgpt"))
+        await restored.stop()
+    }
+
     @MainActor func testSavingKeyDoesNotEnableCloudAndDeletionDisablesIt() async throws {
         let root = try temporary(); defer { try? FileManager.default.removeItem(at: root) }
         let credentials = ReleaseCredentials()

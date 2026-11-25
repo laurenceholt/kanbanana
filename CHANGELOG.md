@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.4.9-beta.1 (release candidate)
+
+App version `0.4.9`, build `13`. Prepared for private MacBook Air acceptance testing; no public download until that test passes.
+
+- Collect the stability fixes since the earlier candidate: standard macOS activation and titlebar behavior, continued Codex history discovery, capacity-error explanations, and safeguards against launching obsolete upgrade backups.
+- Make experimental ChatGPT monitoring explicitly opt-in, including upgrades from 0.4.8. Keep its existing cards and curation; do not claim complete ChatGPT status or summary support.
+- Align the README, release checklist and test instructions with the actual supported desktop workflow.
+
+## Earlier development changes
 
 - Add limited ChatGPT discovery from the desktop app’s local catalog, with explicit unread-result and fresh activity signals, independent monitoring controls, and browser navigation. Unknown status remains unknown; message summaries and Needs me detection are unavailable. Version `0.4.8`, build `12`.
 

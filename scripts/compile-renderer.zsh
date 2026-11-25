@@ -5,8 +5,10 @@ cd "${0:A:h:h}"
 renderer=${1:-preview}
 [[ $renderer == preview || $renderer == demo ]] || { print -u2 'Use preview or demo'; exit 1; }
 mkdir -p .build
-swift build
-build_dir=$(swift build --show-bin-path)
+# The standalone renderer links SwiftPM object files. Pin the native layout
+# rather than assuming the newer swiftbuild engine emits description.json.
+swift build --build-system native
+build_dir=$(swift build --build-system native --show-bin-path)
 package_identity=$(sed -n '/"-package-name"/{n;s/[", ]//g;p;q;}' "$build_dir/description.json")
 sources=(Sources/AgentKanban/*.swift)
 sources=(${sources:#Sources/AgentKanban/App.swift})

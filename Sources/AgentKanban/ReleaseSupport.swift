@@ -20,7 +20,7 @@ enum IntegrationInfo {
         switch provider {
         case "claude": "Claude Desktop Code"
         case "codex": "Codex Desktop"
-        case "chatgpt": "ChatGPT · limited"
+        case "chatgpt": "ChatGPT · experimental"
         default: provider
         }
     }
@@ -43,10 +43,10 @@ struct WelcomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack { BananaMark().frame(width: 36, height: 36); Text("Welcome to kanbanana").font(.title2.bold()) }
-            Text("A small window for Claude Code, Codex, and locally cataloged ChatGPT conversations.")
+            Text("A small window for the Claude Code and Codex conversations stored on this Mac.")
             ScrollView { VStack(alignment: .leading, spacing: 16) {
             Text("Which apps do you use here?").font(.headline)
-            ForEach(["claude", "codex", "chatgpt"], id: \.self) { provider in
+            ForEach(["claude", "codex"], id: \.self) { provider in
                 Toggle(isOn: Binding(get: { !store.privacy.disabledProviders.contains(provider) }, set: { store.setProvider(provider, enabled: $0) })) {
                     Text("\(IntegrationInfo.title(provider)) · \(IntegrationInfo.versions[provider] ?? "Not installed")")
                 }

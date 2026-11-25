@@ -12,7 +12,7 @@ CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No prod
 
 ## Signed app download
 
-**Not yet released.** Apple enrollment and Developer ID signing were verified on October 19, 2026. Notarization credentials are configured. Version 0.4.0 passed Apple notarization, stapling and Gatekeeper checks on October 19; its installation on a MacBook Air was reported October 25. Provider workflows still need wider independent-Mac verification, and each new binary needs its own notarization. The release script packages a ZIP and a signed disk image with an Applications shortcut. Track the full launch in [LAUNCH.md](LAUNCH.md).
+**Not yet released.** The current candidate is **0.4.9 (build 13)**, tagged only when ready as `v0.4.9-beta.1`. Keep its GitHub release in **draft** until [MacBook Air testing](DOWNLOAD-TEST.md) passes. Do not replace old release tags or advertise a draft URL as a public download. Apple enrollment and Developer ID signing were verified on October 19, 2026. Notarization credentials are configured. Version 0.4.0 passed Apple notarization, stapling and Gatekeeper checks on October 19; its installation on a MacBook Air was reported October 25. Provider workflows still need wider independent-Mac verification, and each new binary needs its own notarization. The release script packages a ZIP and a signed disk image with an Applications shortcut. Track the full launch in [LAUNCH.md](LAUNCH.md).
 
 An Apple Developer membership, Developer ID Application certificate/private key, and a notarytool credential profile are required. Install/import those through Apple's tools; never commit them or paste credentials into an issue or script.
 
@@ -32,7 +32,7 @@ Follow [the download acceptance checklist](DOWNLOAD-TEST.md) on a separate clean
 
 Store local upgrade app backups as `.app-backup` directories or archives, never runnable `.app` bundles. Unregister obsolete copies from Launch Services. After quitting all previous copies, launch the explicit installed path and verify the running executable is `~/Applications/kanbanana.app/Contents/MacOS/kanbanana`, with its readers beneath that same bundle. `open` returning success does not establish which copy is running.
 
-Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. Use a numeric three-part CFBundleShortVersionString (currently `0.4.1`, build `5`); the GitHub release tag carries beta status (`v0.4.1-beta.1`). GitHub Releases is the update channel; this beta has no automatic updater.
+Preserve `com.laurenceholt.agent-kanban` and the existing data/Keychain service names when upgrading. Keep runtime hashes and license files in sync. The runtime and all artwork images are bundled; no runtime downloader is added. Bump CFBundleVersion for each distributed app. Use a numeric three-part CFBundleShortVersionString (current candidate: `0.4.9`, build `13`); the GitHub release tag carries beta status (`v0.4.9-beta.1`). GitHub Releases is the update channel; this beta has no automatic updater.
 
 ## Pilot checklist
 

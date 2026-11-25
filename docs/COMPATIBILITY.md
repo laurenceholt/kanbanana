@@ -2,6 +2,14 @@
 
 Compatibility is based on dated observations and tests, not an official integration contract. The native-use matrix below records the September source-beta checks; later automated checks are listed separately.
 
+## 0.4.9 release candidate — 25 November 2026
+
+App version `0.4.9`, build `13`, collects the daily-use stability fixes. Local validation passed **118 Swift tests** with warnings as errors and **61 Python tests** under the bundled runtime. The read-only reader passed an isolated empty-source smoke check. The full Git history and the candidate diff passed secret scanning. Fictional Focus/Projects screenshots were regenerated and visually checked; the existing demo remains a 56-second portrait H.264/AAC video and its transcript makes no public-download or ChatGPT-support claim.
+
+ChatGPT is explicitly opt-in on fresh installs and upgrades without recorded consent; tests cover consent persistence and preservation of the other privacy settings. Packaging now uses Swift’s reported executable directory. The isolated documentation renderer pins the supported native build layout because the newer default build engine no longer writes the description file it uses.
+
+Developer ID signing succeeds. Apple notarization is currently blocked before upload by HTTP 403 (required agreement missing/expired), despite the developer account page showing active membership and accepted agreements. Do not distribute this candidate until notarization and Gatekeeper validation succeed. GitHub CI and private MacBook Air acceptance are separate remaining gates; the release draft carries their latest status. Your existing installed 0.4.8 app has not been replaced during candidate preparation.
+
 ## Limited ChatGPT catalog integration — 9 November 2026
 
 The reader supports the `local_thread_catalog` table in `~/.codex/sqlite/codex.db`, filtered to `source_kind = 'chatgpt'`, with optional `active_chat_turns` freshness evidence. This is a desktop implementation detail, not a supported ChatGPT API. The catalog does not contain message bodies. Status values were checked against the installed desktop app’s async-status enum: 3 streaming, 4 unread, 5 realtime, 6 realtime busy. Unrecognized/null status stays unknown. Cached activity expires after 120 seconds unless a matching account/thread heartbeat was recorded within 30 seconds. Heartbeats do not change card revisions. Catalog inventories are never authoritative for deletion.

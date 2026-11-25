@@ -276,6 +276,7 @@ import KanbananaServices
     }
     func setProvider(_ provider: String, enabled: Bool) {
         var options = privacy
+        if provider == "chatgpt" { options.chatGPTOptIn = enabled }
         if enabled { options.disabledProviders.remove(provider) } else { options.disabledProviders.insert(provider) }
         saved.privacy = options
         summaries.cancel()
