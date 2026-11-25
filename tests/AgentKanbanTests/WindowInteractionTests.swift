@@ -107,8 +107,13 @@ final class WindowInteractionTests: XCTestCase {
             window.contentView?.layoutSubtreeIfNeeded()
             let frame = try XCTUnwrap(window.contentView?.superview)
             let content = try XCTUnwrap(window.contentView)
+            // Native titlebar height varies by OS. Probe its actual midpoint,
+            // not a fixed offset that can land outside a shorter titlebar.
+            let titlebarBottom = window.contentLayoutRect.maxY
+            let titlebarTop = frame.bounds.maxY
+            XCTAssertGreaterThan(titlebarTop, titlebarBottom)
             for x in [CGFloat(150), size.width / 2, size.width - 30] {
-                let point = NSPoint(x: x, y: window.contentLayoutRect.maxY + 16)
+                let point = NSPoint(x: x, y: (titlebarBottom + titlebarTop) / 2)
                 let hit = frame.hitTest(point)
                 XCTAssertNotNil(hit)
                 XCTAssertFalse(hit?.isDescendant(of: content) == true, "Native titlebar must not hit board content")

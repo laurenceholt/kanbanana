@@ -8,6 +8,8 @@ App version `0.4.9`, build `13`, collects the daily-use stability fixes. Local v
 
 ChatGPT is explicitly opt-in on fresh installs and upgrades without recorded consent; tests cover consent persistence and preservation of the other privacy settings. Packaging now uses Swift’s reported executable directory. The isolated documentation renderer pins the supported native build layout because the newer default build engine no longer writes the description file it uses.
 
+Current CI targets macOS 15 and 26 after GitHub retired macOS 14 runners on 2 November 2026. macOS 14 remains the deployment minimum, but its latest automated evidence is the September run below. The native titlebar regression test measures the actual titlebar height rather than assuming an OS-specific offset.
+
 Developer ID signing succeeds. Apple notarization is currently blocked before upload by HTTP 403 (required agreement missing/expired), despite the developer account page showing active membership and accepted agreements. Do not distribute this candidate until notarization and Gatekeeper validation succeed. GitHub CI and private MacBook Air acceptance are separate remaining gates; the release draft carries their latest status. Your existing installed 0.4.8 app has not been replaced during candidate preparation.
 
 ## Limited ChatGPT catalog integration — 9 November 2026

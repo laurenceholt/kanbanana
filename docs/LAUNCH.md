@@ -18,7 +18,7 @@ The source repository is public. The **0.4.9 (build 13)** candidate is being pre
 - [x] Select current stability fixes and prepare 0.4.9/build 13 on `codex/release-0.4.9`.
 - [x] Make ChatGPT monitoring explicitly opt-in and test upgrade behavior.
 - [x] Pass local Swift/Python tests and secret scanning on the final candidate (118 Swift / 61 Python; November 25).
-- [ ] Pass GitHub CI for the candidate commit on macOS 14 and 15.
+- [ ] Pass GitHub CI for the candidate commit on macOS 15 and 26.
 - [ ] Sign and notarize the exact ZIP and DMG; validate stapled tickets, Gatekeeper and SHA-256 checksums.
 - [ ] Put the artifacts and release notes in an **unpublished draft** for owner-only testing.
 
