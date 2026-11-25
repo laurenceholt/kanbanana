@@ -95,7 +95,7 @@ Keys live in macOS Keychain. Fresh installs default to excerpts and summaries of
 - `zsh scripts/demo.zsh`: offscreen rendering of real views with synthetic state, followed by local video encoding. No desktop capture, source data or cloud calls.
 - `zsh scripts/build.zsh`: pinned runtime, packaged worker modules, ad-hoc local signing and bundle verification.
 
-CI runs these tests and the packaged-reader smoke check on macOS 14 and 15. Native store schemas remain private integration details; automated fixtures cannot guarantee compatibility with every provider release. See [Compatibility](COMPATIBILITY.md).
+CI runs these tests and the packaged-reader smoke check on macOS 15 and 26. Native store schemas remain private integration details; automated fixtures cannot guarantee compatibility with every provider release. See [Compatibility](COMPATIBILITY.md).
 
 ### ChatGPT catalog adapter
 

@@ -8,7 +8,7 @@
 4. Update version, changelog and dated compatibility evidence. Verify fresh-run onboarding, privacy controls, ordinary navigation, persistence and recovery.
 5. Choose a new version, update `CFBundleShortVersionString` and increase `CFBundleVersion` in `scripts/build.zsh`, then tag that tested commit. Never reuse or move a published release tag. Source-only releases must clearly say they have no signed download.
 
-CI runs on macOS 14 and 15 using synthetic data and an isolated runtime. No production API key, signing identity or user data is needed.
+CI runs on macOS 15 and 26 using synthetic data and an isolated runtime. No production API key, signing identity or user data is needed.
 
 ## Signed app download
 
