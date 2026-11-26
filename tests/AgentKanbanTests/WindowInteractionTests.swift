@@ -112,10 +112,13 @@ final class WindowInteractionTests: XCTestCase {
             let titlebarBottom = window.contentLayoutRect.maxY
             let titlebarTop = frame.bounds.maxY
             XCTAssertGreaterThan(titlebarTop, titlebarBottom)
-            for x in [CGFloat(150), size.width / 2, size.width - 30] {
+            // AppKit can constrain the requested window to a smaller display.
+            // Hit-test the resulting native frame, not the requested dimensions.
+            let actualWidth = frame.bounds.width
+            for x in [actualWidth * 0.25, actualWidth / 2, actualWidth - 30] {
                 let point = NSPoint(x: x, y: (titlebarBottom + titlebarTop) / 2)
                 let hit = frame.hitTest(point)
-                XCTAssertNotNil(hit)
+                XCTAssertNotNil(hit, "\(layout): point \(point), frame \(frame.bounds), layout \(window.contentLayoutRect)")
                 XCTAssertFalse(hit?.isDescendant(of: content) == true, "Native titlebar must not hit board content")
             }
             window.close()
